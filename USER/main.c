@@ -8,7 +8,7 @@
 #include "led.h"
 
 
-//u8 eprombuf[100];
+u8 eprombuf[100];
 //u8 i = 0;
 RCC_ClocksTypeDef RCC_Clocks;
 int main(void)
