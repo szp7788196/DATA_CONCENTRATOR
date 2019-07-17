@@ -181,28 +181,57 @@ void EXTI0_IRQHandler(void)
   * @param  None
   * @retval None
   */
-void ETH_IRQHandler(void)
+void ETH_IRQHandler()
 {
-  portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
-
-  /* Frame received */
-  if ( ETH_GetDMAFlagStatus(ETH_DMA_FLAG_R) == SET) 
-  {
-    /* Give the semaphore to wakeup LwIP task */
-    xSemaphoreGiveFromISR( s_xSemaphore, &xHigherPriorityTaskWoken );
-  }
-
-  /* Clear the interrupt flags. */
-  /* Clear the Eth DMA Rx IT pending bits */
-  ETH_DMAClearITPendingBit(ETH_DMA_IT_R);
-  ETH_DMAClearITPendingBit(ETH_DMA_IT_NIS);
-
-  /* Switch tasks if necessary. */	
-  if( xHigherPriorityTaskWoken != pdFALSE )
-  {
-    portEND_SWITCHING_ISR( xHigherPriorityTaskWoken );
-  }
+	portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
+	/// give away taked semaphore. Used to inform the ethernet_input
+	/// thread that new data is available
+	/// give away only if frame received interrupt was triggered
+	if(ETH_GetDMAFlagStatus(ETH_DMA_FLAG_R) == SET)
+	{
+		xSemaphoreGiveFromISR( s_xSemaphore, &xHigherPriorityTaskWoken );
+		ETH_DMAClearITPendingBit(ETH_DMA_IT_R);
+	}
+	if(ETH_GetDMAFlagStatus(ETH_DMA_FLAG_T)==SET)
+	{
+		xHigherPriorityTaskWoken = pdFALSE;
+	}
+	if(ETH_GetDMAFlagStatus(ETH_DMA_FLAG_TBU)==SET)
+	{
+		xHigherPriorityTaskWoken = pdFALSE;
+	}
+	
+	ETH_DMAClearITPendingBit(ETH_DMA_IT_NIS);
+	
+//	if( xHigherPriorityTaskWoken != pdFALSE )
+//	{
+		portEND_SWITCHING_ISR( xHigherPriorityTaskWoken );
+//	}
 }
+
+//void ETH_IRQHandler()
+//{
+//	long xHigherPriorityTaskWoken = pdFALSE;
+//	/// give away taked semaphore. Used to inform the ethernet_input
+//	/// thread that new data is available
+//	/// give away only if frame received interrupt was triggered
+//	if(ETH_GetDMAFlagStatus(ETH_DMA_FLAG_R) == SET)
+//	{
+//		xSemaphoreGiveFromISR( s_xSemaphore, &xHigherPriorityTaskWoken );
+//		ETH_DMAClearITPendingBit(ETH_DMA_IT_R);
+//	}
+//	if(ETH_GetDMAFlagStatus(ETH_DMA_FLAG_T)==SET)
+//	{
+//		xHigherPriorityTaskWoken = pdFALSE;
+//	}
+//	if(ETH_GetDMAFlagStatus(ETH_DMA_FLAG_TBU)==SET)
+//	{
+//		xHigherPriorityTaskWoken = pdFALSE;
+//	}
+//	ETH_DMAClearITPendingBit(ETH_DMA_IT_R);
+//	ETH_DMAClearITPendingBit(ETH_DMA_IT_NIS);
+//	portEND_SWITCHING_ISR( xHigherPriorityTaskWoken );
+//}
 
 /******************************************************************************/
 /*                 STM32F4xx Peripherals Interrupt Handlers                   */

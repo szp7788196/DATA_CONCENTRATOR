@@ -79,6 +79,12 @@ void LwIP_Init(void)
   IP4_ADDR(&ipaddr, lwipdev.ip[0], lwipdev.ip[1], lwipdev.ip[2], lwipdev.ip[3]);
   IP4_ADDR(&netmask, lwipdev.netmask[0], lwipdev.netmask[1] , lwipdev.netmask[2], lwipdev.netmask[3]);
   IP4_ADDR(&gw, lwipdev.gateway[0], lwipdev.gateway[1], lwipdev.gateway[2], lwipdev.gateway[3]);
+
+  printf("网卡en的MAC地址为:................%d.%d.%d.%d.%d.%d\r\n",lwipdev.mac[0],lwipdev.mac[1],lwipdev.mac[2],lwipdev.mac[3],lwipdev.mac[4],lwipdev.mac[5]);
+  printf("静态IP地址........................%d.%d.%d.%d\r\n",lwipdev.ip[0],lwipdev.ip[1],lwipdev.ip[2],lwipdev.ip[3]);
+  printf("子网掩码..........................%d.%d.%d.%d\r\n",lwipdev.netmask[0],lwipdev.netmask[1],lwipdev.netmask[2],lwipdev.netmask[3]);
+  printf("默认网关..........................%d.%d.%d.%d\r\n",lwipdev.gateway[0],lwipdev.gateway[1],lwipdev.gateway[2],lwipdev.gateway[3]);
+  
 #endif  
 
   /* - netif_add(struct netif *netif, struct ip_addr *ipaddr,
@@ -124,6 +130,8 @@ void LwIP_Init(void)
 }
 
 #ifdef USE_DHCP
+
+TaskHandle_t xHandleTaskDHCP = NULL;
 /**
   * @brief  LwIP_DHCP_Process_Handle
   * @param  None
@@ -131,64 +139,96 @@ void LwIP_Init(void)
   */
 void LwIP_DHCP_task(void * pvParameters)
 {
-  struct ip_addr ipaddr;
-  struct ip_addr netmask;
-  struct ip_addr gw;
-  uint32_t IPaddress;
-  
-  for (;;)
-  {
-    switch (DHCP_state)
-    {
-    case DHCP_START:
-      {
-        dhcp_start(&xnetif);
-        /* IP address should be set to 0 
-           every time we want to assign a new DHCP address*/
-        IPaddress = 0;
-        DHCP_state = DHCP_WAIT_ADDRESS;
+	struct ip_addr ipaddr;
+	struct ip_addr netmask;
+	struct ip_addr gw;
+	uint32_t IPaddress;
+	uint32_t NETmask;
+	uint32_t GATEway;
 
-      }
-      break;
+	while(1)
+	{
+		switch (DHCP_state)
+		{
+			case DHCP_START:
+			{
+				dhcp_start(&xnetif);
+				/* IP address should be set to 0 
+				every time we want to assign a new DHCP address*/
+				IPaddress = 0;
+				DHCP_state = DHCP_WAIT_ADDRESS;
+				
+				printf("正在查找DHCP服务器,请稍等...........\r\n"); 
+			}
+			break;
 
-      case DHCP_WAIT_ADDRESS:
-      {
-        /* Read the new IP address */
-        IPaddress = xnetif.ip_addr.addr;
+			case DHCP_WAIT_ADDRESS:
+			{
+				printf("正在获取地址...\r\n");
+				/* Read the new IP address */
+				IPaddress=xnetif.ip_addr.addr;		//读取新IP地址
+				NETmask=xnetif.netmask.addr;//读取子网掩码
+				GATEway=xnetif.gw.addr;			//读取默认网关 
 
-        if (IPaddress!=0) 
-        {
-          DHCP_state = DHCP_ADDRESS_ASSIGNED;	
-          
-          /* Stop DHCP */
-          dhcp_stop(&xnetif);
-        }
-        else
-        {
-          /* DHCP timeout */
-          if (xnetif.dhcp->tries > MAX_DHCP_TRIES)
-          {
-            DHCP_state = DHCP_TIMEOUT;
+				if (IPaddress!=0) 
+				{
+					printf("网卡en的MAC地址为:................%d.%d.%d.%d.%d.%d\r\n",lwipdev.mac[0],lwipdev.mac[1],lwipdev.mac[2],lwipdev.mac[3],lwipdev.mac[4],lwipdev.mac[5]);
+					//解析出通过DHCP获取到的IP地址
+					lwipdev.ip[3]=(uint8_t)(IPaddress>>24); 
+					lwipdev.ip[2]=(uint8_t)(IPaddress>>16);
+					lwipdev.ip[1]=(uint8_t)(IPaddress>>8);
+					lwipdev.ip[0]=(uint8_t)(IPaddress);
+					printf("通过DHCP获取到IP地址..............%d.%d.%d.%d\r\n",lwipdev.ip[0],lwipdev.ip[1],lwipdev.ip[2],lwipdev.ip[3]);
+					//解析通过DHCP获取到的子网掩码地址
+					lwipdev.netmask[3]=(uint8_t)(NETmask>>24);
+					lwipdev.netmask[2]=(uint8_t)(NETmask>>16);
+					lwipdev.netmask[1]=(uint8_t)(NETmask>>8);
+					lwipdev.netmask[0]=(uint8_t)(NETmask);
+					printf("通过DHCP获取到子网掩码............%d.%d.%d.%d\r\n",lwipdev.netmask[0],lwipdev.netmask[1],lwipdev.netmask[2],lwipdev.netmask[3]);
+					//解析出通过DHCP获取到的默认网关
+					lwipdev.gateway[3]=(uint8_t)(GATEway>>24);
+					lwipdev.gateway[2]=(uint8_t)(GATEway>>16);
+					lwipdev.gateway[1]=(uint8_t)(GATEway>>8);
+					lwipdev.gateway[0]=(uint8_t)(GATEway);
+					printf("通过DHCP获取到的默认网关..........%d.%d.%d.%d\r\n",lwipdev.gateway[0],lwipdev.gateway[1],lwipdev.gateway[2],lwipdev.gateway[3]);
 
-            /* Stop DHCP */
-            dhcp_stop(&xnetif);
+					DHCP_state = DHCP_ADDRESS_ASSIGNED;	
 
-            /* Static address used */
-            IP4_ADDR(&ipaddr, IP_ADDR0 ,IP_ADDR1 , IP_ADDR2 , IP_ADDR3 );
-            IP4_ADDR(&netmask, NETMASK_ADDR0, NETMASK_ADDR1, NETMASK_ADDR2, NETMASK_ADDR3);
-            IP4_ADDR(&gw, GW_ADDR0, GW_ADDR1, GW_ADDR2, GW_ADDR3);
-            netif_set_addr(&xnetif, &ipaddr , &netmask, &gw);
-          }
-        }
-      }
-      break;
+					/* Stop DHCP */
+					dhcp_stop(&xnetif);
+				}
+				else
+				{
+					/* DHCP timeout */
+					if (xnetif.dhcp->tries > MAX_DHCP_TRIES)
+					{
+						/* Static address used */
+						IP4_ADDR(&ipaddr, lwipdev.ip[0], lwipdev.ip[1], lwipdev.ip[2], lwipdev.ip[3]);
+						IP4_ADDR(&netmask, lwipdev.netmask[0], lwipdev.netmask[1] , lwipdev.netmask[2], lwipdev.netmask[3]);
+						IP4_ADDR(&gw, lwipdev.gateway[0], lwipdev.gateway[1], lwipdev.gateway[2], lwipdev.gateway[3]);
 
-      default: break;
-    }
-    
-    /* wait 250 ms */
-    vTaskDelay(250);
-  }   
+						printf("网卡en的MAC地址为:................%d.%d.%d.%d.%d.%d\r\n",lwipdev.mac[0],lwipdev.mac[1],lwipdev.mac[2],lwipdev.mac[3],lwipdev.mac[4],lwipdev.mac[5]);
+						printf("静态IP地址........................%d.%d.%d.%d\r\n",lwipdev.ip[0],lwipdev.ip[1],lwipdev.ip[2],lwipdev.ip[3]);
+						printf("子网掩码..........................%d.%d.%d.%d\r\n",lwipdev.netmask[0],lwipdev.netmask[1],lwipdev.netmask[2],lwipdev.netmask[3]);
+						printf("默认网关..........................%d.%d.%d.%d\r\n",lwipdev.gateway[0],lwipdev.gateway[1],lwipdev.gateway[2],lwipdev.gateway[3]);
+
+						netif_set_addr(&xnetif, &ipaddr , &netmask, &gw);
+						
+						DHCP_state = DHCP_TIMEOUT;
+
+						/* Stop DHCP */
+						dhcp_stop(&xnetif);
+					}
+				}
+			}
+			break;
+
+			default: break;
+		}
+
+		/* wait 250 ms */
+		delay_ms(250);
+	}   
 }
 #endif  /* USE_DHCP */
 

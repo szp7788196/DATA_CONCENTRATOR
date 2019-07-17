@@ -2,6 +2,7 @@
 #include "usart.h"
 #include "string.h"
 #include "FreeRTOS.h"					//FreeRTOS使用
+#include "common.h"
 
 #if 1
 #pragma import(__use_no_semihosting)
@@ -210,11 +211,20 @@ void TIM2_Config(u16 TIM2_Interval_xus)
 //定时器2中断入口
 void TIM2_IRQHandler(void)
 {
+	static u16 cnt = 0;
+	
 	if(TIM_GetITStatus(TIM2, TIM_IT_Update) != RESET) 
 	{
 		TIM_ClearITPendingBit(TIM2, TIM_IT_Update); 
 		
 		Usart1ReciveFrameEnd();
+		
+		if((cnt ++) >= 100)
+		{
+			cnt = 0;
+			
+			SysTick1s ++;
+		}
 	}
 }
 

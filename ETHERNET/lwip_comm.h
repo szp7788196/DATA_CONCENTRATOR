@@ -3,7 +3,7 @@
 #include "common.h"
 #include "dp83848.h"
   
-//#define USE_DHCP
+#define USE_DHCP
 
    
 

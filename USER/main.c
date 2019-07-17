@@ -21,7 +21,7 @@ int main(void)
 	LED_Init();
 	
 	TIM2_Config(100);									//定时器2初始化
-	usart1_config(115200);								//维护串口初始化
+	usart1_config(9600);								//维护串口初始化
 
 	IWDG_Feed_Thread();									//上电第一次喂看门狗
 

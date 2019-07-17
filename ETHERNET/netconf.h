@@ -30,6 +30,12 @@
 #ifndef __NETCONF_H
 #define __NETCONF_H
 
+#include "sys.h"
+#include "FreeRTOS.h"
+#include "task.h"
+#include "queue.h"
+#include "semphr.h"
+
 #ifdef __cplusplus
  extern "C" {
 #endif
@@ -44,6 +50,10 @@
 /* Exported constants --------------------------------------------------------*/
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */
+	 
+extern __IO uint8_t DHCP_state;
+extern TaskHandle_t xHandleTaskDHCP;
+	 
 void LwIP_Init(void);
 void LwIP_DHCP_task(void * pvParameters);
 

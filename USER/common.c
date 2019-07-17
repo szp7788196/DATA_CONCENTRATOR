@@ -1,6 +1,8 @@
 #include "common.h"
 
 
+time_t SysTick1s = 0;
+
 //32位CRC校验
 u32 CRC32( const u8 *buf, u32 size)
 {
@@ -44,7 +46,6 @@ u8 CalCheckSum(u8 *buf, u16 len)
 
 	return sum;
 }
-
 
 
 

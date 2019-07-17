@@ -8,7 +8,7 @@
 
 #define TCP_CLIENT_RX_BUFSIZE	2000	//接收缓冲区长度
 #define TCP_CLIENT_TX_BUFSIZE	2000	//接收缓冲区长度
-#define REMOTE_PORT				8080	//定义远端主机的IP地址
+#define REMOTE_PORT				16200	//定义远端主机的IP地址
 #define LWIP_SEND_DATA			0X80    //定义有数据发送
 
 

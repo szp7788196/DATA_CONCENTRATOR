@@ -13,14 +13,14 @@ void AppTaskCreate(void)
 				"vTaskLWIP_INIT",  					/* 任务名称    */
 				configMINIMAL_STACK_SIZE * 2,       /* stack大小,单位word,也就是4字节 */
 				NULL,        						/* 任务参数  */
-				1,           						/* 任务优先级*/
+				configMAX_PRIORITIES - 7,           /* 任务优先级*/
 				&xHandleTaskLWIP_INIT); 			/* 任务句柄  */	
 	
 	xTaskCreate(vTaskLED,    						/* 指示灯任务  */
 				"vTaskLED",  						/* 任务名称    */
 				64,         						/* stack大小,单位word,也就是4字节 */
 				NULL,        						/* 任务参数  */
-				2,           						/* 任务优先级*/
+				configMAX_PRIORITIES - 6,           /* 任务优先级*/
 				&xHandleTaskLED); 					/* 任务句柄  */
 }
 

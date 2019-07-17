@@ -175,6 +175,9 @@ static u8 auchCRCLo[] =
     0x43,0x83,0x41,0x81,0x80,0x40
 };
 
+
+extern time_t SysTick1s;
+
 u32 CRC32( const u8 *buf, u32 size);
 u16 CRC16(u8 *puchMsgg,u8 usDataLen);
 u8 CalCheckSum(u8 *buf, u16 len);

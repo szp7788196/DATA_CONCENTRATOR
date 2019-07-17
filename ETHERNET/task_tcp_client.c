@@ -3,6 +3,8 @@
 #include "lwip/lwip_sys.h"
 #include "lwip/api.h"
 #include "lwip_comm.h"
+#include "netconf.h"
+#include "common.h"
 
 
 struct netconn *tcp_clientconn;					//TCP CLIENT网络连接结构体
@@ -19,12 +21,26 @@ void vTaskTCP_CLIENT(void *pvParameters)
 	err_t err,recv_err;
 	static ip_addr_t server_ipaddr,loca_ipaddr;
 	static u16_t 		 server_port,loca_port;
+	
+	time_t time_heart_beat = SysTick1s;
+	u8 heart_beat[24] = {0x68 ,0x00 ,0x00 ,0x00 ,0x00 ,0x00 ,0x04 ,0x68 ,0xE1 
+,0x06 ,0x9C ,0xA5 ,0x25 ,0x8D ,0xEE ,0x46 ,0xE2 ,0x16 ,0xFE ,0xFD ,0xFC ,0xFB ,0xFA ,0xF9};
 
 	server_port = REMOTE_PORT;
 	IP4_ADDR(&server_ipaddr, lwipdev.remoteip[0],lwipdev.remoteip[1], lwipdev.remoteip[2],lwipdev.remoteip[3]);
 
 	while (1)
 	{
+#ifdef USE_DHCP
+		WAIT_DHCP:
+		if(DHCP_state != DHCP_ADDRESS_ASSIGNED &&
+		   DHCP_state != DHCP_TIMEOUT)
+		{
+			delay_ms(500);
+			
+			goto WAIT_DHCP;
+		}
+#endif
 		tcp_clientconn = netconn_new(NETCONN_TCP);  //创建一个TCP链接
 		err = netconn_connect(tcp_clientconn,&server_ipaddr,server_port);//连接服务器
 		if(err != ERR_OK)  netconn_delete(tcp_clientconn); //返回值不等于ERR_OK,删除tcp_clientconn连接
@@ -36,6 +52,30 @@ void vTaskTCP_CLIENT(void *pvParameters)
 			printf("连接上服务器%d.%d.%d.%d,本机端口号为:%d\r\n",lwipdev.remoteip[0],lwipdev.remoteip[1], lwipdev.remoteip[2],lwipdev.remoteip[3],loca_port);
 			while(1)
 			{
+				if(Usart1RecvEnd == 0xAA)
+				{
+					Usart1RecvEnd = 0;
+					
+					memcpy(tcp_client_sendbuf,Usart1RxBuf,Usart1FrameLen);
+					
+					data_len = Usart1FrameLen;
+					
+					tcp_client_flag |= LWIP_SEND_DATA;
+				}
+				else
+				{
+					if(SysTick1s - time_heart_beat >= 30)
+					{
+						time_heart_beat = SysTick1s;
+						
+						memcpy(tcp_client_sendbuf,heart_beat,24);
+						
+						data_len = 24;
+					
+						tcp_client_flag |= LWIP_SEND_DATA;
+					}
+				}
+				
 				if((tcp_client_flag & LWIP_SEND_DATA) == LWIP_SEND_DATA) //有数据要发送
 				{
 					err = netconn_write(tcp_clientconn ,tcp_client_sendbuf,data_len,NETCONN_COPY); //发送tcp_server_sentbuf中的数据
@@ -62,10 +102,16 @@ void vTaskTCP_CLIENT(void *pvParameters)
 					}
 
 //					data_len=0;  //复制完成后data_len要清零。
-					memcpy(tcp_client_sendbuf,tcp_client_recvbuf,data_len);
+//					memcpy(tcp_client_sendbuf,tcp_client_recvbuf,data_len);
 //					printf("%s\r\n",tcp_client_recvbuf);
+					
+					memcpy(Usart1TxBuf,tcp_client_recvbuf,data_len);
+					Usart1SendLen = data_len;
+					data_len = 0;
+					USART_ITConfig(USART1, USART_IT_TC, ENABLE);
+					
 					netbuf_delete(recvbuf);
-					tcp_client_flag |= LWIP_SEND_DATA;
+//					tcp_client_flag |= LWIP_SEND_DATA;
 				}else if(recv_err == ERR_CLSD)  //关闭连接
 				{
 					netconn_close(tcp_clientconn);
@@ -80,12 +126,12 @@ void vTaskTCP_CLIENT(void *pvParameters)
 
 void tcp_client_init(void)
 {
-	xTaskCreate(vTaskTCP_CLIENT,    					/* 指示灯任务  */
-				"vTaskTCP_CLIENT",  					/* 任务名称    */
+	xTaskCreate(vTaskTCP_CLIENT,    				/* 指示灯任务  */
+				"vTaskTCP_CLIENT",  				/* 任务名称    */
 				configMINIMAL_STACK_SIZE * 8,       /* stack大小,单位word,也就是4字节 */
 				NULL,        						/* 任务参数  */
-				10,           						/* 任务优先级*/
-				&xHandleTaskTCP_CLIENT); 			/* 任务句柄  */	
+				configMAX_PRIORITIES - 3,           /* 任务优先级*/
+				&xHandleTaskTCP_CLIENT); 			/* 任务句柄  */
 }
 
 

@@ -6,8 +6,8 @@
 
 
 
-#define Usart1RxLen	256	
-#define Usart1TxLen	256
+#define Usart1RxLen	4096	
+#define Usart1TxLen	4096
 
 
 
