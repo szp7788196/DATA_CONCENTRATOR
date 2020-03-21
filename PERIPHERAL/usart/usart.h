@@ -5,34 +5,38 @@
 #include "sys.h" 
 
 
+#define	RS485_DIR			PDout(15)
 
-#define Usart1RxLen	4096	
-#define Usart1TxLen	4096
+
+#define RS485_RX			0
+#define RS485_TX			1
+
+
+#define USART1_MAX_RX_LN	128	
+#define USART5_MAX_RX_LN	512	
 
 
 
 extern u16 Usart1RxCnt;
-extern u16 OldUsart1RxCnt;
 extern u16 Usart1FrameLen;
-extern u8 Usart1RxBuf[Usart1RxLen];
-extern u8 Usart1TxBuf[Usart1TxLen];
+extern u8 Usart1RxBuf[USART1_MAX_RX_LN];
 extern u8 Usart1RecvEnd;
-extern u8 Usart1Busy;
-extern u16 Usart1SendLen;
-extern u16 Usart1SendNum;
-extern u8 Usart1RecvCnt;
-extern u8 Usart1SendCnt;
+
+extern u16 Usart5RxCnt;
+extern u16 Usart5FrameLen;
+extern u8 Usart5RxBuf[USART5_MAX_RX_LN];
+extern u8 Usart5RecvEnd;
 
 
 
 
-void usart1_config(u32 BaudRate);
+void USART1_Init(u32 BaudRate);
+void USART5_Init(u32 BaudRate);
+u8 UsartSendString(USART_TypeDef* USARTx,u8 *str, u16 len);
 
 
-void Usart1FrameSend(void);
 
-
-void TIM2_Config(u16 TIM2_Interval_xus);
+void TIM2_Init(u16 TIM2_Interval_xus);
 
 #endif
 

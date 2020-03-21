@@ -1059,5 +1059,7 @@ typedef struct xSTATIC_TIMER
 }
 #endif
 
+extern volatile BaseType_t xSchedulerRunning;
+
 #endif /* INC_FREERTOS_H */
 

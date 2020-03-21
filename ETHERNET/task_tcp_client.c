@@ -105,10 +105,10 @@ void vTaskTCP_CLIENT(void *pvParameters)
 //					memcpy(tcp_client_sendbuf,tcp_client_recvbuf,data_len);
 //					printf("%s\r\n",tcp_client_recvbuf);
 					
-					memcpy(Usart1TxBuf,tcp_client_recvbuf,data_len);
-					Usart1SendLen = data_len;
-					data_len = 0;
-					USART_ITConfig(USART1, USART_IT_TC, ENABLE);
+//					memcpy(Usart1TxBuf,tcp_client_recvbuf,data_len);
+//					Usart1SendLen = data_len;
+//					data_len = 0;
+//					USART_ITConfig(USART1, USART_IT_TC, ENABLE);
 					
 					netbuf_delete(recvbuf);
 //					tcp_client_flag |= LWIP_SEND_DATA;

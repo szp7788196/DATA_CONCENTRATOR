@@ -40,9 +40,13 @@
     typedef long long int           int64;
 
 
-#define SOFT_WARE_VRESION			101			//软件版本号
+#define SOFT_WARE_VRESION						101			//软件版本号
 
  
+#define CONCENTRATOR_BASIC_CONF_ADD				0			//集控器基础参数配置EEPROM存储地址
+#define CONCENTRATOR_BASIC_CONF_LEN				139
+
+
 
 
 
@@ -176,12 +180,41 @@ static u8 auchCRCLo[] =
 };
 
 
+extern SemaphoreHandle_t  xMutex_SPI2;
+extern SemaphoreHandle_t  xMutex_RTC;
+extern SemaphoreHandle_t  xMutex_Push_xQueue_ServerFrameRx;
+extern SemaphoreHandle_t  xMutex_Push_xQueue_ServerFrameTx;
+
+
+extern QueueHandle_t xQueue_ServerFrameRx;
+extern QueueHandle_t xQueue_4gFrameTx;
+extern QueueHandle_t xQueue_WifiFrameTx;
+extern QueueHandle_t xQueue_EthFrameTx;
+extern QueueHandle_t xQueue_NB_IoTFrameTx;
+extern QueueHandle_t xQueue_ConcentratorFrameStruct;
+extern QueueHandle_t xQueue_LampControllerFrameStruct;
+extern QueueHandle_t xQueue_RelayFrameStruct;
+extern QueueHandle_t xQueue_InputCollectorFrameStruct;
+extern QueueHandle_t xQueue_ElectricMeterFrameStruct;
+extern QueueHandle_t xQueue_LumeterFrameStruct;
+
+
 extern time_t SysTick1s;
 
-u32 CRC32( const u8 *buf, u32 size);
+time_t GetSysTick1s(void);
+
+u32 CRC32(const u8 *buf, u32 size);
 u16 CRC16(u8 *puchMsgg,u8 usDataLen);
 u8 CalCheckSum(u8 *buf, u16 len);
 
+u16 MyStrstr(u8 *str1, u8 *str2, u16 str1_len, u16 str2_len);
+unsigned short find_str(unsigned char *s_str, unsigned char *p_str, unsigned short count, unsigned short *seek);
+int search_str(unsigned char *source, unsigned char *target);
+unsigned short get_str1(unsigned char *source, unsigned char *begin, unsigned short count1, unsigned char *end, unsigned short count2, unsigned char *out);
+unsigned short get_str2(unsigned char *source, unsigned char *begin, unsigned short count, unsigned short length, unsigned char *out);
+unsigned short get_str3(unsigned char *source, unsigned char *out, unsigned short length);
+
+u8 GetMemoryForSpecifyPointer(u8 **str,u16 size, u8 *memory);
 
 
 
@@ -200,8 +233,7 @@ u8 CalCheckSum(u8 *buf, u16 len);
 
 
 
-
-
+void ReadTotalConfigurationParameters(void);
 
 
 

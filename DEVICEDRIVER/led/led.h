@@ -4,12 +4,15 @@
 
 
 
-#define LED1	PEout(3)
-#define LED2	PEout(4)
+#define LED_RUN		PAout(3)
+#define LED_WIFI	PDout(12)
+#define LED_ZIGBEE	PDout(14)
+#define LED_RS485	PGout(2)
+#define LED_4G		PDout(0)
+#define LED_ETH		PDout(1)
 
 
-#define LED_RUN		LED1
-#define LED_ERR		LED2
+
 
 
 void LED_Init(void);//≥ı ºªØ		 				    

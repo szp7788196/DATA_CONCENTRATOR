@@ -1,11 +1,11 @@
 /**
   ******************************************************************************
-  * @file    Project/STM32F4xx_StdPeriph_Templates/stm32f4xx_it.c 
+  * @file    Project/STM32F4xx_StdPeriph_Templates/stm32f4xx_it.c
   * @author  MCD Application Team
   * @version V1.4.0
   * @date    04-August-2014
   * @brief   Main Interrupt Service Routines.
-  *          This file provides template for all exceptions handler and 
+  *          This file provides template for all exceptions handler and
   *          peripherals interrupt service routine.
   ******************************************************************************
   * @attention
@@ -18,8 +18,8 @@
   *
   *        http://www.st.com/software_license_agreement_liberty_v2
   *
-  * Unless required by applicable law or agreed to in writing, software 
-  * distributed under the License is distributed on an "AS IS" BASIS, 
+  * Unless required by applicable law or agreed to in writing, software
+  * distributed under the License is distributed on an "AS IS" BASIS,
   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   * See the License for the specific language governing permissions and
   * limitations under the License.
@@ -34,7 +34,7 @@
 #include "lwip/lwip_sys.h"
 #include "dp83848.h"
 #include "common.h"
- 
+
 
 /** @addtogroup Template_Project
   * @{
@@ -71,9 +71,18 @@ void NMI_Handler(void)
 void HardFault_Handler(void)
 {
   /* Go to infinite loop when Hard Fault exception occurs */
-  while (1)
-  {
-  }
+
+//	__disable_fault_irq();
+//	NVIC_SystemReset();
+
+	if(CoreDebug->DHCSR & 1)
+	{
+		__breakpoint(0);
+	}
+
+	while (1)
+	{
+	}
 }
 
 /**
@@ -149,7 +158,7 @@ void DebugMon_Handler(void)
 //  */
 //void SysTick_Handler(void)
 //{
-// 
+//
 //}
 
 /**
@@ -160,16 +169,16 @@ void DebugMon_Handler(void)
 void EXTI0_IRQHandler(void)
 {
   portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
-  
+
   if(EXTI_GetITStatus(ETH_LINK_EXTI_LINE) != RESET)
   {
   /* Give the semaphore to wakeup LwIP task */
-  xSemaphoreGiveFromISR( ETH_link_xSemaphore, &xHigherPriorityTaskWoken ); 
+  xSemaphoreGiveFromISR( ETH_link_xSemaphore, &xHigherPriorityTaskWoken );
   }
    /* Clear interrupt pending bit */
    EXTI_ClearITPendingBit(ETH_LINK_EXTI_LINE);
-  
-    /* Switch tasks if necessary. */	
+
+    /* Switch tasks if necessary. */
   if( xHigherPriorityTaskWoken != pdFALSE )
   {
     portEND_SWITCHING_ISR( xHigherPriorityTaskWoken );
@@ -200,9 +209,9 @@ void ETH_IRQHandler()
 	{
 		xHigherPriorityTaskWoken = pdFALSE;
 	}
-	
+
 	ETH_DMAClearITPendingBit(ETH_DMA_IT_NIS);
-	
+
 //	if( xHigherPriorityTaskWoken != pdFALSE )
 //	{
 		portEND_SWITCHING_ISR( xHigherPriorityTaskWoken );
@@ -251,7 +260,7 @@ void ETH_IRQHandler()
 
 /**
   * @}
-  */ 
+  */
 
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

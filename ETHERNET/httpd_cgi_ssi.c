@@ -73,20 +73,20 @@ static int FindCGIParameter(const char *pcToFind,char *pcParam[],int iNumParams)
 //SSIHandler中需要用到的处理ADC的函数
 void ADC_Handler(char *pcInsert)
 { 
-    char Digit1=0, Digit2=0, Digit3=0, Digit4=0; 
-    uint32_t ADCVal = 0;        
+//    char Digit1=0, Digit2=0, Digit3=0, Digit4=0; 
+//    uint32_t ADCVal = 0;        
 
      //获取ADC的值
 //     ADCVal = Get_Adc_Average(5,10); //获取ADC1_CH5的电压值
 		
      
      //转换为电压 ADCVval * 0.8mv
-     ADCVal = (uint32_t)(ADCVal * 0.8);  
-     
-     Digit1= ADCVal/1000;
-     Digit2= (ADCVal-(Digit1*1000))/100 ;
-     Digit3= (ADCVal-((Digit1*1000)+(Digit2*100)))/10;
-     Digit4= ADCVal -((Digit1*1000)+(Digit2*100)+ (Digit3*10));
+//     ADCVal = (uint32_t)(ADCVal * 0.8);  
+//     
+//     Digit1= ADCVal/1000;
+//     Digit2= (ADCVal-(Digit1*1000))/100 ;
+//     Digit3= (ADCVal-((Digit1*1000)+(Digit2*100)))/10;
+//     Digit4= ADCVal -((Digit1*1000)+(Digit2*100)+ (Digit3*10));
         
      //准备添加到html中的数据
 	*pcInsert 		= (char)(1+0x30);
@@ -101,16 +101,16 @@ void ADC_Handler(char *pcInsert)
 //SSIHandler中需要用到的处理内部温度传感器的函数
 void Temperate_Handler(char *pcInsert)
 {
-		char Digit1=0, Digit2=0, Digit3=0, Digit4=0,Digit5=0; 
-		short Temperate = 111;
+//		char Digit1=0, Digit2=0, Digit3=0, Digit4=0,Digit5=0; 
+//		short Temperate = 111;
 		
 		//获取内部温度值
 //		Temperate = Get_Temprate(); //获取温度值 此处扩大了100倍
-		Digit1 = Temperate / 10000;
-		Digit2 = (Temperate % 10000)/1000;
-		Digit3 = (Temperate % 1000)/100 ;
-		Digit4 = (Temperate % 100)/10;
-		Digit5 = Temperate % 10;
+//		Digit1 = Temperate / 10000;
+//		Digit2 = (Temperate % 10000)/1000;
+//		Digit3 = (Temperate % 1000)/100 ;
+//		Digit4 = (Temperate % 100)/10;
+//		Digit5 = Temperate % 10;
 		//添加到html中的数据
 		*pcInsert 		= (char)(1+0x30);
 		*(pcInsert+1) = (char)(0+0x30);
@@ -123,7 +123,7 @@ void Temperate_Handler(char *pcInsert)
 //SSIHandler中需要用到的处理RTC时间的函数
 void RTCTime_Handler(char *pcInsert)
 {
-	u8 hour,min,sec,ampm;
+	u8 hour,min,sec;
 	
 //	RTC_Get_Time(&hour,&min,&sec,&ampm);
 	
@@ -192,22 +192,22 @@ const char* LEDS_CGI_Handler(int iIndex, int iNumParams, char *pcParam[], char *
 	//只有一个CGI句柄 iIndex=0
 	if (iIndex != -1)
 	{
-			LED_ERR=1;  //关闭所有的LED1灯
 		for (i=0; i<iNumParams; i++) //检查CGI参数: example GET /leds.cgi?led=2&led=4 */
 		{
 		  if (strcmp(pcParam[i] , "LED1")==0)  //检查参数"led"
 		  {
 			if(strcmp(pcValue[i], "LED1ON") ==0)  //改变LED1状态
-			  LED_ERR=0; //打开LED1
+			{
+				
+			}
 			else if(strcmp(pcValue[i],"LED1OFF") == 0)
-				LED_ERR=1; //关闭LED1
+			{
+				
+			}
 		  }
 		}
 	 }
-	if(LED_ERR == 0 && LED_RUN == 0) 		return "/STM32_LED_ON_BEEP_OFF.shtml";  	//LED1开,BEEP关
-	else if(LED_ERR == 0 && LED_RUN == 1) return "/STM32_LED_ON_BEEP_ON.shtml";	//LED1开,BEEP开
-	else if(LED_ERR == 1 && LED_RUN == 1) return "/STM32_LED_OFF_BEEP_ON.shtml";	//LED1关,BEEP开
-	else return "/STM32_LED_OFF_BEEP_OFF.shtml";   							//LED1关,BEEP关					
+	return "/STM32_LED_OFF_BEEP_OFF.shtml";   							//LED1关,BEEP关					
 }
 
 //BEEP的CGI控制句柄
@@ -229,11 +229,8 @@ const char *BEEP_CGI_Handler(int iIndex,int iNumParams,char *pcParam[],char *pcV
 			}
 		}
 	}
-	if(LED_ERR == 0 && LED_RUN == 0) 		return "/STM32_LED_ON_BEEP_OFF.shtml";  	//LED1开,BEEP关
-	else if(LED_ERR == 0 && LED_RUN == 1) return "/STM32_LED_ON_BEEP_ON.shtml";	//LED1开,BEEP开
-	else if(LED_ERR == 1 && LED_RUN == 1) return "/STM32_LED_OFF_BEEP_ON.shtml";	//LED1关,BEEP开
-	else return "/STM32_LED_OFF_BEEP_OFF.shtml";   //LED1关,BEEP关
 	
+	return "/STM32_LED_OFF_BEEP_OFF.shtml";   //LED1关,BEEP关
 }
 
 //SSI句柄初始化

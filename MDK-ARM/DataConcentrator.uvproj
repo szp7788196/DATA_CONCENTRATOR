@@ -351,7 +351,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F40XX,USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>..\CORE;..\DEVICEDRIVER\led;..\FREERTOS\include;..\FREERTOS\portable\RVDS\ARM_CM4F;..\FWLIB\inc;..\PERIPHERAL\usart;..\PERIPHERAL\watch_dog;..\PROTOCOL;..\SYSTEM\delay;..\SYSTEM\sys;..\USER;..\DEVICEDRIVER\dp83848;..\ETHERNET;..\LWIP\lwip-1.4.1\src\include;..\LWIP\lwip-1.4.1\src\include\lwip;..\LWIP\lwip-1.4.1\src\include\ipv4;..\LWIP\lwip-1.4.1\src\include\netif;..\LWIP\lwip-1.4.1\port\STM32F4x7;..\LWIP\lwip-1.4.1\port\STM32F4x7\FreeRTOS;..\DEVICEDRIVER\key</IncludePath>
+              <IncludePath>..\CORE;..\DEVICEDRIVER\led;..\FREERTOS\include;..\FREERTOS\portable\RVDS\ARM_CM4F;..\FWLIB\inc;..\PERIPHERAL\usart;..\PERIPHERAL\watch_dog;..\PROTOCOL;..\SYSTEM\delay;..\SYSTEM\sys;..\USER;..\DEVICEDRIVER\dp83848;..\ETHERNET;..\LWIP\lwip-1.4.1\src\include;..\LWIP\lwip-1.4.1\src\include\lwip;..\LWIP\lwip-1.4.1\src\include\ipv4;..\LWIP\lwip-1.4.1\src\include\netif;..\LWIP\lwip-1.4.1\port\STM32F4x7;..\LWIP\lwip-1.4.1\port\STM32F4x7\FreeRTOS;..\DEVICEDRIVER\key;..\PERIPHERAL\spi;..\PERIPHERAL\iic;..\PERIPHERAL\stmflash;..\DEVICEDRIVER\kc;..\DEVICEDRIVER\kr;..\DEVICEDRIVER\rx8010s;..\DEVICEDRIVER\cat25x;..\DEVICEDRIVER\w25qxx;..\FATFS;..\FATFS\src;..\FATFS\exfuns;..\DEVICEDRIVER\ht7038;..\MEMORY;..\MIDDLEWARE;..\DEVICEDRIVER\ec20;..\EXTERNALDEVICE\concentrator</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -416,6 +416,26 @@
               <FileName>task_led.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\USER\task_led.c</FilePath>
+            </File>
+            <File>
+              <FileName>task_4g.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\USER\task_4g.c</FilePath>
+            </File>
+            <File>
+              <FileName>task_handle_server_frame.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\USER\task_handle_server_frame.c</FilePath>
+            </File>
+            <File>
+              <FileName>task_sensor.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\USER\task_sensor.c</FilePath>
+            </File>
+            <File>
+              <FileName>task_concentrator.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\USER\task_concentrator.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -592,10 +612,30 @@
               <FileType>1</FileType>
               <FilePath>..\PERIPHERAL\watch_dog\watch_dog.c</FilePath>
             </File>
+            <File>
+              <FileName>spi.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\PERIPHERAL\spi\spi.c</FilePath>
+            </File>
+            <File>
+              <FileName>iic.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\PERIPHERAL\iic\iic.c</FilePath>
+            </File>
+            <File>
+              <FileName>stmflash.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\PERIPHERAL\stmflash\stmflash.c</FilePath>
+            </File>
+            <File>
+              <FileName>usart6.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\PERIPHERAL\usart\usart6.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
-          <GroupName>DEVICEDRIVER</GroupName>
+          <GroupName>DEVIC_EDRIVER</GroupName>
           <Files>
             <File>
               <FileName>led.c</FileName>
@@ -608,14 +648,51 @@
               <FilePath>..\DEVICEDRIVER\dp83848\dp83848.c</FilePath>
             </File>
             <File>
-              <FileName>key.c</FileName>
+              <FileName>kc.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\DEVICEDRIVER\key\key.c</FilePath>
+              <FilePath>..\DEVICEDRIVER\kc\kc.c</FilePath>
+            </File>
+            <File>
+              <FileName>kr.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\DEVICEDRIVER\kr\kr.c</FilePath>
+            </File>
+            <File>
+              <FileName>rx8010s.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\DEVICEDRIVER\rx8010s\rx8010s.c</FilePath>
+            </File>
+            <File>
+              <FileName>cat25x.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\DEVICEDRIVER\cat25x\cat25x.c</FilePath>
+            </File>
+            <File>
+              <FileName>w25qxx.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\DEVICEDRIVER\w25qxx\w25qxx.c</FilePath>
+            </File>
+            <File>
+              <FileName>ht7038.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\DEVICEDRIVER\ht7038\ht7038.c</FilePath>
+            </File>
+            <File>
+              <FileName>ec20.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\DEVICEDRIVER\ec20\ec20.c</FilePath>
             </File>
           </Files>
         </Group>
         <Group>
           <GroupName>PROTOCOL</GroupName>
+          <Files>
+            <File>
+              <FileName>server_protocol.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\PROTOCOL\server_protocol.c</FilePath>
+            </File>
+          </Files>
         </Group>
         <Group>
           <GroupName>FREERTOS</GroupName>
@@ -874,6 +951,66 @@
               <FileName>sys_arch.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\LWIP\lwip-1.4.1\port\STM32F4x7\FreeRTOS\sys_arch.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>FATFS</GroupName>
+          <Files>
+            <File>
+              <FileName>diskio.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\FATFS\src\diskio.c</FilePath>
+            </File>
+            <File>
+              <FileName>ff.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\FATFS\src\ff.c</FilePath>
+            </File>
+            <File>
+              <FileName>exfuns.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\FATFS\exfuns\exfuns.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>MEMORY</GroupName>
+          <Files>
+            <File>
+              <FileName>fifo.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\MEMORY\fifo.c</FilePath>
+            </File>
+            <File>
+              <FileName>memb.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\MEMORY\memb.c</FilePath>
+            </File>
+            <File>
+              <FileName>ringbuf.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\MEMORY\ringbuf.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>MIDDLE_WARE</GroupName>
+          <Files>
+            <File>
+              <FileName>at_cmd.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\MIDDLEWARE\at_cmd.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>EXTERNAL_DEVICE</GroupName>
+          <Files>
+            <File>
+              <FileName>concentrator.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\EXTERNALDEVICE\concentrator\concentrator.c</FilePath>
             </File>
           </Files>
         </Group>
