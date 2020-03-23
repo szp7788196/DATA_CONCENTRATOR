@@ -90,10 +90,14 @@ u8 BCD_TO_DATA(u8 bcd)
 	return data;
 }
 
-void RX8010S_Set_Time(u8 syear,u8 smonth,u8 sday,u8 shour,u8 smin,u8 ssecond,u8 sweek)
+void RX8010S_Set_Time(u8 syear,u8 smonth,u8 sday,u8 shour,u8 smin,u8 ssecond)
 {
+	u8 sweek = 0;
+	
 	if(xSchedulerRunning == 1)
 		xSemaphoreTake(xMutex_RTC, portMAX_DELAY);
+	
+	sweek = RTC_Get_Week(syear + 2000,smonth,sday);
 	
 	syear = DATA_TO_BCD(syear);
 	smonth = DATA_TO_BCD(smonth);
@@ -101,7 +105,6 @@ void RX8010S_Set_Time(u8 syear,u8 smonth,u8 sday,u8 shour,u8 smin,u8 ssecond,u8 
 	shour = DATA_TO_BCD(shour);
 	smin = DATA_TO_BCD(smin);
 	ssecond = DATA_TO_BCD(ssecond);
-	sweek = 1 << sweek;
 
 	RX8010S_WriteOneByte(RX8010_REG_YEAR,syear);
 	RX8010S_WriteOneByte(RX8010_REG_MONTH,smonth);
@@ -130,7 +133,7 @@ u8 RX8010S_Get_Time(void)
 	second = RX8010S_ReadOneByte(RX8010_REG_SEC);
 	week = RX8010S_ReadOneByte(RX8010_REG_WEEK);
 
-	calendar.w_year = BCD_TO_DATA(year);
+	calendar.w_year = BCD_TO_DATA(year) + 2000;
 	calendar.w_month = BCD_TO_DATA(month);
 	calendar.w_date = BCD_TO_DATA(day);
 	calendar.hour = BCD_TO_DATA(hour);
@@ -249,10 +252,8 @@ u8 SyncTimeFromNet(u32 sec_num)
 	calen.hour = temp / 3600;
 	calen.min = (temp % 3600) / 60;
 	calen.sec = (temp % 3600) % 60;
-	
-	calen.week = RTC_Get_Week(calen.w_year,calen.w_month,calen.w_date);
 
-	RX8010S_Set_Time(calen.w_year,calen.w_month,calen.w_date,calen.hour,calen.min,calen.sec,calen.week);
+	RX8010S_Set_Time(calen.w_year - 2000,calen.w_month,calen.w_date,calen.hour,calen.min,calen.sec);
 
 	return ret;
 }

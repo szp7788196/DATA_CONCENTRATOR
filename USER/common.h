@@ -202,6 +202,10 @@ extern QueueHandle_t xQueue_LumeterFrameStruct;
 extern time_t SysTick1s;
 
 time_t GetSysTick1s(void);
+u8 GetDatBit(u32 dat);
+u32 GetADV(u8 len);
+void IntToString(u8 *DString,u32 Dint,u8 zero_num);
+void TimeToString(u8 *str,u16 year, u8 month, u8 date, u8 hour, u8 minute, u8 second);
 
 u32 CRC32(const u8 *buf, u32 size);
 u16 CRC16(u8 *puchMsgg,u8 usDataLen);

@@ -3,7 +3,6 @@
 
 #include "sys.h"
 #include "rtos_task.h"
-#include "concentrator.h"
 
 
 #define NET_RX_FRAME_MAX_LEN					4096
@@ -12,7 +11,15 @@
 #define MAX_PARA_NUM							50
 
 
+typedef enum
+{
+	MODE_INSIDE 	= 0,
+	MODE_4G 		= 1,
+	MODE_ETH 		= 2,
+	MODE_NB_IOT 	= 3,
+	MODE_WIFI 		= 4,
 
+} CONNECTION_MODE_E;
 
 typedef enum
 {
@@ -26,6 +33,7 @@ typedef enum
 
 typedef enum
 {
+	UNKNOW_DEVICE			= 0xFFFF,	//未知设备
 	CONCENTRATOR 			= 0x0000,	//集控设备
 	LAMP_CONTROLLER 		= 0x0100,	//路灯控制器
 	RELAY 					= 0x0200,	//继电器
@@ -69,8 +77,9 @@ typedef struct	ServerFrame
 typedef struct	Parameter					//参数
 {
 	u16 type;								//参数类型
+	u16 len;								//参数长度
 	u8 *value;								//参数值
-}__attribute__((packed))Parameter_S;
+}Parameter_S;								//切记不可强制地址对齐，不然接收消息队列时会死机
 
 
 typedef struct	ServerFrameStruct			//帧结构
@@ -91,10 +100,10 @@ typedef struct	ServerFrameStruct			//帧结构
 	
 	u8 para_num;							//参数个数
 	
-	Parameter_S para[MAX_PARA_NUM];			//具体参数
+	Parameter_S *para;						//具体参数
 	
 	u8 stop;
-}__attribute__((packed))ServerFrameStruct_S;
+}ServerFrameStruct_S;
 
 
 
@@ -107,9 +116,13 @@ typedef struct	ServerFrameStruct			//帧结构
 
 
 void ServerFrameHandle(ServerFrame_S *rx_frame);
+u8 TransServerFrameStructToOtherTask(ServerFrameStruct_S *server_frame_struct,DEVICE_TYPE_E device_type);
+u8 GetParameterNum(ServerFrame_S *rx_frame);
 u8 GetParameters(ServerFrameStruct_S *server_frame_struct,ServerFrame_S *rx_frame);
 s8 GetServerFrameStruct(ServerFrameStruct_S *server_frame_struct,ServerFrame_S *rx_frame);
+u8 ConvertFrameStructToFrame(ServerFrameStruct_S *server_frame_struct);
 u8 CopyServerFrameStruct(ServerFrameStruct_S *s_server_frame_struct,ServerFrameStruct_S *d_server_frame_struct,u8 mode);
+u16 GetFinalFrameLen(u8 *buf,u16 len);
 u16 EscapeSymbolDelete(u8* inbuf,u16 inbuf_len,u8* outbuf);
 u16 EscapeSymbolAdd(u8* inbuf,u16 inbuf_len,u8* outbuf);
 

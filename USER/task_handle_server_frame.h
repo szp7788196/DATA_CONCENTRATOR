@@ -16,7 +16,7 @@ void vTaskHANDLE_SERVER_FRAME(void *pvParameters);
 
 
 
-void PushTheFrameToBeSendToTxQueue(ServerFrame_S *tx_frame);
+void PushTheFrameToTxQueue(ServerFrame_S *tx_frame);
 
 void RecvNetFrameAndPushToRxQueue(CONNECTION_MODE_E conncetion_mode);
 

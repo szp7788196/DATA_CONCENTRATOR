@@ -2,17 +2,10 @@
 #define __CONCENTRATOR_H
 
 #include "sys.h"
+#include "server_protocol.h"
 
 
-typedef enum
-{
-	MODE_INSIDE 	= 0,
-	MODE_4G 		= 1,
-	MODE_ETH 		= 2,
-	MODE_NB_IOT 	= 3,
-	MODE_WIFI 		= 4,
 
-} CONNECTION_MODE_E;
 
 
 
@@ -52,7 +45,7 @@ typedef struct	ConcentratorBasicConfig		//集控器基础配置参数
 
 
 extern ConcentratorBasicConfig_S ConcentratorBasicConfig;
-
+extern u8 SystemReBoot;										//系统重启标识
 
 
 
@@ -66,10 +59,14 @@ extern ConcentratorBasicConfig_S ConcentratorBasicConfig;
 
 
 void ReadConcentratorBasicConfig(void);
+void WriteConcentratorBasicConfig(u8 reset,u8 write_enable);
 void RecvAndHandleFrameStruct(void);
 
 
-
+u8 TransparentTransmission(ServerFrameStruct_S *server_frame_struct);
+u8 SynchronizeTime(ServerFrameStruct_S *server_frame_struct);
+u8 ResetConfigParameters(ServerFrameStruct_S *server_frame_struct);
+u8 RebootTheSystem(ServerFrameStruct_S *server_frame_struct);
 
 
 

@@ -20,21 +20,21 @@ void AppTaskCreate(void)
 //				&xHandleTaskLWIP_INIT); 			/* 任务句柄  */
 
 	xTaskCreate(vTask4G,    						/* 指示灯任务  */
-				"vTask4G",  						/* 任务名称    */
-				2048,         						/* stack大小,单位word,也就是4字节 */
+				" ",  						/* 任务名称    */
+				1024,         						/* stack大小,单位word,也就是4字节 */
 				NULL,        						/* 任务参数  */
 				configMAX_PRIORITIES - 0,           /* 任务优先级*/
 				&xHandleTask4G);
 
 	xTaskCreate(vTaskHANDLE_SERVER_FRAME,    		/* 指示灯任务  */
-				"vTaskHANDLE_SERVER_FRAME",  		/* 任务名称    */
-				2048,         						/* stack大小,单位word,也就是4字节 */
+				" ",  		/* 任务名称    */
+				1024,         						/* stack大小,单位word,也就是4字节 */
 				NULL,        						/* 任务参数  */
 				configMAX_PRIORITIES - 1,           /* 任务优先级*/
 				&xHandleTaskHANDLE_SERVER_FRAME); 	/* 任务句柄  */
 	
 	xTaskCreate(vTaskCONCENTRATOR,    				/* 指示灯任务  */
-				"vTaskCONCENTRATOR",  				/* 任务名称    */
+				" ",  				/* 任务名称    */
 				1024,         						/* stack大小,单位word,也就是4字节 */
 				NULL,        						/* 任务参数  */
 				configMAX_PRIORITIES - 2,           /* 任务优先级*/
@@ -49,12 +49,11 @@ void AppTaskCreate(void)
 
 	xTaskCreate(vTaskLED,    						/* 指示灯任务  */
 				"vTaskLED",  						/* 任务名称    */
-				256,         						/* stack大小,单位word,也就是4字节 */
+				64,         						/* stack大小,单位word,也就是4字节 */
 				NULL,        						/* 任务参数  */
 				configMAX_PRIORITIES - 9,           /* 任务优先级*/
 				&xHandleTaskLED); 					/* 任务句柄  */
 }
-
 
 
 //创建消息队列
@@ -86,67 +85,67 @@ void AppObjCreate(void)
     }
 
 	//消息队列
-	xQueue_ServerFrameRx = xQueueCreate(25, sizeof(ServerFrame_S));
+	xQueue_ServerFrameRx = xQueueCreate(10, sizeof(ServerFrame_S));
     if(xQueue_ServerFrameRx == NULL)
     {
 
     }
 
-	xQueue_4gFrameTx = xQueueCreate(25, sizeof(ServerFrame_S));
+	xQueue_4gFrameTx = xQueueCreate(10, sizeof(ServerFrame_S));
     if(xQueue_4gFrameTx == NULL)
     {
 
     }
 
-	xQueue_WifiFrameTx = xQueueCreate(25, sizeof(ServerFrame_S));
+	xQueue_WifiFrameTx = xQueueCreate(10, sizeof(ServerFrame_S));
     if(xQueue_WifiFrameTx == NULL)
     {
 
     }
 
-	xQueue_EthFrameTx = xQueueCreate(25, sizeof(ServerFrame_S));
+	xQueue_EthFrameTx = xQueueCreate(10, sizeof(ServerFrame_S));
     if(xQueue_EthFrameTx == NULL)
     {
 
     }
 
-	xQueue_NB_IoTFrameTx = xQueueCreate(25, sizeof(ServerFrame_S));
+	xQueue_NB_IoTFrameTx = xQueueCreate(10, sizeof(ServerFrame_S));
     if(xQueue_NB_IoTFrameTx == NULL)
     {
 
     }
 	
-	xQueue_ConcentratorFrameStruct = xQueueCreate(25, sizeof(ServerFrameStruct_S));
+	xQueue_ConcentratorFrameStruct = xQueueCreate(10, sizeof(ServerFrame_S));
     if(xQueue_ConcentratorFrameStruct == NULL)
     {
 
     }
 	
-	xQueue_LampControllerFrameStruct = xQueueCreate(25, sizeof(ServerFrameStruct_S));
+	xQueue_LampControllerFrameStruct = xQueueCreate(10, sizeof(ServerFrameStruct_S));
     if(xQueue_LampControllerFrameStruct == NULL)
     {
 
     }
 	
-	xQueue_RelayFrameStruct = xQueueCreate(25, sizeof(ServerFrameStruct_S));
+	xQueue_RelayFrameStruct = xQueueCreate(10, sizeof(ServerFrameStruct_S));
     if(xQueue_RelayFrameStruct == NULL)
     {
 
     }
 	
-	xQueue_InputCollectorFrameStruct = xQueueCreate(25, sizeof(ServerFrameStruct_S));
+	xQueue_InputCollectorFrameStruct = xQueueCreate(10, sizeof(ServerFrameStruct_S));
     if(xQueue_InputCollectorFrameStruct == NULL)
     {
 
     }
 	
-	xQueue_ElectricMeterFrameStruct = xQueueCreate(25, sizeof(ServerFrameStruct_S));
+	xQueue_ElectricMeterFrameStruct = xQueueCreate(10, sizeof(ServerFrameStruct_S));
     if(xQueue_ElectricMeterFrameStruct == NULL)
     {
 
     }
 	
-	xQueue_LumeterFrameStruct = xQueueCreate(25, sizeof(ServerFrameStruct_S));
+	xQueue_LumeterFrameStruct = xQueueCreate(10, sizeof(ServerFrameStruct_S));
     if(xQueue_LumeterFrameStruct == NULL)
     {
 

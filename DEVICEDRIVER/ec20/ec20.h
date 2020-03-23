@@ -59,6 +59,9 @@
 #define TIMEOUT_180S 18000
 
 
+#define EC20_MAX_RECV_SEND_BUF_LEN	1460
+
+
 typedef enum
 {
     UNKNOW_STATE 	= 255,	//获取连接状态失败

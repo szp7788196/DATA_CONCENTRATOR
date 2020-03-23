@@ -32,12 +32,12 @@ void vTaskHANDLE_SERVER_FRAME(void *pvParameters)
 			rx_frame = NULL;
 		}
 
-		delay_ms(100);
+		delay_ms(50);
 	}
 }
 
 //将待发送的数据推进消息队列
-void PushTheFrameToBeSendToTxQueue(ServerFrame_S *tx_frame)
+void PushTheFrameToTxQueue(ServerFrame_S *tx_frame)
 {
 	xSemaphoreTake(xMutex_Push_xQueue_ServerFrameTx, portMAX_DELAY);
 
@@ -151,6 +151,11 @@ void RecvNetFrameAndPushToRxQueue(CONNECTION_MODE_E connection_mode)
 								vPortFree(rx_frame);
 								rx_frame = NULL;
 							}
+						}
+						else
+						{
+							vPortFree(rx_frame);
+							rx_frame = NULL;
 						}
 					}
 

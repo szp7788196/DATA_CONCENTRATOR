@@ -68,6 +68,6 @@ u8 RX8010S_Get_Time(void);
 u8 RTC_Get_Week(u16 year,u8 month,u8 day);
 u8 RX8010S_ReadOneByte(u8 ReadAddr);
 void RX8010S_WriteOneByte(u8 WriteAddr,u8 Data);
-void RX8010S_Set_Time(u8 syear,u8 smonth,u8 sday,u8 shour,u8 smin,u8 ssecond,u8 sweek);
+void RX8010S_Set_Time(u8 syear,u8 smonth,u8 sday,u8 shour,u8 smin,u8 ssecond);
 u8 SyncTimeFromNet(u32 sec_num);
 #endif

@@ -2,16 +2,14 @@
 #include "task_handle_server_frame.h"
 #include <string.h>
 #include "common.h"
+#include "ec20.h"
 
 
 
 void ServerFrameHandle(ServerFrame_S *rx_frame)
 {
-	u8 i = 0;
 	s8 ret = 0;
-	DEVICE_TYPE_E device_type = CONCENTRATOR;
-	QueueHandle_t xQueue_DeviceXxFrameStruct = NULL;
-
+	
 	ServerFrameStruct_S *server_frame_struct = NULL;
 
 	server_frame_struct = (ServerFrameStruct_S *)pvPortMalloc(sizeof(ServerFrameStruct_S));
@@ -22,55 +20,7 @@ void ServerFrameHandle(ServerFrame_S *rx_frame)
 
 		if(ret != -1)		//初步解析成功，发送至各个任务进行进一步处理
 		{
-			device_type = (DEVICE_TYPE_E)(server_frame_struct->msg_type & 0xFF00);
-
-			switch((u16)device_type)
-			{
-				case (u16)CONCENTRATOR:
-					xQueue_DeviceXxFrameStruct = xQueue_ConcentratorFrameStruct;
-				break;
-
-				case (u16)LAMP_CONTROLLER:
-					xQueue_DeviceXxFrameStruct = xQueue_LampControllerFrameStruct;
-				break;
-
-				case (u16)RELAY:
-					xQueue_DeviceXxFrameStruct = xQueue_RelayFrameStruct;
-				break;
-
-				case (u16)INPUT_COLLECTOR:
-					xQueue_DeviceXxFrameStruct = xQueue_InputCollectorFrameStruct;
-				break;
-
-				case (u16)ELECTRIC_METER:
-					xQueue_DeviceXxFrameStruct = xQueue_ElectricMeterFrameStruct;
-				break;
-
-				case (u16)LUMETER:
-					xQueue_DeviceXxFrameStruct = xQueue_LumeterFrameStruct;
-				break;
-
-				default:
-				break;
-			}
-
-			if(xQueue_DeviceXxFrameStruct != NULL)
-			{
-				if(xQueueSend(xQueue_DeviceXxFrameStruct,(void *)&server_frame_struct,(TickType_t)10) != pdPASS)
-				{
-#ifdef DEBUG_LOG
-					printf("send xQueue_DeviceXxFrameStruct fail.\r\n");
-#endif
-					for(i = 0; i < server_frame_struct->para_num; i ++)		//释放server_frame_struct缓存
-					{
-						vPortFree(server_frame_struct->para[i].value);
-						server_frame_struct->para[i].value = NULL;
-					}
-
-					vPortFree(server_frame_struct);
-					server_frame_struct = NULL;
-				}
-			}
+			TransServerFrameStructToOtherTask(server_frame_struct,UNKNOW_DEVICE);
 		}
 		else	//释放server_frame_struct缓存
 		{
@@ -80,38 +30,133 @@ void ServerFrameHandle(ServerFrame_S *rx_frame)
 	}
 }
 
+u8 TransServerFrameStructToOtherTask(ServerFrameStruct_S *server_frame_struct,DEVICE_TYPE_E device_type)
+{
+	u8 ret = 1;
+	u8 i = 0;
+	QueueHandle_t xQueue_DeviceXxFrameStruct = NULL;
+	DEVICE_TYPE_E _device_type = CONCENTRATOR;
+	
+	if(device_type == UNKNOW_DEVICE)
+	{
+		_device_type = (DEVICE_TYPE_E)(server_frame_struct->msg_type & 0xFF00);
+	}
+	
+	switch((u16)_device_type)
+	{
+		case (u16)CONCENTRATOR:
+			xQueue_DeviceXxFrameStruct = xQueue_ConcentratorFrameStruct;
+		break;
+
+		case (u16)LAMP_CONTROLLER:
+			xQueue_DeviceXxFrameStruct = xQueue_LampControllerFrameStruct;
+		break;
+
+		case (u16)RELAY:
+			xQueue_DeviceXxFrameStruct = xQueue_RelayFrameStruct;
+		break;
+
+		case (u16)INPUT_COLLECTOR:
+			xQueue_DeviceXxFrameStruct = xQueue_InputCollectorFrameStruct;
+		break;
+
+		case (u16)ELECTRIC_METER:
+			xQueue_DeviceXxFrameStruct = xQueue_ElectricMeterFrameStruct;
+		break;
+
+		case (u16)LUMETER:
+			xQueue_DeviceXxFrameStruct = xQueue_LumeterFrameStruct;
+		break;
+
+		default:
+			vPortFree(server_frame_struct);
+			server_frame_struct = NULL;
+		break;
+	}
+
+	if(xQueue_DeviceXxFrameStruct != NULL)
+	{
+		if(xQueueSend(xQueue_DeviceXxFrameStruct,(void *)&server_frame_struct,(TickType_t)10) != pdPASS)
+		{
+#ifdef DEBUG_LOG
+			printf("send xQueue_DeviceXxFrameStruct fail.\r\n");
+#endif
+			if(server_frame_struct->para != NULL || server_frame_struct->para_num != 0)
+			{
+				for(i = 0; i < server_frame_struct->para_num; i ++)		//释放server_frame_struct缓存
+				{
+					vPortFree(server_frame_struct->para[i].value);
+					server_frame_struct->para[i].value = NULL;
+				}
+				
+				vPortFree(server_frame_struct->para);
+				server_frame_struct->para = NULL;
+				
+				vPortFree(server_frame_struct);
+				server_frame_struct = NULL;
+			}
+			
+			ret = 0;
+		}
+	}
+	
+	return ret;
+}
+
+u8 GetParameterNum(ServerFrame_S *rx_frame)
+{
+	u16 i = 0;
+	
+	u8 cnt = 0;//参数个数
+	
+	for(i = 27; i < rx_frame->len; i ++)//29为第一个参数值起始位置
+	{
+		if(rx_frame->buf[i] == 0)
+		{
+			cnt ++;
+		}
+	}
+	
+	return cnt;
+}
+
 //获取帧数据中的参数个数和参数
 u8 GetParameters(ServerFrameStruct_S *server_frame_struct,ServerFrame_S *rx_frame)
 {
+	u8 i = 0;
 	u8 para_num = 0;
-	u16 para_len;
 	u16 pos = 27;
 	u8 *msg = NULL;
-
-	while(pos < rx_frame->len - 1)		//偏移指针不得超过帧长度
-	{
-		server_frame_struct->para[para_num].type = (((u16)rx_frame->buf[pos + 0] << 8) +
-	                                                  (u16)rx_frame->buf[pos + 1]);
-
-		pos += 2;
-
-		msg = rx_frame->buf + pos;
-
-		para_len = strlen((char *)msg);
-
-		server_frame_struct->para[para_num].value = (u8 *)pvPortMalloc((para_len + 1) * sizeof(u8));
-
-		if(server_frame_struct->para[para_num].value != NULL)
-		{
-			memcpy(server_frame_struct->para[para_num].value,msg,para_len + 1);
-		}
-
-		para_num ++;
-
-		pos += (para_len + 1);
-	}
-
+	
+	para_num = GetParameterNum(rx_frame);
+	
 	server_frame_struct->para_num = para_num;
+	
+	server_frame_struct->para = (Parameter_S *)pvPortMalloc(para_num * sizeof(Parameter_S));
+	
+	for(i = 0; i < para_num; i ++)
+	{
+		if(pos < rx_frame->len - 1)		//偏移指针不得超过帧长度
+		{
+			server_frame_struct->para[i].type = (((u16)rx_frame->buf[pos + 0] << 8) +
+												(u16)rx_frame->buf[pos + 1]);
+
+			pos += 2;
+
+			msg = rx_frame->buf + pos;
+
+			server_frame_struct->para[i].len = strlen((char *)msg);
+
+			server_frame_struct->para[i].value = (u8 *)pvPortMalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
+
+			if(server_frame_struct->para[i].value != NULL)
+			{
+				memcpy(server_frame_struct->para[i].value,msg,server_frame_struct->para[i].len + 1);
+			}
+
+			pos += (server_frame_struct->para[i].len + 1);
+		}
+	}
 
 	return para_num;
 }
@@ -169,15 +214,165 @@ s8 GetServerFrameStruct(ServerFrameStruct_S *server_frame_struct,ServerFrame_S *
 //将帧结构体转换为数据帧
 u8 ConvertFrameStructToFrame(ServerFrameStruct_S *server_frame_struct)
 {
-	
+	u8 ret = 0;
+	u8 i = 0;
+	u16 origin_frame_len = 28;
+	u16 final_frame_len = 28;
+	u16 offset = 27;
+	u32 crc32_cal = 0;
+	u8 frame_num = 0;
+	u8 *origin_buf = NULL;
+	u8 *final_buf = NULL;
+
 	if(server_frame_struct == NULL)
 	{
 		return 0;
 	}
-	
-	
-	
-	
+
+	for(i = 0; i < server_frame_struct->para_num; i ++)
+	{
+		origin_frame_len += 3;
+
+		origin_frame_len += server_frame_struct->para[i].len;
+	}
+
+	origin_buf = (u8 *)pvPortMalloc(origin_frame_len * sizeof(u8));
+
+	if(origin_buf != NULL)
+	{
+		*(origin_buf + 0)  = server_frame_struct->start;										//帧起始符
+		*(origin_buf + 1)  = server_frame_struct->msg_type;
+
+		*(origin_buf + 2)  = (u8)((server_frame_struct->serial_num >> 24) & 0x000000FF);		//帧流水号
+		*(origin_buf + 3)  = (u8)((server_frame_struct->serial_num >> 16) & 0x000000FF);
+		*(origin_buf + 4)  = (u8)((server_frame_struct->serial_num >>  8) & 0x000000FF);
+		*(origin_buf + 5)  = (u8)((server_frame_struct->serial_num >>  0) & 0x000000FF);
+
+		*(origin_buf + 6)  = (u8)(((origin_frame_len - 18) >> 8) & 0x00FF);						//消息体长度
+		*(origin_buf + 7)  = (u8)(((origin_frame_len - 18) >> 0) & 0x00FF);
+
+		*(origin_buf + 8)  = server_frame_struct->err_code;										//错误码
+
+		*(origin_buf + 9)  = 0;																	//保留位
+		*(origin_buf + 10) = 0;
+		*(origin_buf + 11) = 0;
+		*(origin_buf + 12) = 0;
+
+		*(origin_buf + 13) = 0;																	//CRC32校验
+		*(origin_buf + 14) = 0;
+		*(origin_buf + 15) = 0;
+		*(origin_buf + 16) = 0;
+
+		*(origin_buf + 17) = (u8)((server_frame_struct->msg_id >> 8) & 0x00FF);					//消息ID
+		*(origin_buf + 18) = (u8)((server_frame_struct->msg_id >> 0) & 0x00FF);
+
+		*(origin_buf + 19) = (u8)((server_frame_struct->gateway_id >> 24) & 0x000000FF);		//网关ID
+		*(origin_buf + 20) = (u8)((server_frame_struct->gateway_id >> 16) & 0x000000FF);
+		*(origin_buf + 21) = (u8)((server_frame_struct->gateway_id >>  8) & 0x000000FF);
+		*(origin_buf + 22) = (u8)((server_frame_struct->gateway_id >>  0) & 0x000000FF);
+
+		*(origin_buf + 23) = (u8)((server_frame_struct->device_id >> 24) & 0x000000FF);			//设备ID
+		*(origin_buf + 24) = (u8)((server_frame_struct->device_id >> 16) & 0x000000FF);
+		*(origin_buf + 25) = (u8)((server_frame_struct->device_id >>  8) & 0x000000FF);
+		*(origin_buf + 26) = (u8)((server_frame_struct->device_id >>  0) & 0x000000FF);
+
+		*(origin_buf + origin_frame_len - 1) = server_frame_struct->stop;						//帧结束符
+
+		for(i = 0; i < server_frame_struct->para_num; i ++)
+		{
+			*(origin_buf + offset + 0) = ((server_frame_struct->para[i].type >> 8) & 0x00FF);	//参数类型
+			*(origin_buf + offset + 1) = ((server_frame_struct->para[i].type >> 0) & 0x00FF);
+
+			offset += 2;
+
+			memcpy(origin_buf + offset,server_frame_struct->para[i].value,server_frame_struct->para[i].len + 1);
+
+			offset += (server_frame_struct->para[i].len + 1);
+		}
+
+		crc32_cal = CRC32(origin_buf + 17,origin_frame_len - 18);
+
+		*(origin_buf + 13) = (u8)((crc32_cal >> 24) & 0x000000FF);								//CRC32校验
+		*(origin_buf + 14) = (u8)((crc32_cal >> 16) & 0x000000FF);
+		*(origin_buf + 15) = (u8)((crc32_cal >>  8) & 0x000000FF);
+		*(origin_buf + 16) = (u8)((crc32_cal >>  0) & 0x000000FF);
+
+		final_frame_len = GetFinalFrameLen(origin_buf,origin_frame_len);
+
+		final_buf = (u8 *)pvPortMalloc(final_frame_len * sizeof(u8));
+
+		if(final_buf != NULL)
+		{
+			final_frame_len = EscapeSymbolAdd(origin_buf,origin_frame_len,final_buf);
+
+			frame_num = final_frame_len / EC20_MAX_RECV_SEND_BUF_LEN;
+
+			for(i = 0; i < frame_num + 1; i ++)
+			{
+				ServerFrame_S *tx_frame = NULL;
+
+				tx_frame = (ServerFrame_S *)pvPortMalloc(sizeof(ServerFrame_S));
+
+				if(tx_frame != NULL)
+				{
+					tx_frame->connection_mode = server_frame_struct->connection_mode;
+
+					if(i == frame_num)
+					{
+						tx_frame->len = final_frame_len % EC20_MAX_RECV_SEND_BUF_LEN;
+					}
+					else
+					{
+						tx_frame->len = EC20_MAX_RECV_SEND_BUF_LEN;
+					}
+
+					tx_frame->buf = (u8 *)pvPortMalloc(tx_frame->len * sizeof(u8));
+
+					if(tx_frame->buf != NULL)
+					{
+						memcpy(tx_frame->buf,&final_buf[i * EC20_MAX_RECV_SEND_BUF_LEN],tx_frame->len);
+
+						PushTheFrameToTxQueue(tx_frame);
+						
+						if(frame_num > 1)		//多帧数据之间需要加延时
+						{
+							delay_ms(1000);
+						}
+
+						ret ++;
+					}
+					else
+					{
+						vPortFree(tx_frame);
+						tx_frame = NULL;
+					}
+				}
+			}
+
+			vPortFree(final_buf);
+			final_buf = NULL;
+		}
+
+		vPortFree(origin_buf);
+		origin_buf = NULL;
+	}
+
+	if(server_frame_struct->para != NULL || server_frame_struct->para_num != 0)
+	{
+		for(i = 0; i < server_frame_struct->para_num; i ++)		//释放server_frame_struct缓存
+		{
+			vPortFree(server_frame_struct->para[i].value);
+			server_frame_struct->para[i].value = NULL;
+		}
+		
+		vPortFree(server_frame_struct->para);
+		server_frame_struct->para = NULL;
+		
+		vPortFree(server_frame_struct);
+		server_frame_struct = NULL;
+	}
+
+	return ret;
 }
 
 //复制帧结构体 s原件 d副本
@@ -186,13 +381,12 @@ u8 CopyServerFrameStruct(ServerFrameStruct_S *s_server_frame_struct,ServerFrameS
 {
 	u8 ret = 1;
 	u8 i = 0;
-	u16 para_len;
 
 	if(s_server_frame_struct == NULL || d_server_frame_struct == NULL)
 	{
 		return 0;
 	}
-	
+
 	d_server_frame_struct->connection_mode 	= s_server_frame_struct->connection_mode;
 	d_server_frame_struct->start 			= s_server_frame_struct->start;
 	d_server_frame_struct->msg_type 		= s_server_frame_struct->msg_type;
@@ -205,26 +399,54 @@ u8 CopyServerFrameStruct(ServerFrameStruct_S *s_server_frame_struct,ServerFrameS
 	d_server_frame_struct->device_id 		= s_server_frame_struct->device_id;
 	d_server_frame_struct->para_num			= s_server_frame_struct->para_num;
 	d_server_frame_struct->stop				= s_server_frame_struct->stop;
-	
-	
+
 	if(mode == 1)
 	{
-		for(i = 0; i < d_server_frame_struct->para_num; i ++)
+		d_server_frame_struct->para = (Parameter_S *)pvPortMalloc(d_server_frame_struct->para_num * sizeof(Parameter_S));
+
+		if(d_server_frame_struct->para != NULL)
 		{
-			d_server_frame_struct->para[i].type = s_server_frame_struct->para[i].type;
-			
-			para_len = strlen((char *)s_server_frame_struct->para[i].value);
-			
-			d_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((para_len + 1) * sizeof(u8));
-			
-			if(d_server_frame_struct->para[i].value != NULL)
+			for(i = 0; i < d_server_frame_struct->para_num; i ++)
 			{
-				memcpy(d_server_frame_struct->para[i].value,s_server_frame_struct->para[i].value,para_len + 1);
+				d_server_frame_struct->para[i].type = s_server_frame_struct->para[i].type;
+
+				d_server_frame_struct->para[i].len = s_server_frame_struct->para[i].len;
+
+				d_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((d_server_frame_struct->para[i].len + 1) * sizeof(u8));
+
+				if(d_server_frame_struct->para[i].value != NULL)
+				{
+					memcpy(d_server_frame_struct->para[i].value,s_server_frame_struct->para[i].value,d_server_frame_struct->para[i].len + 1);
+				}
 			}
+		}
+		else
+		{
+			d_server_frame_struct->para_num = 0;
 		}
 	}
 
 	return ret;
+}
+
+
+//获取原始帧转义后的帧长度
+u16 GetFinalFrameLen(u8 *buf,u16 len)
+{
+	u16 i = 0;
+	u16 final_len = 0;
+
+	for(i = 0; i < len; i ++)
+	{
+		if(*(buf + i) == 0x02 || *(buf + i) == 0x03 || *(buf + i) == 0x1B)
+		{
+			final_len += 1;
+		}
+	}
+
+	final_len += len;
+
+	return final_len;
 }
 
 
@@ -316,7 +538,7 @@ u16 EscapeSymbolAdd(u8* inbuf,u16 inbuf_len,u8* outbuf)
 		else if(inbuf[i] == 0x1B)
 		{
 			outbuf[j] = 0x1B;
-			outbuf[++ j] = 0;
+			outbuf[++ j] = 0x00;
 
 			out_len ++;
 		}

@@ -14,13 +14,11 @@ TaskHandle_t xHandleTaskCONCENTRATOR = NULL;
 
 void vTaskCONCENTRATOR(void *pvParameters)
 {
-	
-	
 	while(1)
 	{
 		RecvAndHandleFrameStruct();			//±¨ÎÄ½âÎö
 		
-		delay_ms(100);
+		delay_ms(50);
 	}
 }
 

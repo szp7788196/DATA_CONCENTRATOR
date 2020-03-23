@@ -40,6 +40,79 @@ time_t GetSysTick1s(void)
 	return sec;
 }
 
+//获得整数的位数
+u8 GetDatBit(u32 dat)
+{
+	u8 j = 1;
+	u32 i;
+	i = dat;
+	while(i >= 10)
+	{
+		j ++;
+		i /= 10;
+	}
+	return j;
+}
+
+//用个位数换算出一个整数 1 10 100 1000......
+u32 GetADV(u8 len)
+{
+	u32 count = 1;
+	if(len == 1)
+	{
+		return 1;
+	}
+	else
+	{
+		len --;
+		while(len --)
+		{
+			count *= 10;
+		}
+	}
+	return count;
+}
+
+//整数转换为字符串
+void IntToString(u8 *DString,u32 Dint,u8 zero_num)
+{
+	u16 i = 0;
+	u8 j = GetDatBit(Dint);
+	for(i = 0; i < GetDatBit(Dint) + zero_num; i ++)
+	{
+		DString[i] = Dint / GetADV(j) % 10 + 0x30;
+		j --;
+	}
+}
+
+void TimeToString(u8 *str,u16 year, u8 month, u8 date, u8 hour, u8 minute, u8 second)
+{
+	if(str == NULL)
+	{
+		return;
+	}
+	
+	*(str + 0) = (year / 1000) + 0x30;
+	*(str + 1) = (year / 100) % 10 + 0x30;
+	*(str + 2) = (year / 10) % 10 + 0x30;
+	*(str + 3) = year % 10 + 0x30;
+	
+	*(str + 4) = (month / 10) % 10 + 0x30;
+	*(str + 5) = month % 10 + 0x30;
+	
+	*(str + 6) = (date / 10) % 10 + 0x30;
+	*(str + 7) = date % 10 + 0x30;
+	
+	*(str + 8) = (hour / 10) % 10 + 0x30;
+	*(str + 9) = hour % 10 + 0x30;
+	
+	*(str + 10) = (minute / 10) % 10 + 0x30;
+	*(str + 11) = minute % 10 + 0x30;
+	
+	*(str + 12) = (second / 10) % 10 + 0x30;
+	*(str + 13) = second % 10 + 0x30;
+}
+
 
 
 //32位CRC校验

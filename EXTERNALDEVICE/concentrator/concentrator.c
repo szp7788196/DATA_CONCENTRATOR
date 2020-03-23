@@ -3,9 +3,11 @@
 #include "cat25x.h"
 #include "server_protocol.h"
 #include "task_handle_server_frame.h"
+#include "rx8010s.h"
 
 
 ConcentratorBasicConfig_S ConcentratorBasicConfig;
+u8 SystemReBoot = 0;								//系统重启标识
 
 
 
@@ -22,13 +24,26 @@ void ReadConcentratorBasicConfig(void)
 
 	if(crc16_cal != ConcentratorBasicConfig.crc16)
 	{
+		WriteConcentratorBasicConfig(1,0);
+	}
+}
+
+//存储集控器基本参数配置
+//reset 0不复位 1复位
+//write_enable 0不写入EEPROM 1写入EEPROM
+void WriteConcentratorBasicConfig(u8 reset,u8 write_enable)
+{
+	u8 len = 0;
+	
+	if(reset == 1)
+	{
 		ConcentratorBasicConfig.conncetion_mode = (u8)MODE_4G;
 
 		memset(ConcentratorBasicConfig.server_ip,0,31);
-		memcpy(ConcentratorBasicConfig.server_ip,"118.178.253.220",15);
+		memcpy(ConcentratorBasicConfig.server_ip,"103.48.232.119",14);
 
 		memset(ConcentratorBasicConfig.server_port,0,6);
-		memcpy(ConcentratorBasicConfig.server_port,"40901",5);
+		memcpy(ConcentratorBasicConfig.server_port,"7703",4);
 
 		ConcentratorBasicConfig.heartbeat_cycle = 60;
 
@@ -64,8 +79,17 @@ void ReadConcentratorBasicConfig(void)
 
 		memset(ConcentratorBasicConfig.manufacturer_website,0,33);
 		memcpy(ConcentratorBasicConfig.manufacturer_website,"www.bjlinktech.com",18);
-
+		
 		ConcentratorBasicConfig.crc16 = 0;
+	}
+	
+	if(write_enable == 1)
+	{
+		len = sizeof(ConcentratorBasicConfig_S);
+		
+		ConcentratorBasicConfig.crc16 = CRC16((u8 *)&ConcentratorBasicConfig,len - 2);
+		
+		CAT25X_Write((u8 *)&ConcentratorBasicConfig,CONCENTRATOR_BASIC_CONF_ADD,len);
 	}
 }
 
@@ -83,19 +107,19 @@ void RecvAndHandleFrameStruct(void)
 		switch(server_frame_struct->msg_id)
 		{
 			case 0x0000:	//数据透传
-				
+				TransparentTransmission(server_frame_struct);
 			break;
 			
 			case 0x0001:	//校时
-				
+				SynchronizeTime(server_frame_struct);
 			break;
 			
 			case 0x0002:	//复位
-				
+				ResetConfigParameters(server_frame_struct);
 			break;
 			
 			case 0x0003:	//重启
-				
+				RebootTheSystem(server_frame_struct);
 			break;
 			
 			case 0x0004:	//重连
@@ -194,22 +218,30 @@ void RecvAndHandleFrameStruct(void)
 			break;
 		}
 
-		for(i = 0; i < server_frame_struct->para_num; i ++)		//释放server_frame_struct缓存
+		if(server_frame_struct->para != NULL || server_frame_struct->para_num != 0)
 		{
-			vPortFree(server_frame_struct->para[i].value);
-			server_frame_struct->para[i].value = NULL;
+			for(i = 0; i < server_frame_struct->para_num; i ++)		//释放server_frame_struct缓存
+			{
+				vPortFree(server_frame_struct->para[i].value);
+				server_frame_struct->para[i].value = NULL;
+			}
+			
+			vPortFree(server_frame_struct->para);
+			server_frame_struct->para = NULL;
+			
+			vPortFree(server_frame_struct);
+			server_frame_struct = NULL;
 		}
-
-		vPortFree(server_frame_struct);
-		server_frame_struct = NULL;
 	}
 }
 
-u8 TransparentTransmission(ServerFrameStruct_S *in_server_frame_struct)
+//透传指令
+u8 TransparentTransmission(ServerFrameStruct_S *server_frame_struct)
 {
 	u8 ret = 0;
-	
-	u8 device_type = 0;
+	u8 i = 0;
+	u8 type = 0;
+	DEVICE_TYPE_E device_type = RELAY;
 	
 	ServerFrameStruct_S *resp_server_frame_struct = NULL;		//用于响应服务器
 	ServerFrameStruct_S *tran_server_frame_struct = NULL;		//用于透传到其他设备
@@ -217,16 +249,220 @@ u8 TransparentTransmission(ServerFrameStruct_S *in_server_frame_struct)
 	resp_server_frame_struct = (ServerFrameStruct_S *)pvPortMalloc(sizeof(ServerFrameStruct_S));
 	tran_server_frame_struct = (ServerFrameStruct_S *)pvPortMalloc(sizeof(ServerFrameStruct_S));
 	
-	CopyServerFrameStruct(in_server_frame_struct,resp_server_frame_struct,0);
-	CopyServerFrameStruct(in_server_frame_struct,tran_server_frame_struct,1);
+	CopyServerFrameStruct(server_frame_struct,resp_server_frame_struct,0);
+	CopyServerFrameStruct(server_frame_struct,tran_server_frame_struct,1);
 	
-	resp_server_frame_struct->msg_type 	= (u8)DEVICE_RESPONSE_UP;	//响应服务器类型
-	resp_server_frame_struct->msg_len 	= 10;
-	resp_server_frame_struct->err_code 	= (u8)NO_ERR;
+	if(resp_server_frame_struct != NULL)
+	{
+		resp_server_frame_struct->msg_type 	= (u8)DEVICE_RESPONSE_UP;	//响应服务器类型
+		resp_server_frame_struct->msg_len 	= 10;
+		resp_server_frame_struct->err_code 	= (u8)NO_ERR;
+		
+		ret = ConvertFrameStructToFrame(resp_server_frame_struct);
+	}
 	
-	
+	if(tran_server_frame_struct != NULL)
+	{
+		type = atoi((char *)tran_server_frame_struct->para[0].value);
+		
+		switch(type)
+		{
+			case 0:
+				
+			break;
+			
+			case 1:
+				device_type = ELECTRIC_METER;
+			break;
+			
+			case 2:
+				device_type = RELAY;
+			break;
+			
+			case 3:
+				device_type = ELECTRIC_METER;
+			break;
+			
+			case 4:
+				device_type = LUMETER;
+			break;
+			
+			default:
+				
+			break;
+		}
+
+		if(device_type != CONCENTRATOR && device_type != UNKNOW_DEVICE)
+		{
+			TransServerFrameStructToOtherTask(tran_server_frame_struct,device_type);
+		}
+		else
+		{
+			if(tran_server_frame_struct->para != NULL || tran_server_frame_struct->para_num != 0)
+			{
+				for(i = 0; i < tran_server_frame_struct->para_num; i ++)		//释放server_frame_struct缓存
+				{
+					vPortFree(tran_server_frame_struct->para[i].value);
+					tran_server_frame_struct->para[i].value = NULL;
+				}
+				
+				vPortFree(tran_server_frame_struct->para);
+				tran_server_frame_struct->para = NULL;
+				
+				vPortFree(tran_server_frame_struct);
+				tran_server_frame_struct = NULL;
+			}
+		}
+	}
+
 	return ret;
 }
+
+//校时指令
+u8 SynchronizeTime(ServerFrameStruct_S *server_frame_struct)
+{
+	u8 ret = 0;
+	char buf[5];
+	_calendar_obj cal;
+	ServerFrameStruct_S *resp_server_frame_struct = NULL;		//用于响应服务器
+	
+	memset(buf,0,5);
+	memcpy(buf,&server_frame_struct->para[0].value[0],4);
+	cal.w_year = atoi(buf);
+	
+	memset(buf,0,5);
+	memcpy(buf,&server_frame_struct->para[0].value[4],2);
+	cal.w_month = atoi(buf);
+	
+	memset(buf,0,5);
+	memcpy(buf,&server_frame_struct->para[0].value[6],2);
+	cal.w_date = atoi(buf);
+	
+	memset(buf,0,5);
+	memcpy(buf,&server_frame_struct->para[0].value[8],2);
+	cal.hour = atoi(buf);
+	
+	memset(buf,0,5);
+	memcpy(buf,&server_frame_struct->para[0].value[10],2);
+	cal.min = atoi(buf);
+	
+	memset(buf,0,5);
+	memcpy(buf,&server_frame_struct->para[0].value[12],2);
+	cal.sec = atoi(buf);
+	
+	RX8010S_Set_Time(cal.w_year - 2000,cal.w_month,cal.w_date,cal.hour,cal.min,cal.sec);
+
+	resp_server_frame_struct = (ServerFrameStruct_S *)pvPortMalloc(sizeof(ServerFrameStruct_S));
+	
+	CopyServerFrameStruct(server_frame_struct,resp_server_frame_struct,1);
+	
+	if(resp_server_frame_struct != NULL)
+	{
+		resp_server_frame_struct->msg_type 	= (u8)DEVICE_RESPONSE_UP;	//响应服务器类型
+		resp_server_frame_struct->msg_len 	= server_frame_struct->msg_len;
+		resp_server_frame_struct->err_code 	= (u8)NO_ERR;
+		
+		resp_server_frame_struct->para[0].type = 0xA101;
+		
+		RX8010S_Get_Time();
+		
+		TimeToString((u8 *)resp_server_frame_struct->para[0].value,
+                     calendar.w_year, 
+		             calendar.w_month, 
+		             calendar.w_date, 
+		             calendar.hour, 
+		             calendar.min, 
+					 calendar.sec);
+		
+		ret = ConvertFrameStructToFrame(resp_server_frame_struct);
+	}
+
+	return ret;
+}
+
+//恢复出厂设置
+u8 ResetConfigParameters(ServerFrameStruct_S *server_frame_struct)
+{
+	u8 ret = 0;
+	u8 reset_type = 0;
+	u8 reboot_type = 0;
+
+	ServerFrameStruct_S *resp_server_frame_struct = NULL;		//用于响应服务器
+	
+	reset_type = atoi((char *)server_frame_struct->para[0].value);
+	reboot_type = atoi((char *)server_frame_struct->para[1].value);
+	
+	if(reset_type == 1)
+	{
+		WriteConcentratorBasicConfig(1,1);
+	}
+	else if(reset_type == 2)
+	{
+		WriteConcentratorBasicConfig(1,1);
+	}
+	
+	SystemReBoot = reboot_type;
+	
+	resp_server_frame_struct = (ServerFrameStruct_S *)pvPortMalloc(sizeof(ServerFrameStruct_S));
+	
+	CopyServerFrameStruct(server_frame_struct,resp_server_frame_struct,0);
+	
+	if(resp_server_frame_struct != NULL)
+	{
+		resp_server_frame_struct->msg_type 	= (u8)DEVICE_RESPONSE_UP;	//响应服务器类型
+		resp_server_frame_struct->msg_len 	= 10;
+		resp_server_frame_struct->err_code 	= (u8)NO_ERR;
+		
+		ret = ConvertFrameStructToFrame(resp_server_frame_struct);
+	}
+
+	return ret;
+}
+
+//重启系统
+u8 RebootTheSystem(ServerFrameStruct_S *server_frame_struct)
+{
+	u8 ret = 0;
+
+	ServerFrameStruct_S *resp_server_frame_struct = NULL;		//用于响应服务器
+	
+	SystemReBoot = 1;
+	
+	resp_server_frame_struct = (ServerFrameStruct_S *)pvPortMalloc(sizeof(ServerFrameStruct_S));
+	
+	CopyServerFrameStruct(server_frame_struct,resp_server_frame_struct,0);
+	
+	if(resp_server_frame_struct != NULL)
+	{
+		resp_server_frame_struct->msg_type 	= (u8)DEVICE_RESPONSE_UP;	//响应服务器类型
+		resp_server_frame_struct->msg_len 	= 10;
+		resp_server_frame_struct->err_code 	= (u8)NO_ERR;
+		
+		ret = ConvertFrameStructToFrame(resp_server_frame_struct);
+	}
+
+	return ret;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

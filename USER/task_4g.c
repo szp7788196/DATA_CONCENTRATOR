@@ -110,7 +110,7 @@ void vTask4G(void *pvParameters)
 			break;
 		}
 
-		delay_ms(100);
+		delay_ms(50);
 	}
 }
 
