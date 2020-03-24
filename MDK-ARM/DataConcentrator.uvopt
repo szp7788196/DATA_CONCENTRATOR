@@ -213,7 +213,7 @@
         <Ww>
           <count>8</count>
           <WinNumber>1</WinNumber>
-          <ItemText>resp_server_frame_struct</ItemText>
+          <ItemText>FreeHeapSize,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>9</count>
@@ -228,7 +228,32 @@
         <Ww>
           <count>11</count>
           <WinNumber>1</WinNumber>
-          <ItemText>FreeHeapSize,0x0A</ItemText>
+          <ItemText>FlagReConnectToServer</ItemText>
+        </Ww>
+        <Ww>
+          <count>12</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>buf</ItemText>
+        </Ww>
+        <Ww>
+          <count>13</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>EC20Info,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>14</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>ConcentratorAlarmConfig,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>15</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>resp_server_frame_struct</ItemText>
+        </Ww>
+        <Ww>
+          <count>16</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>siiize,0x0A</ItemText>
         </Ww>
       </WatchWindow1>
       <Tracepoint>
@@ -277,10 +302,10 @@
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <Focus>0</Focus>
-      <ColumnNumber>0</ColumnNumber>
+      <ColumnNumber>52</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>16</TopLine>
-      <CurrentLine>46</CurrentLine>
+      <TopLine>18</TopLine>
+      <CurrentLine>39</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>..\USER\main.c</PathWithFileName>
       <FilenameWithoutPath>main.c</FilenameWithoutPath>
@@ -293,10 +318,10 @@
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <Focus>0</Focus>
-      <ColumnNumber>13</ColumnNumber>
+      <ColumnNumber>0</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>72</TopLine>
-      <CurrentLine>77</CurrentLine>
+      <TopLine>316</TopLine>
+      <CurrentLine>421</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>..\USER\common.c</PathWithFileName>
       <FilenameWithoutPath>common.c</FilenameWithoutPath>
@@ -357,10 +382,10 @@
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <Focus>0</Focus>
-      <ColumnNumber>1</ColumnNumber>
+      <ColumnNumber>37</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>106</TopLine>
-      <CurrentLine>134</CurrentLine>
+      <TopLine>19</TopLine>
+      <CurrentLine>40</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>..\USER\task_4g.c</PathWithFileName>
       <FilenameWithoutPath>task_4g.c</FilenameWithoutPath>
@@ -373,10 +398,10 @@
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <Focus>0</Focus>
-      <ColumnNumber>0</ColumnNumber>
+      <ColumnNumber>40</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>136</TopLine>
-      <CurrentLine>40</CurrentLine>
+      <TopLine>1</TopLine>
+      <CurrentLine>28</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>..\USER\task_handle_server_frame.c</PathWithFileName>
       <FilenameWithoutPath>task_handle_server_frame.c</FilenameWithoutPath>
@@ -405,10 +430,10 @@
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <Focus>0</Focus>
-      <ColumnNumber>18</ColumnNumber>
+      <ColumnNumber>33</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>1</TopLine>
-      <CurrentLine>19</CurrentLine>
+      <TopLine>31</TopLine>
+      <CurrentLine>38</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>..\USER\task_concentrator.c</PathWithFileName>
       <FilenameWithoutPath>task_concentrator.c</FilenameWithoutPath>
@@ -997,10 +1022,10 @@
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <Focus>0</Focus>
-      <ColumnNumber>25</ColumnNumber>
+      <ColumnNumber>26</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>0</TopLine>
-      <CurrentLine>0</CurrentLine>
+      <TopLine>1</TopLine>
+      <CurrentLine>18</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>..\PERIPHERAL\usart\usart6.c</PathWithFileName>
       <FilenameWithoutPath>usart6.c</FilenameWithoutPath>
@@ -1149,10 +1174,10 @@
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <Focus>0</Focus>
-      <ColumnNumber>0</ColumnNumber>
+      <ColumnNumber>6</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>558</TopLine>
-      <CurrentLine>584</CurrentLine>
+      <TopLine>1</TopLine>
+      <CurrentLine>11</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>..\DEVICEDRIVER\ec20\ec20.c</PathWithFileName>
       <FilenameWithoutPath>ec20.c</FilenameWithoutPath>
@@ -1173,10 +1198,10 @@
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <Focus>0</Focus>
-      <ColumnNumber>9</ColumnNumber>
+      <ColumnNumber>74</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>448</TopLine>
-      <CurrentLine>366</CurrentLine>
+      <TopLine>357</TopLine>
+      <CurrentLine>377</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>..\PROTOCOL\server_protocol.c</PathWithFileName>
       <FilenameWithoutPath>server_protocol.c</FilenameWithoutPath>
@@ -1263,8 +1288,8 @@
       <Focus>0</Focus>
       <ColumnNumber>0</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>3360</TopLine>
-      <CurrentLine>3377</CurrentLine>
+      <TopLine>2060</TopLine>
+      <CurrentLine>2077</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>..\FREERTOS\tasks.c</PathWithFileName>
       <FilenameWithoutPath>tasks.c</FilenameWithoutPath>
@@ -2141,10 +2166,10 @@
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <Focus>0</Focus>
-      <ColumnNumber>40</ColumnNumber>
+      <ColumnNumber>0</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>397</TopLine>
-      <CurrentLine>313</CurrentLine>
+      <TopLine>168</TopLine>
+      <CurrentLine>184</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>..\EXTERNALDEVICE\concentrator\concentrator.c</PathWithFileName>
       <FilenameWithoutPath>concentrator.c</FilenameWithoutPath>

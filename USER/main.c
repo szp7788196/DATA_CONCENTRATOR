@@ -14,11 +14,13 @@
 #include "ht7038.h"
 #include "usart6.h"
 #include "ec20.h"
+#include "concentrator.h"
 
 
 //u8 eprombuf[100];
 //u8 i = 0;
 RCC_ClocksTypeDef RCC_Clocks;
+u16 siiize = 0;
 int main(void)
 {
 	RCC_GetClocksFreq(&RCC_Clocks);
@@ -42,7 +44,6 @@ int main(void)
 	HT7038_Init();										//电能计量芯片初始化
 	EC20_Init();										//4G模块初始化
 	
-
 	ReadTotalConfigurationParameters();				//读取所有配置参数
 
 	IWDG_Feed_Thread();									//上电第一次喂看门狗

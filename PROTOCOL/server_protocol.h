@@ -123,6 +123,8 @@ s8 GetServerFrameStruct(ServerFrameStruct_S *server_frame_struct,ServerFrame_S *
 u8 ConvertFrameStructToFrame(ServerFrameStruct_S *server_frame_struct);
 u8 CopyServerFrameStruct(ServerFrameStruct_S *s_server_frame_struct,ServerFrameStruct_S *d_server_frame_struct,u8 mode);
 u16 GetFinalFrameLen(u8 *buf,u16 len);
+void DeleteServerFrameStruct(ServerFrameStruct_S *server_frame_struct);
+void DeleteServerFrame(ServerFrame_S *server_frame);
 u16 EscapeSymbolDelete(u8* inbuf,u16 inbuf_len,u8* outbuf);
 u16 EscapeSymbolAdd(u8* inbuf,u16 inbuf_len,u8* outbuf);
 

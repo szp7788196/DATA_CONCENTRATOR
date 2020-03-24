@@ -46,6 +46,12 @@
 #define CONCENTRATOR_BASIC_CONF_ADD				0			//集控器基础参数配置EEPROM存储地址
 #define CONCENTRATOR_BASIC_CONF_LEN				139
 
+#define CONCENTRATOR_RUN_MODE_ADD				151			//集控器运行模式EEPROM存储地址
+#define CONCENTRATOR_RUN_MODE_LEN				3
+
+#define CONCENTRATOR_ALARM_CONF_ADD				0			//集控器告警参数配置EEPROM存储地址
+#define CONCENTRATOR_ALARM_CONF_LEN				17
+
 
 
 
@@ -202,6 +208,7 @@ extern QueueHandle_t xQueue_LumeterFrameStruct;
 extern time_t SysTick1s;
 
 time_t GetSysTick1s(void);
+void myitoa(int num,char *str,int radix);
 u8 GetDatBit(u32 dat);
 u32 GetADV(u8 len);
 void IntToString(u8 *DString,u32 Dint,u8 zero_num);

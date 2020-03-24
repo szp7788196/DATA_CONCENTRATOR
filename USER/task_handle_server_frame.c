@@ -25,11 +25,7 @@ void vTaskHANDLE_SERVER_FRAME(void *pvParameters)
 		{
 			ServerFrameHandle(rx_frame);
 			
-			vPortFree(rx_frame->buf);
-			rx_frame->buf = NULL;
-
-			vPortFree(rx_frame);
-			rx_frame = NULL;
+			DeleteServerFrame(rx_frame);
 		}
 
 		delay_ms(50);
@@ -63,11 +59,7 @@ void PushTheFrameToTxQueue(ServerFrame_S *tx_frame)
 			break;
 			
 			default:
-				vPortFree(tx_frame->buf);		//发送失败需要释放缓存
-				tx_frame->buf = NULL;
-
-				vPortFree(tx_frame);
-				tx_frame = NULL;
+				DeleteServerFrame(tx_frame);
 			break;
 		}
 
@@ -78,11 +70,7 @@ void PushTheFrameToTxQueue(ServerFrame_S *tx_frame)
 #ifdef DEBUG_LOG
 				printf("send xQueue_XxFrameTx fail.\r\n");
 #endif
-				vPortFree(tx_frame->buf);		//发送失败需要释放缓存
-				tx_frame->buf = NULL;
-
-				vPortFree(tx_frame);
-				tx_frame = NULL;
+				DeleteServerFrame(tx_frame);
 			}
 		}
 	}
@@ -145,17 +133,12 @@ void RecvNetFrameAndPushToRxQueue(CONNECTION_MODE_E connection_mode)
 #ifdef DEBUG_LOG
 								printf("send xQueue_ServerFrameRx fail.\r\n");
 #endif
-								vPortFree(rx_frame->buf);		//发送失败需要释放缓存
-								rx_frame->buf = NULL;
-
-								vPortFree(rx_frame);
-								rx_frame = NULL;
+								DeleteServerFrame(rx_frame);
 							}
 						}
 						else
 						{
-							vPortFree(rx_frame);
-							rx_frame = NULL;
+							DeleteServerFrame(rx_frame);
 						}
 					}
 

@@ -40,6 +40,52 @@ time_t GetSysTick1s(void)
 	return sec;
 }
 
+void myitoa(int num,char *str,int radix)
+{
+	/* 索引表 */
+	char index[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+	unsigned unum; /* 中间变量 */
+	int i=0,j,k;
+	char temp;
+
+	/* 确定unum的值 */
+	if(radix == 10 && num < 0) /* 十进制负数 */
+	{
+		unum = (unsigned) -num;
+		str[i ++] = '-';
+	}
+	else
+	{
+		unum=(unsigned)num; /* 其它情况 */
+	}
+	/* 逆序 */
+	do
+	{
+		str[i ++] = index[unum % (unsigned)radix];
+		unum /= radix;
+	}
+	while(unum);
+
+	str[i] = '\0';
+	/* 转换 */
+	if(str[0]=='-')
+	{
+		k=1; /* 十进制负数 */
+	}
+	else
+	{
+		k=0;
+	}
+	/* 将原来的“/2”改为“/2.0”，保证当num在16~255之间，radix等于16时，也能得到正确结果 */
+
+	for(j = k; j <= (i - k - 1) / 2.0f; j ++)
+	{
+		temp = str[j];
+		str[j] = str[i - j - 1];
+		str[i - j - 1] = temp;
+	}
+}
+
 //获得整数的位数
 u8 GetDatBit(u32 dat)
 {
@@ -91,24 +137,24 @@ void TimeToString(u8 *str,u16 year, u8 month, u8 date, u8 hour, u8 minute, u8 se
 	{
 		return;
 	}
-	
+
 	*(str + 0) = (year / 1000) + 0x30;
 	*(str + 1) = (year / 100) % 10 + 0x30;
 	*(str + 2) = (year / 10) % 10 + 0x30;
 	*(str + 3) = year % 10 + 0x30;
-	
+
 	*(str + 4) = (month / 10) % 10 + 0x30;
 	*(str + 5) = month % 10 + 0x30;
-	
+
 	*(str + 6) = (date / 10) % 10 + 0x30;
 	*(str + 7) = date % 10 + 0x30;
-	
+
 	*(str + 8) = (hour / 10) % 10 + 0x30;
 	*(str + 9) = hour % 10 + 0x30;
-	
+
 	*(str + 10) = (minute / 10) % 10 + 0x30;
 	*(str + 11) = minute % 10 + 0x30;
-	
+
 	*(str + 12) = (second / 10) % 10 + 0x30;
 	*(str + 13) = second % 10 + 0x30;
 }
@@ -377,14 +423,16 @@ u8 GetMemoryForSpecifyPointer(u8 **str,u16 size, u8 *memory)
 
 void ReadTotalConfigurationParameters(void)
 {
+	ReadRunMode();							//读取集控器运行模式
 	ReadConcentratorBasicConfig();			//读取集控器基础配置参数
+	ReadConcentratorAlarmConfig();			//读取集控器告警配置参数
 }
 
 
 
 
 
-	
+
 
 
 

@@ -83,6 +83,9 @@ void ec20_soft_init(void)
 	if(ec20_get_AT_CIMI() != 1)
 		goto RE_INIT;
 	
+	if(ec20_get_AT_CGDCONT() != 1)
+		goto RE_INIT;
+	
 //	if(ec20_get_AT_CNUM() != 1)
 //		goto RE_INIT;
 }
@@ -334,6 +337,31 @@ unsigned char ec20_get_AT_CIMI(void)
 		if(strlen(buf) == 15)
 		{
 			GetMemoryForSpecifyPointer((u8 **)&EC20Info.imsi,15,(u8 *)buf);
+
+			ret = 1;
+		}
+    }
+	
+	ringbuf_clear(result_ptr);
+
+    return ret;
+}
+
+//»ñÈ¡APN
+unsigned char ec20_get_AT_CGDCONT(void)
+{
+	unsigned char ret = 0;
+	char buf[33];
+
+    if(AT_SendCmd("AT+CGDCONT?\r\n", "+CGDCONT", 100,10,TIMEOUT_1S) == 1)
+    {
+		memset(buf,0,33);
+
+		get_str1((u8 *)result_ptr->data, "\"", 3, "\"", 4, (unsigned char *)buf);
+
+		if(strlen(buf) <= 32)
+		{
+			GetMemoryForSpecifyPointer((u8 **)&EC20Info.apn,strlen(buf),(u8 *)buf);
 
 			ret = 1;
 		}

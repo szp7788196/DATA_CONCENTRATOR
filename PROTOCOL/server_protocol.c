@@ -18,14 +18,13 @@ void ServerFrameHandle(ServerFrame_S *rx_frame)
 	{
 		ret = GetServerFrameStruct(server_frame_struct,rx_frame);
 
-		if(ret != -1)		//初步解析成功，发送至各个任务进行进一步处理
+		if(ret >= 0)		//初步解析成功，发送至各个任务进行进一步处理
 		{
 			TransServerFrameStructToOtherTask(server_frame_struct,UNKNOW_DEVICE);
 		}
 		else	//释放server_frame_struct缓存
 		{
-			vPortFree(server_frame_struct);
-			server_frame_struct = NULL;
+			DeleteServerFrameStruct(server_frame_struct);
 		}
 	}
 }
@@ -33,7 +32,6 @@ void ServerFrameHandle(ServerFrame_S *rx_frame)
 u8 TransServerFrameStructToOtherTask(ServerFrameStruct_S *server_frame_struct,DEVICE_TYPE_E device_type)
 {
 	u8 ret = 1;
-	u8 i = 0;
 	QueueHandle_t xQueue_DeviceXxFrameStruct = NULL;
 	DEVICE_TYPE_E _device_type = CONCENTRATOR;
 	
@@ -69,8 +67,7 @@ u8 TransServerFrameStructToOtherTask(ServerFrameStruct_S *server_frame_struct,DE
 		break;
 
 		default:
-			vPortFree(server_frame_struct);
-			server_frame_struct = NULL;
+			DeleteServerFrameStruct(server_frame_struct);
 		break;
 	}
 
@@ -81,20 +78,7 @@ u8 TransServerFrameStructToOtherTask(ServerFrameStruct_S *server_frame_struct,DE
 #ifdef DEBUG_LOG
 			printf("send xQueue_DeviceXxFrameStruct fail.\r\n");
 #endif
-			if(server_frame_struct->para != NULL || server_frame_struct->para_num != 0)
-			{
-				for(i = 0; i < server_frame_struct->para_num; i ++)		//释放server_frame_struct缓存
-				{
-					vPortFree(server_frame_struct->para[i].value);
-					server_frame_struct->para[i].value = NULL;
-				}
-				
-				vPortFree(server_frame_struct->para);
-				server_frame_struct->para = NULL;
-				
-				vPortFree(server_frame_struct);
-				server_frame_struct = NULL;
-			}
+			DeleteServerFrameStruct(server_frame_struct);
 			
 			ret = 0;
 		}
@@ -200,12 +184,18 @@ s8 GetServerFrameStruct(ServerFrameStruct_S *server_frame_struct,ServerFrame_S *
 
 	crc32_cal = CRC32((u8*)&rx_frame->buf[17],rx_frame->len - 18);
 
-	if(crc32_cal == server_frame_struct->crc32 &&
-	  (server_frame_struct->msg_type == (u8)SERVER_REQUEST_DOWN ||
-	   server_frame_struct->msg_type == (u8)SERVER_RESPONSE_DOWN ||
-	   server_frame_struct->msg_type == (u8)SYNC_RESPONSE))
+	if(crc32_cal == server_frame_struct->crc32)
 	{
-		ret = GetParameters(server_frame_struct,rx_frame);
+		if(server_frame_struct->msg_type == (u8)SERVER_REQUEST_DOWN ||
+	       server_frame_struct->msg_type == (u8)SERVER_RESPONSE_DOWN ||
+	       server_frame_struct->msg_type == (u8)SYNC_RESPONSE)
+		{
+			ret = GetParameters(server_frame_struct,rx_frame);
+		}
+	}
+	else
+	{
+		return -2;
 	}
 
 	return ret;
@@ -343,8 +333,7 @@ u8 ConvertFrameStructToFrame(ServerFrameStruct_S *server_frame_struct)
 					}
 					else
 					{
-						vPortFree(tx_frame);
-						tx_frame = NULL;
+						DeleteServerFrame(tx_frame);
 					}
 				}
 			}
@@ -357,20 +346,7 @@ u8 ConvertFrameStructToFrame(ServerFrameStruct_S *server_frame_struct)
 		origin_buf = NULL;
 	}
 
-	if(server_frame_struct->para != NULL || server_frame_struct->para_num != 0)
-	{
-		for(i = 0; i < server_frame_struct->para_num; i ++)		//释放server_frame_struct缓存
-		{
-			vPortFree(server_frame_struct->para[i].value);
-			server_frame_struct->para[i].value = NULL;
-		}
-		
-		vPortFree(server_frame_struct->para);
-		server_frame_struct->para = NULL;
-		
-		vPortFree(server_frame_struct);
-		server_frame_struct = NULL;
-	}
+	DeleteServerFrameStruct(server_frame_struct);
 
 	return ret;
 }
@@ -402,6 +378,8 @@ u8 CopyServerFrameStruct(ServerFrameStruct_S *s_server_frame_struct,ServerFrameS
 
 	if(mode == 1)
 	{
+		d_server_frame_struct->para_num = s_server_frame_struct->para_num;
+		
 		d_server_frame_struct->para = (Parameter_S *)pvPortMalloc(d_server_frame_struct->para_num * sizeof(Parameter_S));
 
 		if(d_server_frame_struct->para != NULL)
@@ -425,6 +403,10 @@ u8 CopyServerFrameStruct(ServerFrameStruct_S *s_server_frame_struct,ServerFrameS
 			d_server_frame_struct->para_num = 0;
 		}
 	}
+	else
+	{
+		d_server_frame_struct->para_num = 0;
+	}
 
 	return ret;
 }
@@ -447,6 +429,49 @@ u16 GetFinalFrameLen(u8 *buf,u16 len)
 	final_len += len;
 
 	return final_len;
+}
+
+//释放ServerFrameStruct结构体申请的内存
+void DeleteServerFrameStruct(ServerFrameStruct_S *server_frame_struct)
+{
+	u8 i = 0;
+	
+	if(server_frame_struct != NULL)
+	{
+		if(server_frame_struct->para != NULL)
+		{
+			if(server_frame_struct->para_num != 0)
+			{
+				for(i = 0; i < server_frame_struct->para_num; i ++)		//释放server_frame_struct缓存
+				{
+					vPortFree(server_frame_struct->para[i].value);
+					server_frame_struct->para[i].value = NULL;
+				}
+			}
+
+			vPortFree(server_frame_struct->para);
+			server_frame_struct->para = NULL;
+		}
+
+		vPortFree(server_frame_struct);
+		server_frame_struct = NULL;
+	}
+}
+
+//释放ServerFrame结构体申请的内存
+void DeleteServerFrame(ServerFrame_S *server_frame)
+{
+	if(server_frame != NULL)
+	{
+		if(server_frame->buf != NULL)
+		{
+			vPortFree(server_frame->buf);
+			server_frame->buf = NULL;
+		}
+		
+		vPortFree(server_frame);
+		server_frame = NULL;
+	}
 }
 
 

@@ -30,6 +30,13 @@ void vTask4G(void *pvParameters)
 
 	while(1)
 	{
+		if(FlagReConnectToServer == 2)
+		{
+			FlagReConnectToServer = 0;
+			
+			goto RE_INIT;
+		}
+		
 		if(ConnectState != CONNECTED)
 		{
 			refresh_state = 1;

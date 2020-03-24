@@ -7,11 +7,19 @@
 
 
 
+typedef enum
+{
+	MODE_AUTO 	= 1,
+	MODE_MANUAL = 2,
+	MODE_TASK 	= 3,
+	MODE_STOP 	= 4,
+
+} RUN_MODE_E;
 
 
 typedef struct	ConcentratorBasicConfig		//集控器基础配置参数
 {
-	u8 conncetion_mode;						//连接方式
+	u8 connection_mode;						//连接方式
 	u8 server_ip[31];						//服务器地址
 	u8 server_port[6];						//服务器端口
 	u16 heartbeat_cycle;					//心跳周期 s
@@ -39,13 +47,35 @@ typedef struct	ConcentratorBasicConfig		//集控器基础配置参数
 }__attribute__((packed))ConcentratorBasicConfig_S;
 
 
+typedef struct	ConcentratorAlarmConfig		//集控器告警配置参数
+{
+	u8 power_off_alarm_enable;				//断电告警使能
+	u16 power_off_alarm_thre;				//断电告警设置值
+	u8 electric_leakage_alarm_enable;		//漏电告警使能
+	u16 electric_leakage_alarm_v_thre;		//漏电电压阈值
+	u16 electric_leakage_alarm_c_thre;		//漏电电流阈值
+	u8 low_battery_alarm_enable;			//电池电量低告警使能
+	u8 low_battery_alarm_thre;				//电池电量低告警阈值
+	u8 abnormal_charge_alarm_enable;		//电池充电异常告警
+	u16 abnormal_charge_alarm_v_thre;		//电池充电异常电压阈值
+	u16 abnormal_charge_alarm_c_thre;		//电池充电异常电流阈值
+	u16 crc16;								//校验码 存储用
+
+}__attribute__((packed))ConcentratorAlarmConfig_S;
 
 
 
 
 
+
+extern RUN_MODE_E RunMode;
 extern ConcentratorBasicConfig_S ConcentratorBasicConfig;
-extern u8 SystemReBoot;										//系统重启标识
+
+
+
+
+extern u8 FlagSystemReBoot;										//系统重启标识
+extern u8 FlagReConnectToServer;								//断网重连标志
 
 
 
@@ -57,9 +87,14 @@ extern u8 SystemReBoot;										//系统重启标识
 
 
 
-
+void ReadRunMode(void);
+void WriteRunMode(u8 reset,u8 write_enable);
 void ReadConcentratorBasicConfig(void);
 void WriteConcentratorBasicConfig(u8 reset,u8 write_enable);
+void ReadConcentratorAlarmConfig(void);
+void WriteConcentratorAlarmConfig(u8 reset,u8 write_enable);
+
+
 void RecvAndHandleFrameStruct(void);
 
 
@@ -67,6 +102,36 @@ u8 TransparentTransmission(ServerFrameStruct_S *server_frame_struct);
 u8 SynchronizeTime(ServerFrameStruct_S *server_frame_struct);
 u8 ResetConfigParameters(ServerFrameStruct_S *server_frame_struct);
 u8 RebootTheSystem(ServerFrameStruct_S *server_frame_struct);
+u8 ReConnectToServer(ServerFrameStruct_S *server_frame_struct);
+u8 SetRunMode(ServerFrameStruct_S *server_frame_struct);
+u8 QueryState(ServerFrameStruct_S *server_frame_struct);
+u8 SetAlarmConfiguration(ServerFrameStruct_S *server_frame_struct);
+u8 GetAlarmConfiguration(ServerFrameStruct_S *server_frame_struct);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

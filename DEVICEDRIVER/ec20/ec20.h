@@ -106,6 +106,7 @@ unsigned char ec20_set_AT_QICSGP(void);
 unsigned char ec20_get_AT_CGSN(void);
 unsigned char ec20_get_AT_QCCID(void);
 unsigned char ec20_get_AT_CIMI(void);
+unsigned char ec20_get_AT_CGDCONT(void);
 unsigned char ec20_get_AT_CNUM(void);
 unsigned char ec20_set_AT_QIACT(void);
 unsigned char ec20_get_AT_QIACT(void);
