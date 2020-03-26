@@ -23,8 +23,10 @@ RCC_ClocksTypeDef RCC_Clocks;
 u16 siiize = 0;
 int main(void)
 {
-	RCC_GetClocksFreq(&RCC_Clocks);
+	SCB->VTOR = FLASH_BASE | 0x40000; 	/* Vector Table Relocation in Internal FLASH. */
 //	IWDG_Init(6,1000);									//看门狗超时8秒
+	
+	RCC_GetClocksFreq(&RCC_Clocks);
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);		//设置系统中断优先级分组号：4。响应优先级不分组，抢占优先级分16个级别
 	delay_init(168);									//初始化延时函数
 	
@@ -43,6 +45,11 @@ int main(void)
 	W25QXX_Init();										//外部FLASH初始化
 	HT7038_Init();										//电能计量芯片初始化
 	EC20_Init();										//4G模块初始化
+	
+	
+//	siiize = sizeof(ConcentratorLocationConfig_S);
+	
+	
 	
 	ReadTotalConfigurationParameters();				//读取所有配置参数
 

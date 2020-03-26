@@ -1,22 +1,22 @@
 #include "string.h"
 #include "exfuns.h"
-#include "fattester.h"	
+#include "fattester.h"
 //#include "malloc.h"
 #include "usart.h"
 #include "stdlib.h"
 #include "FreeRTOS.h"
-//////////////////////////////////////////////////////////////////////////////////	 
+//////////////////////////////////////////////////////////////////////////////////
 //本程序只供学习使用，未经作者许可，不得用于其它任何用途
 //ALIENTEK战舰STM32开发板V3
-//FATFS 扩展代码	   
+//FATFS 扩展代码
 //正点原子@ALIENTEK
 //技术论坛:www.openedv.com
 //创建日期:2015/1/20
 //版本：V1.0
 //版权所有，盗版必究。
 //Copyright(C) 广州市星翼电子科技有限公司 2014-2024
-//All rights reserved									  
-////////////////////////////////////////////////////////////////////////////////// 	
+//All rights reserved
+//////////////////////////////////////////////////////////////////////////////////
 #define FILE_MAX_TYPE_NUM		6	//最多FILE_MAX_TYPE_NUM个大类
 #define FILE_MAX_SUBT_NUM		13	//最多FILE_MAX_SUBT_NUM个小类
 
@@ -28,10 +28,10 @@ u8*const FILE_TYPE_TBL[FILE_MAX_TYPE_NUM][FILE_MAX_SUBT_NUM]=
 {"NES"},			//NES文件
 {"TXT","C","H"},	//文本文件
 {"MP1","MP2","MP3","MP4","M4A","3GP","3G2","OGG","AAC","WMA","WAV","MID","FLAC"},//音乐文件
-{"BMP","JPG","JPEG","GIF"},//图片文件 
+{"BMP","JPG","JPEG","GIF"},//图片文件
 };
 ///////////////////////////////公共文件区,使用malloc的时候////////////////////////////////////////////
-FATFS *fs;//逻辑磁盘工作区.	 
+FATFS *fs;//逻辑磁盘工作区.
 FIL file;	  		//文件1
 UINT br,bw;			//读写变量
 FILINFO fileinfo;	//文件信息
@@ -45,7 +45,7 @@ u8 fatbuf[1024];			//SD卡数据缓存区
 u8 exfuns_init(void)
 {
 //	u8 i;
-	fs=(FATFS*)pvPortMalloc(sizeof(FATFS));	//为磁盘i工作区申请内存	
+	fs=(FATFS*)pvPortMalloc(sizeof(FATFS));	//为磁盘i工作区申请内存
 	return 0;  //申请有一个失败,即失败.
 }
 
@@ -55,7 +55,7 @@ u8 char_upper(u8 c)
 	if(c<'A')return c;//数字,保持不变.
 	if(c>='a')return c-0x20;//变为大写.
 	else return c;//大写,保持不变
-}	      
+}
 //报告文件的类型
 //fname:文件名
 //返回值:0XFF,表示无法识别的文件类型编号.
@@ -83,7 +83,7 @@ u8 f_typetell(u8 *fname)
 		}
   	}
 	strcpy((char *)tbuf,(const char*)attr);//copy
- 	for(i=0;i<4;i++)tbuf[i]=char_upper(tbuf[i]);//全部变为大写 
+ 	for(i=0;i<4;i++)tbuf[i]=char_upper(tbuf[i]);//全部变为大写
 	for(i=0;i<FILE_MAX_TYPE_NUM;i++)	//大类对比
 	{
 		for(j=0;j<FILE_MAX_SUBT_NUM;j++)//子类对比
@@ -95,8 +95,8 @@ u8 f_typetell(u8 *fname)
 			}
 		}
 	}
-	return 0XFF;//没找到		 			   
-}	 
+	return 0XFF;//没找到
+}
 
 //得到磁盘剩余容量
 //drv:磁盘编号("0:"/"1:")
@@ -111,18 +111,18 @@ u8 exf_getfree(u8 *drv,u32 *total,u32 *free)
     //得到磁盘信息及空闲簇数量
     res =(u32)f_getfree((const TCHAR*)drv, (DWORD*)&fre_clust, &fs1);
     if(res==0)
-	{											   
+	{
 	    tot_sect=(fs1->n_fatent-2)*fs1->csize;	//得到总扇区数
-	    fre_sect=fre_clust*fs1->csize;			//得到空闲扇区数	   
+	    fre_sect=fre_clust*fs1->csize;			//得到空闲扇区数
 #if _MAX_SS!=512				  				//扇区大小不是512字节,则转换为512字节
 		tot_sect*=fs1->ssize/512;
 		fre_sect*=fs1->ssize/512;
-#endif	  
+#endif
 		*total=tot_sect>>1;	//单位为KB
-		*free=fre_sect>>1;	//单位为KB 
+		*free=fre_sect>>1;	//单位为KB
  	}
 	return res;
-}	
+}
 
 
 

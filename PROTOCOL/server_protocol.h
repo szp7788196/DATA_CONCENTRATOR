@@ -118,6 +118,7 @@ typedef struct	ServerFrameStruct			//֡�ṹ
 void ServerFrameHandle(ServerFrame_S *rx_frame);
 u8 TransServerFrameStructToOtherTask(ServerFrameStruct_S *server_frame_struct,DEVICE_TYPE_E device_type);
 u8 GetParameterNum(ServerFrame_S *rx_frame);
+void InitServerFrameStruct(ServerFrameStruct_S *server_frame_struct);
 u8 GetParameters(ServerFrameStruct_S *server_frame_struct,ServerFrame_S *rx_frame);
 s8 GetServerFrameStruct(ServerFrameStruct_S *server_frame_struct,ServerFrame_S *rx_frame);
 u8 ConvertFrameStructToFrame(ServerFrameStruct_S *server_frame_struct);

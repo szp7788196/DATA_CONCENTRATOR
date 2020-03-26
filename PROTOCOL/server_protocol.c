@@ -3,6 +3,7 @@
 #include <string.h>
 #include "common.h"
 #include "ec20.h"
+#include "concentrator.h"
 
 
 
@@ -102,6 +103,28 @@ u8 GetParameterNum(ServerFrame_S *rx_frame)
 	}
 	
 	return cnt;
+}
+
+//初始化ServerFrameStruct
+void InitServerFrameStruct(ServerFrameStruct_S *server_frame_struct)
+{
+	static u32 serial_num = 0;
+	
+	if(server_frame_struct != NULL)
+	{
+		server_frame_struct->connection_mode 	= (CONNECTION_MODE_E)ConcentratorBasicConfig.connection_mode;
+		server_frame_struct->start 				= 0x02;
+		server_frame_struct->msg_type 			= 0x03;
+		server_frame_struct->serial_num 		= serial_num ++;
+		server_frame_struct->msg_len 			= 10;
+		server_frame_struct->err_code 			= 0x00;
+		server_frame_struct->crc32 				= 0x00000000;
+		server_frame_struct->msg_id 			= 0x0000;
+		server_frame_struct->gateway_id 		= 0x0000000A;
+		server_frame_struct->device_id 			= 0x00000000;
+		server_frame_struct->para_num			= 0;
+		server_frame_struct->stop				= 0x03;
+	}
 }
 
 //获取帧数据中的参数个数和参数
@@ -366,7 +389,7 @@ u8 CopyServerFrameStruct(ServerFrameStruct_S *s_server_frame_struct,ServerFrameS
 	d_server_frame_struct->connection_mode 	= s_server_frame_struct->connection_mode;
 	d_server_frame_struct->start 			= s_server_frame_struct->start;
 	d_server_frame_struct->msg_type 		= s_server_frame_struct->msg_type;
-	d_server_frame_struct->serial_num 		= s_server_frame_struct->msg_type;
+	d_server_frame_struct->serial_num 		= s_server_frame_struct->serial_num;
 	d_server_frame_struct->msg_len 			= s_server_frame_struct->msg_len;
 	d_server_frame_struct->err_code 		= s_server_frame_struct->err_code;
 	d_server_frame_struct->crc32 			= s_server_frame_struct->crc32;

@@ -40,17 +40,27 @@
     typedef long long int           int64;
 
 
+
+
+
 #define SOFT_WARE_VRESION						101			//软件版本号
+#define HARD_WARE_VRESION						101			//硬件版本号
 
  
 #define CONCENTRATOR_BASIC_CONF_ADD				0			//集控器基础参数配置EEPROM存储地址
-#define CONCENTRATOR_BASIC_CONF_LEN				139
+#define CONCENTRATOR_BASIC_CONF_LEN				141
 
 #define CONCENTRATOR_RUN_MODE_ADD				151			//集控器运行模式EEPROM存储地址
 #define CONCENTRATOR_RUN_MODE_LEN				3
 
-#define CONCENTRATOR_ALARM_CONF_ADD				0			//集控器告警参数配置EEPROM存储地址
+#define CONCENTRATOR_ALARM_CONF_ADD				161			//集控器告警参数配置EEPROM存储地址
 #define CONCENTRATOR_ALARM_CONF_LEN				17
+
+#define CONCENTRATOR_LOCATION_CONF_ADD			201			//集控器经纬度年表参数配置EEPROM存储地址
+#define CONCENTRATOR_LOCATION_CONF_LEN			1506
+
+#define FW_STATE_ADD							1721		//固件更新状态EEPROM存储地址
+#define FW_STATE_LEN							79
 
 
 
@@ -213,9 +223,13 @@ u8 GetDatBit(u32 dat);
 u32 GetADV(u8 len);
 void IntToString(u8 *DString,u32 Dint,u8 zero_num);
 void TimeToString(u8 *str,u16 year, u8 month, u8 date, u8 hour, u8 minute, u8 second);
+void Int4BitToString(u8 *str,u16 num);
+void HexToStr(char *pbDest, u8 *pbSrc, u16 len);
+void StrToHex(u8 *pbDest, char *pbSrc, u16 len);
 
 u32 CRC32(const u8 *buf, u32 size);
-u16 CRC16(u8 *puchMsgg,u8 usDataLen);
+u32 CRC32Extend(const u8 *buf, u32 size, u32 temp,u8 flag);
+u16 CRC16(u8 *puchMsgg,u16 usDataLen);
 u8 CalCheckSum(u8 *buf, u16 len);
 
 u16 MyStrstr(u8 *str1, u8 *str2, u16 str1_len, u16 str2_len);

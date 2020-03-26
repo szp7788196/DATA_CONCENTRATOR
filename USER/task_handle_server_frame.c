@@ -100,6 +100,11 @@ void RecvNetFrameAndPushToRxQueue(CONNECTION_MODE_E connection_mode)
 
 		if(recv_len != 0)
 		{
+			if(recv_len != 1400)
+			{
+				recv_len = recv_len;
+			}
+			
 			time_r = GetSysTick1s();
 
 			recv_pos = recv_pos + recv_len;

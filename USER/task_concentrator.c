@@ -20,22 +20,33 @@ void vTaskCONCENTRATOR(void *pvParameters)
 	
 	while(1)
 	{
-		RecvAndHandleFrameStruct();			//报文解析
+		RecvAndHandleFrameStruct();						//报文解析
 		
-		if(FlagSystemReBoot == 1)			//接收到重启的命令
+		AutoSendFrameToServer();						//发送登录/心跳/告警灯信息
+		
+		if(FlagSystemReBoot == 1)						//接收到重启的命令
 		{
 			FlagSystemReBoot = 0;
 			delay_ms(5000);
 
-			__disable_fault_irq();			//重启指令
+			__disable_fault_irq();						//重启指令
 			NVIC_SystemReset();
 		}
 		
-		if(FlagReConnectToServer == 1)		//接收到重新连接服务器指令
+		if(FlagReConnectToServer == 1)					//接收到重新连接服务器指令
 		{
 			delay_ms(5000);
 
 			FlagReConnectToServer = 2;
+			LoginResponse = 0;
+		}
+		
+		if(FrameWareState.state == FIRMWARE_DOWNLOADED)	//固件下载完成,重启系统
+		{
+			delay_ms(5000);
+
+			__disable_fault_irq();						//重启指令
+			NVIC_SystemReset();
 		}
 		
 		delay_ms(50);

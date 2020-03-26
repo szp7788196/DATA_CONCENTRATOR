@@ -28,7 +28,7 @@ QueueHandle_t xQueue_LumeterFrameStruct = NULL;
 
 
 
-time_t SysTick1s = 0;
+time_t SysTick1s = 86400;
 
 //获取系统1秒滴答时钟
 time_t GetSysTick1s(void)
@@ -159,7 +159,97 @@ void TimeToString(u8 *str,u16 year, u8 month, u8 date, u8 hour, u8 minute, u8 se
 	*(str + 13) = second % 10 + 0x30;
 }
 
+void Int4BitToString(u8 *str,u16 num)
+{
+	if(str == NULL)
+	{
+		return;
+	}
 
+	*(str + 0) = (num / 1000) + 0x30;
+	*(str + 1) = (num / 100) % 10 + 0x30;
+	*(str + 2) = (num / 10) % 10 + 0x30;
+	*(str + 3) = num % 10 + 0x30;
+}
+
+/*
+// C prototype : void HexToStr(BYTE *pbDest, BYTE *pbSrc, int nLen)
+// parameter(s): [OUT] pbDest - 存放目标字符串
+// [IN] pbSrc - 输入16进制数的起始地址
+// [IN] nLen - 16进制数的字节数
+// return value:
+// remarks : 将16进制数转化为字符串
+*/
+void HexToStr(char *pbDest, u8 *pbSrc, u16 len)
+{
+	char ddl,ddh;
+	int i;
+
+	for (i = 0; i < len; i ++)
+	{
+		ddh = 48 + pbSrc[i] / 16;
+		ddl = 48 + pbSrc[i] % 16;
+		if (ddh > 57) ddh = ddh + 7;
+		if (ddl > 57) ddl = ddl + 7;
+		pbDest[i * 2] = ddh;
+		pbDest[i * 2 + 1] = ddl;
+	}
+
+	pbDest[len * 2] = '\0';
+}
+
+/*
+// C prototype : void StrToHex(BYTE *pbDest, BYTE *pbSrc, int nLen)
+// parameter(s): [OUT] pbDest - 输出缓冲区
+// [IN] pbSrc - 字符串
+// [IN] nLen - 16进制数的字节数(字符串的长度/2)
+// return value:
+// remarks : 将字符串转化为16进制数
+*/
+void StrToHex(u8 *pbDest, char *pbSrc, u16 len)
+{
+	char h1,h2;
+	u8 s1,s2;
+	int i;
+
+	for (i = 0; i < len; i ++)
+	{
+		h1 = pbSrc[2 * i];
+		h2 = pbSrc[2 * i + 1];
+
+		s1 = toupper(h1) - 0x30;
+		if (s1 > 9)
+		s1 -= 7;
+
+		s2 = toupper(h2) - 0x30;
+		if (s2 > 9)
+		s2 -= 7;
+
+		pbDest[i] = s1 * 16 + s2;
+	}
+}
+
+//CRC32
+u32 CRC32Extend(const u8 *buf, u32 size, u32 temp,u8 flag)
+{
+	uint32_t i, crc,crc_e;
+	
+	crc = temp;
+	for (i = 0; i < size; i++)
+	{
+		crc = crc32tab[(crc ^ buf[i]) & 0xff] ^ (crc >> 8);
+	}
+	
+	if(flag != 0)
+	{
+		crc_e = crc^0xFFFFFFFF;
+	}
+	else if(flag == 0)
+	{
+		crc_e = crc;
+	}
+	return crc_e;
+}
 
 //32位CRC校验
 u32 CRC32(const u8 *buf, u32 size)
@@ -177,7 +267,7 @@ u32 CRC32(const u8 *buf, u32 size)
 参数：puchMsgg是要进行CRC校验的消息，usDataLen是消息中字节数
 返回：计算出来的CRC校验码。
 *****************************************************/
-u16 CRC16(u8 *puchMsgg,u8 usDataLen)
+u16 CRC16(u8 *puchMsgg,u16 usDataLen)
 {
     u8 uchCRCHi = 0xFF ; 											//高CRC字节初始化
     u8 uchCRCLo = 0xFF ; 											//低CRC 字节初始化
@@ -426,6 +516,8 @@ void ReadTotalConfigurationParameters(void)
 	ReadRunMode();							//读取集控器运行模式
 	ReadConcentratorBasicConfig();			//读取集控器基础配置参数
 	ReadConcentratorAlarmConfig();			//读取集控器告警配置参数
+	ReadConcentratorLocationConfig();		//读取经纬度年表
+	ReadFrameWareState();					//读取固件升级状态
 }
 
 
