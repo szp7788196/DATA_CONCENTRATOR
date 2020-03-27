@@ -40,7 +40,7 @@
     typedef long long int           int64;
 
 
-
+#define DEBUG_LOG
 
 
 #define SOFT_WARE_VRESION						101			//软件版本号
@@ -200,6 +200,7 @@ extern SemaphoreHandle_t  xMutex_SPI2;
 extern SemaphoreHandle_t  xMutex_RTC;
 extern SemaphoreHandle_t  xMutex_Push_xQueue_ServerFrameRx;
 extern SemaphoreHandle_t  xMutex_Push_xQueue_ServerFrameTx;
+extern SemaphoreHandle_t  xMutex_SPI_FLASH;
 
 
 extern QueueHandle_t xQueue_ServerFrameRx;
@@ -218,6 +219,7 @@ extern QueueHandle_t xQueue_LumeterFrameStruct;
 extern time_t SysTick1s;
 
 time_t GetSysTick1s(void);
+u8 char_upper(u8 c);
 void myitoa(int num,char *str,int radix);
 u8 GetDatBit(u32 dat);
 u32 GetADV(u8 len);
@@ -231,6 +233,8 @@ u32 CRC32(const u8 *buf, u32 size);
 u32 CRC32Extend(const u8 *buf, u32 size, u32 temp,u8 flag);
 u16 CRC16(u8 *puchMsgg,u16 usDataLen);
 u8 CalCheckSum(u8 *buf, u16 len);
+u8 leap_year_judge(u16 year);
+u32 get_days_form_calendar(u16 year,u8 month,u8 date);
 
 u16 MyStrstr(u8 *str1, u8 *str2, u16 str1_len, u16 str2_len);
 unsigned short find_str(unsigned char *s_str, unsigned char *p_str, unsigned short count, unsigned short *seek);

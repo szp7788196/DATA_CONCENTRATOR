@@ -9,7 +9,13 @@ _calendar_obj calendar;//时钟结构体
 
 void RX8010S_Init(void)
 {
+	u32 data = 0;
+	
 	IIC_Init();
+	
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_BKPSRAM, ENABLE);
+	PWR_BackupAccessCmd(ENABLE);
+	data = RTC_ReadBackupRegister(RTC_BKP_DR0);
 
 	RX8010S_ReadOneByte(0x20);
 	RX8010S_WriteOneByte(0x17,0x58);

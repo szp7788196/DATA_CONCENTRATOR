@@ -5,6 +5,7 @@ SemaphoreHandle_t  xMutex_SPI2 = NULL;
 SemaphoreHandle_t  xMutex_RTC = NULL;
 SemaphoreHandle_t  xMutex_Push_xQueue_ServerFrameRx = NULL;
 SemaphoreHandle_t  xMutex_Push_xQueue_ServerFrameTx = NULL;
+SemaphoreHandle_t  xMutex_SPI_FLASH = NULL;
 
 
 
@@ -38,6 +39,18 @@ time_t GetSysTick1s(void)
 	sec = SysTick1s;
 
 	return sec;
+}
+
+//将小写字母转换为大写字母
+u8 char_upper(u8 c)
+{
+	if(c<'A')
+		return c;
+	
+	if(c>='a')
+		return c-0x20;
+	else 
+		return c;
 }
 
 void myitoa(int num,char *str,int radix)
@@ -293,6 +306,73 @@ u8 CalCheckSum(u8 *buf, u16 len)
 	}
 
 	return sum;
+}
+
+//闰年判断
+u8 leap_year_judge(u16 year)
+{
+	u16 leap = 0;
+
+	if(year % 400 == 0)
+	{
+		leap = 1;
+	}
+    else
+    {
+        if(year % 4 == 0 && year % 100 != 0)
+		{
+			leap = 1;
+		}
+        else
+		{
+			leap = 0;
+		}
+	}
+
+	return leap;
+}
+
+//闰年判断 返回当前年月日 在一年中的天数
+u32 get_days_form_calendar(u16 year,u8 month,u8 date)
+{
+	u16 i = 0;
+	u8 leap = 0;
+	u32 days = 0;
+	u8 x[13]={0,31,29,31,30,31,30,31,31,30,31,30,31};
+
+	for(i = 2000; i <= year; i ++)
+	{
+		leap = leap_year_judge(i);
+
+		if(leap == 1)
+		{
+			days += 366;
+		}
+		else if(leap == 0)
+		{
+			days += 365;
+		}
+	}
+
+	leap = leap_year_judge(year);
+
+	if(leap == 1)
+	{
+		x[2] = 29;
+	}
+	else if(leap == 0)
+	{
+		x[2] = 28;
+	}
+
+	for(i = 1; i < month; i ++)
+	{
+		days += x[i];			//整月的天数
+	}
+
+	days += (u16)date;			//日的天数
+
+	return days;
 }
 
 //在str1中查找str2，失败返回0xFF,成功返回str2首个元素在str1中的位置

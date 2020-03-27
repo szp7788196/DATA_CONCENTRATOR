@@ -7,10 +7,10 @@
 
 
 
-#define IIC_SDA_L    GPIOB->BSRRH = GPIO_Pin_9   //sda=0
-#define IIC_SDA_H    GPIOB->BSRRL = GPIO_Pin_9   //sda=1
-#define IIC_SCL_L    GPIOB->BSRRH = GPIO_Pin_8
-#define IIC_SCL_H    GPIOB->BSRRL = GPIO_Pin_8
+#define IIC_SCL_H					 	PBout(8) = 1
+#define IIC_SCL_L					 	PBout(8) = 0
+#define IIC_SDA_H					 	PBout(9) = 1
+#define IIC_SDA_L					 	PBout(9) = 0
 
 //#define IIC_SDA_In()	GPIOB->MODER|=GPIO_Mode_IN<<18; //sdaÊäÈë
 //#define IIC_SDA_Out()   GPIOB->MODER|=GPIO_Mode_OUT<<18;//sdaÊä³ö

@@ -297,7 +297,7 @@
               </OCR_RVCT3>
               <OCR_RVCT4>
                 <Type>1</Type>
-                <StartAddress>0x8040000</StartAddress>
+                <StartAddress>0x8000000</StartAddress>
                 <Size>0x60000</Size>
               </OCR_RVCT4>
               <OCR_RVCT5>
@@ -972,6 +972,11 @@
               <FileType>1</FileType>
               <FilePath>..\FATFS\exfuns\exfuns.c</FilePath>
             </File>
+            <File>
+              <FileName>fattester.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\FATFS\exfuns\fattester.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -1001,6 +1006,11 @@
               <FileName>at_cmd.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\MIDDLEWARE\at_cmd.c</FilePath>
+            </File>
+            <File>
+              <FileName>event_alarm.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\MIDDLEWARE\event_alarm.c</FilePath>
             </File>
           </Files>
         </Group>

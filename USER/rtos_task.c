@@ -83,6 +83,12 @@ void AppObjCreate(void)
     {
 
     }
+	
+	xMutex_SPI_FLASH = xSemaphoreCreateMutex();
+	if(xMutex_SPI_FLASH == NULL)
+    {
+
+    }
 
 	//消息队列
 	xQueue_ServerFrameRx = xQueueCreate(10, sizeof(ServerFrame_S));

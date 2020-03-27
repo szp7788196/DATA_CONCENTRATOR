@@ -33,13 +33,13 @@ typedef enum
 
 typedef enum
 {
-	UNKNOW_DEVICE			= 0xFFFF,	//未知设备
-	CONCENTRATOR 			= 0x0000,	//集控设备
-	LAMP_CONTROLLER 		= 0x0100,	//路灯控制器
-	RELAY 					= 0x0200,	//继电器
-	INPUT_COLLECTOR 		= 0x0300,	//输入量采集器
-	ELECTRIC_METER 			= 0x0400,	//电表
-	LUMETER					= 0x0500,	//照度计
+	UNKNOW_DEVICE			= 0xFF,		//未知设备
+	CONCENTRATOR 			= 0x00,		//集控设备
+	LAMP_CONTROLLER 		= 0x01,		//路灯控制器
+	RELAY 					= 0x02,		//继电器
+	INPUT_COLLECTOR 		= 0x03,		//输入量采集器
+	ELECTRIC_METER 			= 0x04,		//电表
+	LUMETER					= 0x05,		//照度计
 	
 } DEVICE_TYPE_E;
 

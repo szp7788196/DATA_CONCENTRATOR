@@ -15,6 +15,7 @@
 #include "usart6.h"
 #include "ec20.h"
 #include "concentrator.h"
+#include "exfuns.h"
 
 
 //u8 eprombuf[100];
@@ -23,7 +24,7 @@ RCC_ClocksTypeDef RCC_Clocks;
 u16 siiize = 0;
 int main(void)
 {
-	SCB->VTOR = FLASH_BASE | 0x40000; 	/* Vector Table Relocation in Internal FLASH. */
+//	SCB->VTOR = FLASH_BASE | 0x40000; 	/* Vector Table Relocation in Internal FLASH. */
 //	IWDG_Init(6,1000);									//看门狗超时8秒
 	
 	RCC_GetClocksFreq(&RCC_Clocks);
@@ -36,7 +37,7 @@ int main(void)
 	
 	TIM2_Init(100);										//定时器2初始化
 	
-	USART1_Init(9600);									//维护串口初始化
+	USART1_Init(115200);									//维护串口初始化
 	USART5_Init(9600);									//RS485串口
 	USART6_Init(115200);								//4G模块串口
 	
@@ -45,6 +46,8 @@ int main(void)
 	W25QXX_Init();										//外部FLASH初始化
 	HT7038_Init();										//电能计量芯片初始化
 	EC20_Init();										//4G模块初始化
+	
+	init_mount_flash();									//初始化并挂载flash
 	
 	
 //	siiize = sizeof(ConcentratorLocationConfig_S);

@@ -114,30 +114,6 @@ typedef struct	ConcentratorLocationConfig	//集控器经纬度年表配置
 
 }__attribute__((packed))ConcentratorLocationConfig_S;
 
-typedef struct	EventReport					//事件记录结构体
-{
-	u8 device_type;							//设备类型
-	u8 device_address;						//设备地址
-	u8 device_channel;						//设备通道
-	u8 event_type;							//事件类型
-	u8 *event_value;						//事件值
-	u8 occur_time[6];						//发生时间
-
-}__attribute__((packed))EventReport_S;
-
-typedef struct	AlarmReport					//事件记录结构体
-{
-	u8 device_type;							//设备类型
-	u8 alarm_type;							//告警类型
-	u8 device_address;						//设备地址
-	u8 device_channel;						//设备通道
-	u8 *current_value;						//当前值
-	u8 *set_value;							//设置值
-	u8 *reference_value;					//参考值
-	u8 occur_time[6];						//发生时间
-
-}__attribute__((packed))AlarmReport_S;
-
 typedef struct FrameWareState
 {
 	u8 state;								//更新状态

@@ -38,32 +38,32 @@ u8 TransServerFrameStructToOtherTask(ServerFrameStruct_S *server_frame_struct,DE
 	
 	if(device_type == UNKNOW_DEVICE)
 	{
-		_device_type = (DEVICE_TYPE_E)(server_frame_struct->msg_type & 0xFF00);
+		_device_type = (DEVICE_TYPE_E)((server_frame_struct->msg_id & 0xFF00) >> 8);
 	}
 	
-	switch((u16)_device_type)
+	switch((u8)_device_type)
 	{
-		case (u16)CONCENTRATOR:
+		case (u8)CONCENTRATOR:
 			xQueue_DeviceXxFrameStruct = xQueue_ConcentratorFrameStruct;
 		break;
 
-		case (u16)LAMP_CONTROLLER:
+		case (u8)LAMP_CONTROLLER:
 			xQueue_DeviceXxFrameStruct = xQueue_LampControllerFrameStruct;
 		break;
 
-		case (u16)RELAY:
+		case (u8)RELAY:
 			xQueue_DeviceXxFrameStruct = xQueue_RelayFrameStruct;
 		break;
 
-		case (u16)INPUT_COLLECTOR:
+		case (u8)INPUT_COLLECTOR:
 			xQueue_DeviceXxFrameStruct = xQueue_InputCollectorFrameStruct;
 		break;
 
-		case (u16)ELECTRIC_METER:
+		case (u8)ELECTRIC_METER:
 			xQueue_DeviceXxFrameStruct = xQueue_ElectricMeterFrameStruct;
 		break;
 
-		case (u16)LUMETER:
+		case (u8)LUMETER:
 			xQueue_DeviceXxFrameStruct = xQueue_LumeterFrameStruct;
 		break;
 
