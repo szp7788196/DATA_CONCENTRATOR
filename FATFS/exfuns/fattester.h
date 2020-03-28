@@ -7,12 +7,12 @@
 FRESULT mf_mount(u8* path,u8 mt);
 FRESULT mf_open(u8*path,u8 mode);
 FRESULT mf_close(void);
-FRESULT mf_read(u16 len);
+FRESULT mf_read(u32 len);
 FRESULT mf_write(u8*dat,u16 len);
 FRESULT mf_opendir(u8* path);
 FRESULT mf_closedir(void);
 FRESULT mf_readdir(void);
-FRESULT mf_scan_files(u8 * path, u8 *file_num);
+FRESULT mf_scan_files(u8 * path);
 u32 mf_showfree(u8 *drv);
 FRESULT mf_lseek(u32 offset);
 u32 mf_tell(void);

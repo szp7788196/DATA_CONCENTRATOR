@@ -3,6 +3,7 @@
 
 #include "sys.h"
 #include "server_protocol.h"
+#include "event_alarm.h"
 
 /********************************¹Ì¼þÉý¼¶***************************************/
 #define FIRMWARE_FREE					0
@@ -162,6 +163,7 @@ void SendLoginFrameToServer(void);
 void SendHeartBeatFrameToServer(void);
 void SendOtaRequestFrameToServer(FrameWareState_S frame_ware_state);
 void SendOtaCompleteFrameToServer(void);
+void SendAlarmReportFrameToServer(AlarmReport_S *alarm_report);
 void AutoSendFrameToServer(void);
 void RecvAndHandleFrameStruct(void);
 

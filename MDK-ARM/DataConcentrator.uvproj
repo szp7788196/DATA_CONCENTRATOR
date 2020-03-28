@@ -437,6 +437,11 @@
               <FileType>1</FileType>
               <FilePath>..\USER\task_concentrator.c</FilePath>
             </File>
+            <File>
+              <FileName>task_store.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\USER\task_store.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

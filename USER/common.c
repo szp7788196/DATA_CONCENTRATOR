@@ -25,6 +25,9 @@ QueueHandle_t xQueue_InputCollectorFrameStruct = NULL;
 QueueHandle_t xQueue_ElectricMeterFrameStruct = NULL;
 QueueHandle_t xQueue_LumeterFrameStruct = NULL;
 
+QueueHandle_t xQueue_AlarmReportSend = NULL;
+QueueHandle_t xQueue_AlarmReportStore = NULL;
+
 
 
 

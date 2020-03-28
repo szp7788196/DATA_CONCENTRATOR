@@ -214,6 +214,8 @@ extern QueueHandle_t xQueue_RelayFrameStruct;
 extern QueueHandle_t xQueue_InputCollectorFrameStruct;
 extern QueueHandle_t xQueue_ElectricMeterFrameStruct;
 extern QueueHandle_t xQueue_LumeterFrameStruct;
+extern QueueHandle_t xQueue_AlarmReportSend;
+extern QueueHandle_t xQueue_AlarmReportStore;
 
 
 extern time_t SysTick1s;

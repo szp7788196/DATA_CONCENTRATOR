@@ -7,6 +7,8 @@
 #include "exfuns.h"
 #include "ff.h"
 #include "ht7038.h"
+#include "event_alarm.h"
+#include "common.h"
 
 
 

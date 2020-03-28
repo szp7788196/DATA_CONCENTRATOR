@@ -42,11 +42,11 @@ FRESULT mf_close(void)
 //读出数据
 //len:读出的长度
 //返回值:执行结果
-FRESULT mf_read(u16 len)
+FRESULT mf_read(u32 len)
 {
-	u16 i,t;
+	u32 i,t;
 	FRESULT res = FR_OK;
-	u16 tlen = 0;
+	u32 tlen = 0;
 
 #ifdef DEBUG_LOG
 	printf("\r\nRead file data is:\r\n");
@@ -197,7 +197,7 @@ FRESULT mf_readdir(void)
 //遍历文件
 //path:路径
 //返回值:执行结果
-FRESULT mf_scan_files(u8 * path, u8 *file_num)
+FRESULT mf_scan_files(u8 * path)
 {
 	FRESULT res = FR_OK;	  
     char *fn;   /* This function is assuming non-Unicode cfg. */
@@ -220,8 +220,6 @@ FRESULT mf_scan_files(u8 * path, u8 *file_num)
 			}
 			   
         	fn = fileinfo.fname;
-			
-			(*file_num) ++;
 			
 #ifdef DEBUG_LOG
 			printf("%s/", path);//打印路径	

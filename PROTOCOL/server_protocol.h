@@ -71,7 +71,7 @@ typedef struct	ServerFrame
 	u16 len;
 	
 	u8 *buf;
-}__attribute__((packed))ServerFrame_S;
+}ServerFrame_S;
 
 
 typedef struct	Parameter					//²ÎÊı

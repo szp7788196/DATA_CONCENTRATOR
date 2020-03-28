@@ -7,6 +7,7 @@
 #include "ec20.h"
 #include "stmflash.h"
 
+
 //需要存储的数据
 RUN_MODE_E RunMode = MODE_AUTO;								//运行模式
 ConcentratorBasicConfig_S ConcentratorBasicConfig;			//基本配置信息
@@ -20,6 +21,7 @@ u8 FlagSystemReBoot = 0;								//系统重启标识
 u8 FlagReConnectToServer = 0;							//断网重连标志
 u8 LoginResponse = 0;									//服务器对登录包的相应
 u8 HeartBeatResponse = 0;								//服务器对心跳包的响应
+u8 AlarmReportResponse = 0;								//服务器对告警包的相应
 
 
 
@@ -452,7 +454,7 @@ void SendHeartBeatFrameToServer(void)
 	}
 }
 
-//发送登录包
+//发送OTA请求包
 void SendOtaRequestFrameToServer(FrameWareState_S frame_ware_state)
 {
 	u8 i = 0;
@@ -511,7 +513,7 @@ void SendOtaRequestFrameToServer(FrameWareState_S frame_ware_state)
 	}
 }
 
-//发送登录包
+//发送OTA完成包
 void SendOtaCompleteFrameToServer(void)
 {
 	u8 i = 0;
@@ -579,18 +581,143 @@ void SendOtaCompleteFrameToServer(void)
 	}
 }
 
+//发送告警事件
+void SendAlarmReportFrameToServer(AlarmReport_S *alarm_report)
+{
+	u8 i = 0;
+	char buf[25];
+	ServerFrameStruct_S *server_frame_struct = NULL;		//用于响应服务器
+
+	server_frame_struct = (ServerFrameStruct_S *)pvPortMalloc(sizeof(ServerFrameStruct_S));
+
+	if(server_frame_struct != NULL && alarm_report != NULL)
+	{
+		InitServerFrameStruct(server_frame_struct);
+
+		server_frame_struct->msg_type 	= (u8)DEVICE_REQUEST_UP;	//响应服务器类型
+		server_frame_struct->msg_len 	= 10;
+		server_frame_struct->err_code 	= (u8)NO_ERR;
+//		server_frame_struct->msg_id		= 0x0000;
+		server_frame_struct->para_num	= 8;
+		
+		if(alarm_report->record_type == 1)
+		{
+			server_frame_struct->msg_id = 0x00A0;
+		}
+		else if(alarm_report->record_type == 0)
+		{
+			server_frame_struct->msg_id = 0x00A0;
+		}
+		
+		server_frame_struct->msg_id += ((((u16)alarm_report->device_type) << 8) & 0xFF00);
+
+		server_frame_struct->para = (Parameter_S *)pvPortMalloc(server_frame_struct->para_num * sizeof(Parameter_S));
+
+		if(server_frame_struct->para != NULL)
+		{
+			server_frame_struct->para[i].type = 0x8001;
+			memset(buf,0,25);
+			sprintf(buf, "%d",alarm_report->device_type);
+			server_frame_struct->para[i].len = strlen(buf);
+			server_frame_struct->para[i].value = (u8 *)pvPortMalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
+			if(server_frame_struct->para[i].value != NULL)
+			{
+				memcpy(server_frame_struct->para[i].value,buf,server_frame_struct->para[i].len + 1);
+			}
+			i ++;
+			
+			server_frame_struct->para[i].type = 0x8002;
+			memset(buf,0,25);
+			sprintf(buf, "%d",alarm_report->record_type);
+			server_frame_struct->para[i].len = strlen(buf);
+			server_frame_struct->para[i].value = (u8 *)pvPortMalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
+			if(server_frame_struct->para[i].value != NULL)
+			{
+				memcpy(server_frame_struct->para[i].value,buf,server_frame_struct->para[i].len + 1);
+			}
+			i ++;
+			
+			server_frame_struct->para[i].type = 0x4003;
+			server_frame_struct->para[i].len = strlen((char *)alarm_report->device_address);
+			server_frame_struct->para[i].value = (u8 *)pvPortMalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
+			if(server_frame_struct->para[i].value != NULL)
+			{
+				memcpy(server_frame_struct->para[i].value,alarm_report->device_address,server_frame_struct->para[i].len + 1);
+			}
+			i ++;
+			
+			server_frame_struct->para[i].type = 0x4004;
+			server_frame_struct->para[i].len = strlen((char *)alarm_report->device_channel);
+			server_frame_struct->para[i].value = (u8 *)pvPortMalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
+			if(server_frame_struct->para[i].value != NULL)
+			{
+				memcpy(server_frame_struct->para[i].value,alarm_report->device_channel,server_frame_struct->para[i].len + 1);
+			}
+			i ++;
+			
+			server_frame_struct->para[i].type = 0x4005;
+			server_frame_struct->para[i].len = strlen((char *)alarm_report->current_value);
+			server_frame_struct->para[i].value = (u8 *)pvPortMalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
+			if(server_frame_struct->para[i].value != NULL)
+			{
+				memcpy(server_frame_struct->para[i].value,alarm_report->current_value,server_frame_struct->para[i].len + 1);
+			}
+			i ++;
+			
+			server_frame_struct->para[i].type = 0x4006;
+			server_frame_struct->para[i].len = strlen((char *)alarm_report->set_value);
+			server_frame_struct->para[i].value = (u8 *)pvPortMalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
+			if(server_frame_struct->para[i].value != NULL)
+			{
+				memcpy(server_frame_struct->para[i].value,alarm_report->set_value,server_frame_struct->para[i].len + 1);
+			}
+			i ++;
+			
+			server_frame_struct->para[i].type = 0x4007;
+			server_frame_struct->para[i].len = strlen((char *)alarm_report->reference_value);
+			server_frame_struct->para[i].value = (u8 *)pvPortMalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
+			if(server_frame_struct->para[i].value != NULL)
+			{
+				memcpy(server_frame_struct->para[i].value,alarm_report->reference_value,server_frame_struct->para[i].len + 1);
+			}
+			i ++;
+			
+			server_frame_struct->para[i].type = 0xA008;
+			server_frame_struct->para[i].len = strlen((char *)alarm_report->occur_time);
+			server_frame_struct->para[i].value = (u8 *)pvPortMalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
+			if(server_frame_struct->para[i].value != NULL)
+			{
+				memcpy(server_frame_struct->para[i].value,alarm_report->occur_time,server_frame_struct->para[i].len + 1);
+			}
+			i ++;
+		}
+
+		ConvertFrameStructToFrame(server_frame_struct);
+	}
+}
+
 void AutoSendFrameToServer(void)
 {
 	static time_t time_1 = 0;
 	static u8 retry_times1 = 0;
+	
 	static time_t time_2_1 = 0;
 	static time_t time_2_2 = 0;
 	static u8 retry_times2 = 0;
+	
 	static time_t time_3 = 0;
 	static u8 retry_times3 = 0;
+	
 	static time_t time_4 = 0;
 	static u8 retry_times4 = 0;
+	
+	BaseType_t xResult;
+	static AlarmReport_S *alarm_report = NULL;
+	static time_t time_5 = 0;
+	static u8 retry_times5 = 0;
 
+
+/**********************************发送登录包**********************************/	
 	if(LoginResponse == 0)		//未登录状态
 	{
 		if(GetSysTick1s() - time_1 >= ConcentratorBasicConfig.command_response_timeout)
@@ -611,7 +738,7 @@ void AutoSendFrameToServer(void)
 	else
 	{
 		retry_times1 = 0;
-
+/**********************************发送心跳包**********************************/
 		if(GetSysTick1s() - time_2_1 >= ConcentratorBasicConfig.heartbeat_cycle)
 		{
 			time_2_1 = GetSysTick1s();
@@ -645,7 +772,7 @@ void AutoSendFrameToServer(void)
 		{
 			retry_times2 = 0;
 		}
-
+/**********************************发送升级完成通知包**********************************/
 		if(FrameWareState.state == FIRMWARE_UPDATE_SUCCESS ||
 		   FrameWareState.state == FIRMWARE_UPDATE_FAILED ||
 		   FrameWareState.state == FIRMWARE_DOWNLOAD_FAILED)
@@ -668,7 +795,7 @@ void AutoSendFrameToServer(void)
 		{
 			retry_times3 = 0;
 		}
-		
+/**********************************发送固件请求包**********************************/		
 		if(FrameWareState.state == FIRMWARE_DOWNLOADING)
 		{
 			time_4 = GetSysTick1s();
@@ -702,6 +829,55 @@ void AutoSendFrameToServer(void)
 		{
 			retry_times4 = 0;
 		}
+/**********************************发送告警上报包**********************************/		
+		if(AlarmReportResponse == 0)
+		{
+			if(alarm_report != NULL)
+			{
+				DeleteAlarmReport(alarm_report);
+			}
+			
+			if(alarm_report == NULL)
+			{
+				xResult = xQueueReceive(xQueue_AlarmReportSend,(void *)&alarm_report,(TickType_t)pdMS_TO_TICKS(1));
+			
+				if(xResult == pdPASS)
+				{
+					if(AlarmReportResponse == 0)
+					{
+						AlarmReportResponse = 1;
+						
+						time_5 = GetSysTick1s();
+						retry_times5 = 0;
+						
+						RE_SEND_ALARM_REPORT:
+						SendAlarmReportFrameToServer(alarm_report);
+					}
+				}
+			}
+		}
+
+		if(AlarmReportResponse == 1)
+		{
+			if(GetSysTick1s() - time_5 >= ConcentratorBasicConfig.command_response_timeout)
+			{
+				time_5 = GetSysTick1s();
+
+				if((retry_times5 ++) < ConcentratorBasicConfig.command_retransmission_times)
+				{
+					goto RE_SEND_ALARM_REPORT;
+				}
+				else
+				{
+					retry_times5 = 0;
+					
+					AlarmReportResponse = 0;
+					
+					DeleteAlarmReport(alarm_report);
+				}
+			}
+		}
+		
 	}
 }
 
@@ -754,11 +930,11 @@ void RecvAndHandleFrameStruct(void)
 			break;
 
 			case 0x00A0:	//告警上报
-
+				AlarmReportResponse = 0;
 			break;
 
 			case 0x00A1:	//告警解除
-
+				AlarmReportResponse = 0;
 			break;
 
 			case 0x00A2:	//事件上报
