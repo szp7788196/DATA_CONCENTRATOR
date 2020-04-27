@@ -1,7 +1,8 @@
 #include "task_store.h"
 #include "delay.h"
-#include "event_alarm.h"
+#include "history_record.h"
 #include "common.h"
+#include "fattester.h"
 
 
 
@@ -13,31 +14,44 @@ void vTaskSTORE(void *pvParameters)
 	while(1)
 	{
 		RecvAndStoreAlarmReport();
-		
+		RecvAndSendEventHistoryToServer();
+
 		delay_ms(500);
 	}
 }
-
 
 //接收并存储告警历史记录
 void RecvAndStoreAlarmReport(void)
 {
 	AlarmReport_S *alarm_report = NULL;
 	BaseType_t xResult;
-	
+
 	xResult = xQueueReceive(xQueue_AlarmReportStore,(void *)&alarm_report,(TickType_t)pdMS_TO_TICKS(1));
-	
+
 	if(xResult == pdPASS)
 	{
 		StoreAlarmToSpiFlash(alarm_report);
-		
-//		mf_scan_files("1:CONCEN/ALARM");
-		
+
+		mf_scan_files("1:CONCEN/ALARM");
+
 		DeleteAlarmReport(alarm_report);
 	}
 }
 
+void RecvAndSendEventHistoryToServer(void)
+{
+	EventHistory_S *event_history = NULL;
+	BaseType_t xResult;
 
+	xResult = xQueueReceive(xQueue_HistoryRecordRead,(void *)&event_history,(TickType_t)pdMS_TO_TICKS(1));
+
+	if(xResult == pdPASS)
+	{
+		GetAlarmEventContentFromDateSegmentAndSendToServer(*event_history);
+
+		DeleteEventHistory(event_history);
+	}
+}
 
 
 

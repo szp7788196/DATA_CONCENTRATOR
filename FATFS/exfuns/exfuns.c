@@ -37,21 +37,39 @@ FRESULT init_mount_flash(void)
 			{
 				res = mf_mkdir("1:CONCEN");
 				res = mf_mkdir("1:CONCEN/ALARM");
+				res = mf_mkdir("1:CONCEN/EVENT");
+				res = mf_mkdir("1:CONCEN/JOURNAL");
+				res = mf_mkdir("1:CONCEN/STATE");
 
 				res = mf_mkdir("1:LAMP");
 				res = mf_mkdir("1:LAMP/ALARM");
+				res = mf_mkdir("1:LAMP/EVENT");
+				res = mf_mkdir("1:LAMP/JOURNAL");
+				res = mf_mkdir("1:LAMP/STATE");
 
 				res = mf_mkdir("1:RELAY");
 				res = mf_mkdir("1:RELAY/ALARM");
+				res = mf_mkdir("1:RELAY/EVENT");
+				res = mf_mkdir("1:RELAY/JOURNAL");
+				res = mf_mkdir("1:RELAY/STATE");
 
 				res = mf_mkdir("1:INPUT");
 				res = mf_mkdir("1:INPUT/ALARM");
+				res = mf_mkdir("1:INPUT/EVENT");
+				res = mf_mkdir("1:INPUT/JOURNAL");
+				res = mf_mkdir("1:INPUT/STATE");
 
 				res = mf_mkdir("1:METER");
 				res = mf_mkdir("1:METER/ALARM");
+				res = mf_mkdir("1:METER/EVENT");
+				res = mf_mkdir("1:METER/JOURNAL");
+				res = mf_mkdir("1:METER/STATE");
 
 				res = mf_mkdir("1:LUMETER");
 				res = mf_mkdir("1:LUMETER/ALARM");
+				res = mf_mkdir("1:LUMETER/EVENT");
+				res = mf_mkdir("1:LUMETER/JOURNAL");
+				res = mf_mkdir("1:LUMETER/STATE");
 
 				res = mf_closedir();
 			}

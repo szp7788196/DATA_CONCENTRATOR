@@ -53,8 +53,8 @@
 #define CONCENTRATOR_RUN_MODE_ADD				151			//集控器运行模式EEPROM存储地址
 #define CONCENTRATOR_RUN_MODE_LEN				3
 
-#define CONCENTRATOR_ALARM_CONF_ADD				161			//集控器告警参数配置EEPROM存储地址
-#define CONCENTRATOR_ALARM_CONF_LEN				17
+#define CONCENTRATOR_ALARM_CONF_ADD				155			//集控器告警参数配置EEPROM存储地址
+#define CONCENTRATOR_ALARM_CONF_LEN				24
 
 #define CONCENTRATOR_LOCATION_CONF_ADD			201			//集控器经纬度年表参数配置EEPROM存储地址
 #define CONCENTRATOR_LOCATION_CONF_LEN			1506
@@ -201,6 +201,8 @@ extern SemaphoreHandle_t  xMutex_RTC;
 extern SemaphoreHandle_t  xMutex_Push_xQueue_ServerFrameRx;
 extern SemaphoreHandle_t  xMutex_Push_xQueue_ServerFrameTx;
 extern SemaphoreHandle_t  xMutex_SPI_FLASH;
+extern SemaphoreHandle_t  xMutex_Push_xQueue_AlarmReportSend;
+extern SemaphoreHandle_t  xMutex_Push_xQueue_AlarmReportStore;
 
 
 extern QueueHandle_t xQueue_ServerFrameRx;
@@ -216,6 +218,8 @@ extern QueueHandle_t xQueue_ElectricMeterFrameStruct;
 extern QueueHandle_t xQueue_LumeterFrameStruct;
 extern QueueHandle_t xQueue_AlarmReportSend;
 extern QueueHandle_t xQueue_AlarmReportStore;
+extern QueueHandle_t xQueue_AlarmReportRead;
+extern QueueHandle_t xQueue_HistoryRecordRead;
 
 
 extern time_t SysTick1s;

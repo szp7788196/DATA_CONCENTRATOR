@@ -3,7 +3,7 @@
 #include <string.h>
 #include "common.h"
 #include "ec20.h"
-#include "concentrator.h"
+#include "concentrator_comm.h"
 
 
 

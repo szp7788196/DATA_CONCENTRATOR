@@ -351,7 +351,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F40XX,USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>..\CORE;..\DEVICEDRIVER\led;..\FREERTOS\include;..\FREERTOS\portable\RVDS\ARM_CM4F;..\FWLIB\inc;..\PERIPHERAL\usart;..\PERIPHERAL\watch_dog;..\PROTOCOL;..\SYSTEM\delay;..\SYSTEM\sys;..\USER;..\DEVICEDRIVER\dp83848;..\ETHERNET;..\LWIP\lwip-1.4.1\src\include;..\LWIP\lwip-1.4.1\src\include\lwip;..\LWIP\lwip-1.4.1\src\include\ipv4;..\LWIP\lwip-1.4.1\src\include\netif;..\LWIP\lwip-1.4.1\port\STM32F4x7;..\LWIP\lwip-1.4.1\port\STM32F4x7\FreeRTOS;..\DEVICEDRIVER\key;..\PERIPHERAL\spi;..\PERIPHERAL\iic;..\PERIPHERAL\stmflash;..\DEVICEDRIVER\kc;..\DEVICEDRIVER\kr;..\DEVICEDRIVER\rx8010s;..\DEVICEDRIVER\cat25x;..\DEVICEDRIVER\w25qxx;..\FATFS;..\FATFS\src;..\FATFS\exfuns;..\DEVICEDRIVER\ht7038;..\MEMORY;..\MIDDLEWARE;..\DEVICEDRIVER\ec20;..\EXTERNALDEVICE\concentrator</IncludePath>
+              <IncludePath>..\CORE;..\DEVICEDRIVER\led;..\FREERTOS\include;..\FREERTOS\portable\RVDS\ARM_CM4F;..\FWLIB\inc;..\PERIPHERAL\usart;..\PERIPHERAL\watch_dog;..\PROTOCOL;..\SYSTEM\delay;..\SYSTEM\sys;..\USER;..\DEVICEDRIVER\dp83848;..\ETHERNET;..\LWIP\lwip-1.4.1\src\include;..\LWIP\lwip-1.4.1\src\include\lwip;..\LWIP\lwip-1.4.1\src\include\ipv4;..\LWIP\lwip-1.4.1\src\include\netif;..\LWIP\lwip-1.4.1\port\STM32F4x7;..\LWIP\lwip-1.4.1\port\STM32F4x7\FreeRTOS;..\DEVICEDRIVER\key;..\PERIPHERAL\spi;..\PERIPHERAL\iic;..\PERIPHERAL\stmflash;..\DEVICEDRIVER\kc;..\DEVICEDRIVER\kr;..\DEVICEDRIVER\rx8010s;..\DEVICEDRIVER\cat25x;..\DEVICEDRIVER\w25qxx;..\FATFS;..\FATFS\src;..\FATFS\exfuns;..\DEVICEDRIVER\ht7038;..\MEMORY;..\MIDDLEWARE;..\DEVICEDRIVER\ec20;..\EXTERNALDEVICE\concentrator;..\DEVICEDRIVER\battery</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -428,11 +428,6 @@
               <FilePath>..\USER\task_handle_server_frame.c</FilePath>
             </File>
             <File>
-              <FileName>task_sensor.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\USER\task_sensor.c</FilePath>
-            </File>
-            <File>
               <FileName>task_concentrator.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\USER\task_concentrator.c</FilePath>
@@ -441,6 +436,11 @@
               <FileName>task_store.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\USER\task_store.c</FilePath>
+            </File>
+            <File>
+              <FileName>task_electricity_meter.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\USER\task_electricity_meter.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -686,6 +686,11 @@
               <FileName>ec20.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\DEVICEDRIVER\ec20\ec20.c</FilePath>
+            </File>
+            <File>
+              <FileName>battery.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\DEVICEDRIVER\battery\battery.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1013,9 +1018,9 @@
               <FilePath>..\MIDDLEWARE\at_cmd.c</FilePath>
             </File>
             <File>
-              <FileName>event_alarm.c</FileName>
+              <FileName>history_record.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\MIDDLEWARE\event_alarm.c</FilePath>
+              <FilePath>..\MIDDLEWARE\history_record.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1023,9 +1028,19 @@
           <GroupName>EXTERNAL_DEVICE</GroupName>
           <Files>
             <File>
-              <FileName>concentrator.c</FileName>
+              <FileName>concentrator_comm.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\EXTERNALDEVICE\concentrator\concentrator.c</FilePath>
+              <FilePath>..\EXTERNALDEVICE\concentrator\concentrator_comm.c</FilePath>
+            </File>
+            <File>
+              <FileName>concentrator_conf.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\EXTERNALDEVICE\concentrator\concentrator_conf.c</FilePath>
+            </File>
+            <File>
+              <FileName>concentrator_event.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\EXTERNALDEVICE\concentrator\concentrator_event.c</FilePath>
             </File>
           </Files>
         </Group>

@@ -6,6 +6,12 @@
 #define HT7038_CS                    	PAout(15)
 
 
+#define PHASE_A							0
+#define PHASE_B							1
+#define PHASE_C							2
+#define PHASE_ABC						3
+
+
 
 /*****************计量芯片寄存器******************/
 #define HT7038_REG_ACTIVE_POWER_A		0x01		//有功功率
@@ -95,10 +101,15 @@ typedef struct
 	double reactive_energy[6];	
 	double apparent_energy[6];
 	float frequency;
-}__attribute__((packed))IN_METER_INFO;
+}__attribute__((packed))ELECTRICITY_METER_INFO;
 
 
 extern float HT7038_K;
+
+
+
+extern ELECTRICITY_METER_INFO BuiltInMeter;
+
 
 
 

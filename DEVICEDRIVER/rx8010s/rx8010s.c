@@ -98,12 +98,20 @@ u8 BCD_TO_DATA(u8 bcd)
 
 void RX8010S_Set_Time(u8 syear,u8 smonth,u8 sday,u8 shour,u8 smin,u8 ssecond)
 {
+	u8 week = 0;
 	u8 sweek = 0;
 	
 	if(xSchedulerRunning == 1)
 		xSemaphoreTake(xMutex_RTC, portMAX_DELAY);
 	
-	sweek = RTC_Get_Week(syear + 2000,smonth,sday);
+	week = RTC_Get_Week(syear + 2000,smonth,sday);
+	
+	sweek |= (1 << week);
+	
+	if(sweek == 0x80)
+	{
+		sweek = 0x01;
+	}
 	
 	syear = DATA_TO_BCD(syear);
 	smonth = DATA_TO_BCD(smonth);

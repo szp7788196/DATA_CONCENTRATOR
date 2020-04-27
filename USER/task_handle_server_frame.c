@@ -1,6 +1,6 @@
 #include "task_handle_server_frame.h"
 #include "server_protocol.h"
-#include "concentrator.h"
+#include "concentrator_comm.h"
 #include "fifo.h"
 #include "usart6.h"
 #include "common.h"
@@ -96,15 +96,10 @@ void RecvNetFrameAndPushToRxQueue(CONNECTION_MODE_E connection_mode)
 
 		ServerFrame_S *rx_frame = NULL;
 
-		recv_len = fifo_get(dl_buf_id,recv_buf);
+		recv_len = fifo_get(dl_buf_id,&recv_buf[recv_pos]);
 
 		if(recv_len != 0)
 		{
-			if(recv_len != 1400)
-			{
-				recv_len = recv_len;
-			}
-			
 			time_r = GetSysTick1s();
 
 			recv_pos = recv_pos + recv_len;

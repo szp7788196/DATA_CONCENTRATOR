@@ -4,7 +4,8 @@
 #include "rx8010s.h"
 #include <time.h>
 #include "common.h"
-#include "concentrator.h"
+#include "concentrator_comm.h"
+#include "concentrator_conf.h"
 #include "server_protocol.h"
 #include "task_handle_server_frame.h"
 

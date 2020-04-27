@@ -1,11 +1,13 @@
 #include "common.h"
-#include "concentrator.h"
+#include "concentrator_conf.h"
 
 SemaphoreHandle_t  xMutex_SPI2 = NULL;
 SemaphoreHandle_t  xMutex_RTC = NULL;
 SemaphoreHandle_t  xMutex_Push_xQueue_ServerFrameRx = NULL;
 SemaphoreHandle_t  xMutex_Push_xQueue_ServerFrameTx = NULL;
 SemaphoreHandle_t  xMutex_SPI_FLASH = NULL;
+SemaphoreHandle_t  xMutex_Push_xQueue_AlarmReportSend = NULL;
+SemaphoreHandle_t  xMutex_Push_xQueue_AlarmReportStore = NULL;
 
 
 
@@ -27,6 +29,9 @@ QueueHandle_t xQueue_LumeterFrameStruct = NULL;
 
 QueueHandle_t xQueue_AlarmReportSend = NULL;
 QueueHandle_t xQueue_AlarmReportStore = NULL;
+QueueHandle_t xQueue_AlarmReportRead = NULL;
+
+QueueHandle_t xQueue_HistoryRecordRead = NULL;
 
 
 

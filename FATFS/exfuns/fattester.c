@@ -42,7 +42,7 @@ FRESULT mf_close(void)
 //读出数据
 //len:读出的长度
 //返回值:执行结果
-FRESULT mf_read(u32 len)
+u32 mf_read(u32 len)
 {
 	u32 i,t;
 	FRESULT res = FR_OK;
@@ -110,7 +110,7 @@ FRESULT mf_read(u32 len)
 	printf("Read data over\r\n");
 #endif
 	
-	return res;
+	return tlen;
 }
 //写入数据
 //dat:数据缓存区

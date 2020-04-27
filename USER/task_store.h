@@ -21,6 +21,7 @@ void vTaskSTORE(void *pvParameters);
 
 
 void RecvAndStoreAlarmReport(void);
+void RecvAndSendEventHistoryToServer(void);
 
 
 
