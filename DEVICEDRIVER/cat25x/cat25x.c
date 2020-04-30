@@ -138,7 +138,7 @@ void CAT25X_Write(u8* Buff,u16 WriteAddr,u16 Num)
 {
 	u16 i = 0;
 	uint16_t addr = 0;
-	uint8_t len = 0, len1 = 0;
+	uint16_t len = 0, len1 = 0;
 
 	if(xSchedulerRunning == 1)
 		xSemaphoreTake(xMutex_SPI2, portMAX_DELAY);

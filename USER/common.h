@@ -62,6 +62,34 @@
 #define FW_STATE_ADD							1721		//固件更新状态EEPROM存储地址
 #define FW_STATE_LEN							79
 
+#define DEFAULT_SWITCH_TIME_ADD					1895		//默认开关灯时间
+#define DEFAULT_SWITCH_TIME_LEN					6
+
+#define RELAY_MODULE_APPOINTMENT_NUM_ADD		1877		//继电器模块配置地址
+#define RELAY_MODULE_APPOINTMENT_NUM_LEN		6
+
+#define RELAY_MODULE_STRATEGY_NUM_ADD			1883		//继电器模块配置地址
+#define RELAY_MODULE_STRATEGY_NUM_LEN			6
+
+#define RELAY_MODULE_CONF_NUM_ADD				1889		//继电器模块配置地址
+#define RELAY_MODULE_CONF_NUM_LEN				6
+
+#define RELAY_MODULE_CONF_ADD					1901		//继电器模块配置地址
+#define RELAY_MODULE_CONF_LEN					277
+
+#define RELAY_MODULE_ALARM_CONF_ADD				3301		//继电器模块告警参数配置
+#define RELAY_MODULE_ALARM_CONF_LEN				5
+
+#define RELAY_MODULE_APPOINTMENT_ADD			3351		//继电器模块预约控制配置
+#define RELAY_MODULE_APPOINTMENT_LEN			95
+
+#define RELAY_MODULE_STRATEGY_ADD				4351		//继电器模块策略配置
+#define RELAY_MODULE_STRATEGY_LEN				38
+
+#define RELAY_MODULE_STRATEGY_SWITCH_ADD		1848		//策略组(模式)切换配置
+#define RELAY_MODULE_STRATEGY_SWITCH_LEN		29
+
+
 
 
 
@@ -203,6 +231,9 @@ extern SemaphoreHandle_t  xMutex_Push_xQueue_ServerFrameTx;
 extern SemaphoreHandle_t  xMutex_SPI_FLASH;
 extern SemaphoreHandle_t  xMutex_Push_xQueue_AlarmReportSend;
 extern SemaphoreHandle_t  xMutex_Push_xQueue_AlarmReportStore;
+extern SemaphoreHandle_t  xMutex_TransServerFrameStruct;
+extern SemaphoreHandle_t  xMutex_RelayStrategy;
+extern SemaphoreHandle_t  xMutex_RelayAppointment;
 
 
 extern QueueHandle_t xQueue_ServerFrameRx;
@@ -240,7 +271,8 @@ u32 CRC32Extend(const u8 *buf, u32 size, u32 temp,u8 flag);
 u16 CRC16(u8 *puchMsgg,u16 usDataLen);
 u8 CalCheckSum(u8 *buf, u16 len);
 u8 leap_year_judge(u16 year);
-u32 get_days_form_calendar(u16 year,u8 month,u8 date);
+u32 get_days_by_calendar(u16 year,u8 month,u8 date);
+u32 get_minutes_by_calendar(u8 month,u8 date,u8 hour,u8 minute);
 
 u16 MyStrstr(u8 *str1, u8 *str2, u16 str1_len, u16 str2_len);
 unsigned short find_str(unsigned char *s_str, unsigned char *p_str, unsigned short count, unsigned short *seek);

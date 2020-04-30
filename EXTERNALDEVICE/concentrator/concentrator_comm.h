@@ -14,6 +14,7 @@ extern u8 FlagSystemReBoot;										//系统重启标识
 extern u8 FlagReConnectToServer;								//断网重连标志
 extern u8 LoginResponse;										//服务器对登录包的相应
 extern u8 HeartBeatResponse;									//服务器对心跳包的响应
+extern u8 AlarmReportResponse;									//服务器对告警包的相应
 
 
 
@@ -24,7 +25,7 @@ void SendOtaRequestFrameToServer(FrameWareState_S frame_ware_state);
 void SendOtaCompleteFrameToServer(void);
 void SendAlarmReportFrameToServer(AlarmReport_S *alarm_report);
 void AutoSendFrameToServer(void);
-void RecvAndHandleFrameStruct(void);
+void ConcentratorRecvAndHandleFrameStruct(void);
 
 
 u8 TransparentTransmission(ServerFrameStruct_S *server_frame_struct);

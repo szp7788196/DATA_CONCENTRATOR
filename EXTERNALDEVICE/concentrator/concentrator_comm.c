@@ -607,7 +607,7 @@ void AutoSendFrameToServer(void)
 }
 
 
-void RecvAndHandleFrameStruct(void)
+void ConcentratorRecvAndHandleFrameStruct(void)
 {
 	BaseType_t xResult;
 	ServerFrameStruct_S *server_frame_struct = NULL;

@@ -233,7 +233,7 @@
             <Ra2Chk>0</Ra2Chk>
             <Ra3Chk>0</Ra3Chk>
             <Im1Chk>1</Im1Chk>
-            <Im2Chk>0</Im2Chk>
+            <Im2Chk>1</Im2Chk>
             <OnChipMemories>
               <Ocm1>
                 <Type>0</Type>
@@ -351,7 +351,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F40XX,USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>..\CORE;..\DEVICEDRIVER\led;..\FREERTOS\include;..\FREERTOS\portable\RVDS\ARM_CM4F;..\FWLIB\inc;..\PERIPHERAL\usart;..\PERIPHERAL\watch_dog;..\PROTOCOL;..\SYSTEM\delay;..\SYSTEM\sys;..\USER;..\DEVICEDRIVER\dp83848;..\ETHERNET;..\LWIP\lwip-1.4.1\src\include;..\LWIP\lwip-1.4.1\src\include\lwip;..\LWIP\lwip-1.4.1\src\include\ipv4;..\LWIP\lwip-1.4.1\src\include\netif;..\LWIP\lwip-1.4.1\port\STM32F4x7;..\LWIP\lwip-1.4.1\port\STM32F4x7\FreeRTOS;..\DEVICEDRIVER\key;..\PERIPHERAL\spi;..\PERIPHERAL\iic;..\PERIPHERAL\stmflash;..\DEVICEDRIVER\kc;..\DEVICEDRIVER\kr;..\DEVICEDRIVER\rx8010s;..\DEVICEDRIVER\cat25x;..\DEVICEDRIVER\w25qxx;..\FATFS;..\FATFS\src;..\FATFS\exfuns;..\DEVICEDRIVER\ht7038;..\MEMORY;..\MIDDLEWARE;..\DEVICEDRIVER\ec20;..\EXTERNALDEVICE\concentrator;..\DEVICEDRIVER\battery</IncludePath>
+              <IncludePath>..\CORE;..\DEVICEDRIVER\led;..\FREERTOS\include;..\FREERTOS\portable\RVDS\ARM_CM4F;..\FWLIB\inc;..\PERIPHERAL\usart;..\PERIPHERAL\watch_dog;..\PROTOCOL;..\SYSTEM\delay;..\SYSTEM\sys;..\USER;..\DEVICEDRIVER\dp83848;..\ETHERNET;..\LWIP\lwip-1.4.1\src\include;..\LWIP\lwip-1.4.1\src\include\lwip;..\LWIP\lwip-1.4.1\src\include\ipv4;..\LWIP\lwip-1.4.1\src\include\netif;..\LWIP\lwip-1.4.1\port\STM32F4x7;..\LWIP\lwip-1.4.1\port\STM32F4x7\FreeRTOS;..\DEVICEDRIVER\key;..\PERIPHERAL\spi;..\PERIPHERAL\iic;..\PERIPHERAL\stmflash;..\DEVICEDRIVER\kc;..\DEVICEDRIVER\kr;..\DEVICEDRIVER\rx8010s;..\DEVICEDRIVER\cat25x;..\DEVICEDRIVER\w25qxx;..\FATFS;..\FATFS\src;..\FATFS\exfuns;..\DEVICEDRIVER\ht7038;..\MEMORY;..\MIDDLEWARE;..\DEVICEDRIVER\ec20;..\EXTERNALDEVICE\concentrator;..\DEVICEDRIVER\battery;..\EXTERNALDEVICE\relay;..\EXTERNALDEVICE\relay</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -1022,25 +1022,40 @@
               <FileType>1</FileType>
               <FilePath>..\MIDDLEWARE\history_record.c</FilePath>
             </File>
+            <File>
+              <FileName>sun_rise_set.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\MIDDLEWARE\sun_rise_set.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
           <GroupName>EXTERNAL_DEVICE</GroupName>
           <Files>
             <File>
-              <FileName>concentrator_comm.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\EXTERNALDEVICE\concentrator\concentrator_comm.c</FilePath>
-            </File>
-            <File>
               <FileName>concentrator_conf.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\EXTERNALDEVICE\concentrator\concentrator_conf.c</FilePath>
             </File>
             <File>
+              <FileName>concentrator_comm.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\EXTERNALDEVICE\concentrator\concentrator_comm.c</FilePath>
+            </File>
+            <File>
               <FileName>concentrator_event.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\EXTERNALDEVICE\concentrator\concentrator_event.c</FilePath>
+            </File>
+            <File>
+              <FileName>relay_conf.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\EXTERNALDEVICE\relay\relay_conf.c</FilePath>
+            </File>
+            <File>
+              <FileName>relay_comm.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\EXTERNALDEVICE\relay\relay_comm.c</FilePath>
             </File>
           </Files>
         </Group>

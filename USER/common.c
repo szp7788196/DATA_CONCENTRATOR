@@ -1,5 +1,6 @@
 #include "common.h"
 #include "concentrator_conf.h"
+#include "relay_conf.h"
 
 SemaphoreHandle_t  xMutex_SPI2 = NULL;
 SemaphoreHandle_t  xMutex_RTC = NULL;
@@ -8,6 +9,9 @@ SemaphoreHandle_t  xMutex_Push_xQueue_ServerFrameTx = NULL;
 SemaphoreHandle_t  xMutex_SPI_FLASH = NULL;
 SemaphoreHandle_t  xMutex_Push_xQueue_AlarmReportSend = NULL;
 SemaphoreHandle_t  xMutex_Push_xQueue_AlarmReportStore = NULL;
+SemaphoreHandle_t  xMutex_TransServerFrameStruct = NULL;
+SemaphoreHandle_t  xMutex_RelayStrategy = NULL;
+SemaphoreHandle_t  xMutex_RelayAppointment = NULL;
 
 
 
@@ -341,7 +345,7 @@ u8 leap_year_judge(u16 year)
 }
 
 //闰年判断 返回当前年月日 在一年中的天数
-u32 get_days_form_calendar(u16 year,u8 month,u8 date)
+u32 get_days_by_calendar(u16 year,u8 month,u8 date)
 {
 	u16 i = 0;
 	u8 leap = 0;
@@ -381,6 +385,25 @@ u32 get_days_form_calendar(u16 year,u8 month,u8 date)
 	days += (u16)date;			//日的天数
 
 	return days;
+}
+
+u32 get_minutes_by_calendar(u8 month,u8 date,u8 hour,u8 minute)
+{
+	u8 i = 0;
+	u32 minutes = 0;
+	u16 days = 0;
+	u8 x[13]={0,31,29,31,30,31,30,31,31,30,31,30,31};
+
+	for(i = 1; i < month; i ++)
+	{
+		days += x[i];			//整月的天数
+	}
+	
+	days += (u16)date;			//日的天数
+	
+	minutes = 1440 * days + hour * 60 + minute;
+	
+	return minutes;
 }
 
 //在str1中查找str2，失败返回0xFF,成功返回str2首个元素在str1中的位置
@@ -560,52 +583,19 @@ u8 GetMemoryForSpecifyPointer(u8 **str,u16 size, u8 *memory)
 	return ret;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 void ReadTotalConfigurationParameters(void)
 {
 	ReadRunMode();							//读取集控器运行模式
+	ReadDefaultSwitchTime();				//读取默认开关灯时间
 	ReadConcentratorBasicConfig();			//读取集控器基础配置参数
 	ReadConcentratorAlarmConfig();			//读取集控器告警配置参数
 	ReadConcentratorLocationConfig();		//读取经纬度年表
 	ReadFrameWareState();					//读取固件升级状态
+	ReadRelayModuleConfig();				//读取继电器模块配置
+	ReadRelayAlarmConfig();					//读取继电器模块告警参数配置
+	ReadRelayAppointmentGroup();			//读取继电器模块预约控制
+	ReadRelayStrategyGroups();				//读取继电器模块策略组
+	ReadRelayStrategyGroupSwitch();			//读取继电器模块策略组切换配置
 }
 
 

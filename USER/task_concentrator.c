@@ -21,7 +21,7 @@ void vTaskCONCENTRATOR(void *pvParameters)
 {
 	while(1)
 	{
-		RecvAndHandleFrameStruct();						//报文解析
+		ConcentratorRecvAndHandleFrameStruct();			//报文解析
 
 		AutoSendFrameToServer();						//发送登录/心跳/告警灯信息
 		

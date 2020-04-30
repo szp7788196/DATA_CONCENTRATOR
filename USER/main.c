@@ -19,7 +19,7 @@
 
 
 //u8 eprombuf[100];
-//u8 i = 0;
+//u16 i = 0;
 RCC_ClocksTypeDef RCC_Clocks;
 //u16 siiize = 0;
 int main(void)

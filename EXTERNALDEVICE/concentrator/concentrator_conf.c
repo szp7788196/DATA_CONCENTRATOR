@@ -2,6 +2,7 @@
 #include "common.h"
 #include "cat25x.h"
 #include "server_protocol.h"
+#include "relay_conf.h"
 
 
 //需要存储的数据
@@ -207,10 +208,10 @@ void WriteConcentratorLocationConfig(u8 reset,u8 write_enable)
 		{
 			for(j = 0; j < 31; j ++)
 			{
-				ConcentratorLocationConfig.switch_time_month_table[i].switch_time[j].on_hour = 6;
-				ConcentratorLocationConfig.switch_time_month_table[i].switch_time[j].on_minute = 0;
-				ConcentratorLocationConfig.switch_time_month_table[i].switch_time[j].off_hour = 18;
-				ConcentratorLocationConfig.switch_time_month_table[i].switch_time[j].off_minute = 0;
+				ConcentratorLocationConfig.switch_time_month_table[i].switch_time[j].on_hour = DefaultSwitchTime.on_hour;
+				ConcentratorLocationConfig.switch_time_month_table[i].switch_time[j].on_minute = DefaultSwitchTime.on_minute;
+				ConcentratorLocationConfig.switch_time_month_table[i].switch_time[j].off_hour = DefaultSwitchTime.off_hour;
+				ConcentratorLocationConfig.switch_time_month_table[i].switch_time[j].off_minute = DefaultSwitchTime.off_minute;
 			}
 		}
 

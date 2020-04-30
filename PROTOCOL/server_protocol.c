@@ -36,6 +36,8 @@ u8 TransServerFrameStructToOtherTask(ServerFrameStruct_S *server_frame_struct,DE
 	QueueHandle_t xQueue_DeviceXxFrameStruct = NULL;
 	DEVICE_TYPE_E _device_type = CONCENTRATOR;
 	
+	xSemaphoreTake(xMutex_TransServerFrameStruct, portMAX_DELAY);
+	
 	if(device_type == UNKNOW_DEVICE)
 	{
 		_device_type = (DEVICE_TYPE_E)((server_frame_struct->msg_id & 0xFF00) >> 8);
@@ -84,6 +86,8 @@ u8 TransServerFrameStructToOtherTask(ServerFrameStruct_S *server_frame_struct,DE
 			ret = 0;
 		}
 	}
+	
+	xSemaphoreGive(xMutex_TransServerFrameStruct);
 	
 	return ret;
 }

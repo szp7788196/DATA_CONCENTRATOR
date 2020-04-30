@@ -32,7 +32,7 @@ u8 StoreAlarmToSpiFlash(AlarmReport_S *alarm_report)
 
 	xSemaphoreTake(xMutex_SPI_FLASH, portMAX_DELAY);
 
-	current_date = get_days_form_calendar(calendar.w_year,calendar.w_month,calendar.w_date);
+	current_date = get_days_by_calendar(calendar.w_year,calendar.w_month,calendar.w_date);
 	TimeToString((u8 *)&tmp[5],calendar.w_year, calendar.w_month, calendar.w_date, calendar.hour, calendar.min, calendar.sec);
 	memset(&tmp[5],0,2);	//去掉年的高位
 	memset(&tmp[13],0,6);	//tmp[]中前2字节为空，为record_num预留，7~12为年月日，13~最后为空
@@ -90,7 +90,7 @@ u8 StoreAlarmToSpiFlash(AlarmReport_S *alarm_report)
 			date = ((fileinfo.fname[6] - 0x30) * 10) +
 				   (fileinfo.fname[7] - 0x30);
 
-			file_date = get_days_form_calendar(year,month,date);
+			file_date = get_days_by_calendar(year,month,date);
 
 			if(current_date - file_date >= 30 ||
 			   current_date < file_date ||
@@ -271,7 +271,7 @@ u16 GetAlarmEventNumFromDateSegment(EventHistory_S event_history)
 		return 0;
 	}
 
-	current_date = get_days_form_calendar(calendar.w_year,calendar.w_month,calendar.w_date);
+	current_date = get_days_by_calendar(calendar.w_year,calendar.w_month,calendar.w_date);
 
 	year = ((event_history.start_date[2] - 0x30) * 10) +
 		   (event_history.start_date[3] - 0x30) + 2000;
@@ -282,7 +282,7 @@ u16 GetAlarmEventNumFromDateSegment(EventHistory_S event_history)
 	date = ((event_history.start_date[6] - 0x30) * 10) +
 		   (event_history.start_date[7] - 0x30);
 
-	start_date = get_days_form_calendar(year,month,date);
+	start_date = get_days_by_calendar(year,month,date);
 
 	year = ((event_history.end_date[2] - 0x30) * 10) +
 		   (event_history.end_date[3] - 0x30) + 2000;
@@ -293,7 +293,7 @@ u16 GetAlarmEventNumFromDateSegment(EventHistory_S event_history)
 	date = ((event_history.end_date[6] - 0x30) * 10) +
 		   (event_history.end_date[7] - 0x30);
 
-	end_date = get_days_form_calendar(year,month,date);
+	end_date = get_days_by_calendar(year,month,date);
 
 	switch((u8)event_history.device_type)
 	{
@@ -371,7 +371,7 @@ u16 GetAlarmEventNumFromDateSegment(EventHistory_S event_history)
 			date = ((fileinfo.fname[6] - 0x30) * 10) +
 				   (fileinfo.fname[7] - 0x30);
 
-			file_date = get_days_form_calendar(year,month,date);
+			file_date = get_days_by_calendar(year,month,date);
 
 			if(current_date - file_date >= 30 ||
 			   current_date < file_date ||
@@ -449,7 +449,7 @@ void GetAlarmEventContentFromDateSegmentAndSendToServer(EventHistory_S event_his
 		goto GET_OUT;
 	}
 
-	current_date = get_days_form_calendar(calendar.w_year,calendar.w_month,calendar.w_date);
+	current_date = get_days_by_calendar(calendar.w_year,calendar.w_month,calendar.w_date);
 
 	year = ((event_history.start_date[2] - 0x30) * 10) +
 		   (event_history.start_date[3] - 0x30) + 2000;
@@ -460,7 +460,7 @@ void GetAlarmEventContentFromDateSegmentAndSendToServer(EventHistory_S event_his
 	date = ((event_history.start_date[6] - 0x30) * 10) +
 		   (event_history.start_date[7] - 0x30);
 
-	start_date = get_days_form_calendar(year,month,date);
+	start_date = get_days_by_calendar(year,month,date);
 
 	year = ((event_history.end_date[2] - 0x30) * 10) +
 		   (event_history.end_date[3] - 0x30) + 2000;
@@ -471,7 +471,7 @@ void GetAlarmEventContentFromDateSegmentAndSendToServer(EventHistory_S event_his
 	date = ((event_history.end_date[6] - 0x30) * 10) +
 		   (event_history.end_date[7] - 0x30);
 
-	end_date = get_days_form_calendar(year,month,date);
+	end_date = get_days_by_calendar(year,month,date);
 
 	switch((u8)event_history.device_type)
 	{
@@ -559,7 +559,7 @@ void GetAlarmEventContentFromDateSegmentAndSendToServer(EventHistory_S event_his
 			date = ((fileinfo.fname[6] - 0x30) * 10) +
 				   (fileinfo.fname[7] - 0x30);
 
-			file_date = get_days_form_calendar(year,month,date);
+			file_date = get_days_by_calendar(year,month,date);
 
 			if(current_date - file_date >= 30 ||
 			   current_date < file_date ||

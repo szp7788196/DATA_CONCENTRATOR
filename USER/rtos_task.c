@@ -111,6 +111,24 @@ void AppObjCreate(void)
     {
 
     }
+	
+	xMutex_TransServerFrameStruct = xSemaphoreCreateMutex();
+	if(xMutex_TransServerFrameStruct == NULL)
+    {
+
+    }
+	
+	xMutex_RelayStrategy = xSemaphoreCreateMutex();
+	if(xMutex_RelayStrategy == NULL)
+    {
+
+    }
+	
+	xMutex_RelayAppointment = xSemaphoreCreateMutex();
+	if(xMutex_RelayAppointment == NULL)
+    {
+
+    }
 
 	//消息队列
 	xQueue_ServerFrameRx = xQueueCreate(25, sizeof(ServerFrame_S *));
