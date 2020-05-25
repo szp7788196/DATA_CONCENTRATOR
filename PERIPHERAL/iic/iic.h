@@ -6,11 +6,23 @@
 #include "delay.h"
 
 
+#define IIC_GPIO_PORT              	 	GPIOB
+#define IIC_SCL_GPIO_Pin             	GPIO_Pin_8
+#define IIC_SDA_GPIO_Pin             	GPIO_Pin_9
+#define IIC_GPIO_CLK                 	RCC_AHB1Periph_GPIOB
+#define IIC_SCL                      	PBout(8)
+#define IIC_SDA               		 	PBout(9)
+#define IIC_SCL_H					 	(PBout(8)=1)
+#define IIC_SCL_L					 	(PBout(8)=0)
+#define IIC_SDA_H					 	(PBout(9)=1)
+#define IIC_SDA_L					 	(PBout(9)=0)
+#define IIC_SDA_IN					 	PBin(9)
 
-#define IIC_SCL_H					 	PBout(8) = 1
-#define IIC_SCL_L					 	PBout(8) = 0
-#define IIC_SDA_H					 	PBout(9) = 1
-#define IIC_SDA_L					 	PBout(9) = 0
+
+//#define IIC_SCL_H					 	PBout(8) = 1
+//#define IIC_SCL_L					 	PBout(8) = 0
+//#define IIC_SDA_H					 	PBout(9) = 1
+//#define IIC_SDA_L					 	PBout(9) = 0
 
 //#define IIC_SDA_In()	GPIOB->MODER|=GPIO_Mode_IN<<18; //sdaÊäÈë
 //#define IIC_SDA_Out()   GPIOB->MODER|=GPIO_Mode_OUT<<18;//sdaÊä³ö

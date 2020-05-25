@@ -5,17 +5,23 @@
 #include "sun_rise_set.h"
 #include "rx8010s.h"
 
-Uint32TypeNumber_S RelayModuleConfigNum;									//继电器模块配置数量
-RelayModuleConfig_S RelayModuleConfig[MAX_RELAY_MODULE_CONF_NUM];			//继电器模块配置
-DefaultSwitchTime_S DefaultSwitchTime;										//默认开关灯时间
-RelayAlarmConfig_S RelayAlarmConfig;										//继电器模块告警参数配置
-Uint32TypeNumber_S RelayAppointmentNum;										//继电器模块预约控制数量
-Uint32TypeNumber_S RelayStrategyNum;										//继电器模块策略配置数量
+u8 RelayForceSwitchOffAllRelays = 0;												//强制断开所有继电器
+u8 RelayRefreshStrategyGroup = 1;													//继电器策略刷新标志
 
-pRelayAppointment RelayAppointmentGroup;									//预约控制组
-pRelayStrategy RelayStrategyGroup[MAX_RELAY_MODULE_STRATEGY_GROUP_NUM];		//策略组
-RelayStrategyGroupSwitch_S RelayStrategyGroupSwitch;						//策略组(模式)切换配置
-pRelayStrategy CurrentRelayStrategyGroup = NULL;							//当前策略组(模式)
+Uint32TypeNumber_S RelayModuleConfigNum;											//继电器模块配置数量
+RelayModuleConfig_S RelayModuleConfig[MAX_RELAY_MODULE_CONF_NUM];					//继电器模块配置
+DefaultSwitchTime_S DefaultSwitchTime;												//默认开关灯时间
+RelayAlarmConfig_S RelayAlarmConfig;												//继电器模块告警参数配置
+Uint32TypeNumber_S RelayAppointmentNum;												//继电器模块预约控制数量
+Uint32TypeNumber_S RelayStrategyNum;												//继电器模块策略配置数量
+RelayModuleState_S RelayModuleState[MAX_RELAY_MODULE_CONF_NUM];						//继电器模块当前状态
+
+pRelayAppointment RelayAppointmentGroup = NULL;										//预约控制组
+pRelayStrategy RelayStrategyGroup[MAX_RELAY_MODULE_STRATEGY_GROUP_NUM] = {NULL};	//策略组
+RelayStrategyGroupSwitch_S RelayStrategyGroupSwitch;								//策略组(模式)切换配置
+RelayStrategyGroupSwitch_S RelayStrategyGroupSwitchTemp;							//策略组(模式)切换配置(临时)
+pRelayStrategy CurrentRelayStrategyGroup = NULL;									//当前策略组(模式)
+pRelayStrategy CurrentRelayStrategyGroupTemp = NULL;								//当前策略组(模式)(临时)
 
 
 
@@ -41,7 +47,7 @@ void WriteRelayModuleConfigNum(u8 reset,u8 write_enable)
 {
 	if(reset == 1)
 	{
-		RelayModuleConfigNum.number = MAX_RELAY_MODULE_CONF_NUM;
+		RelayModuleConfigNum.number = 0;
 
 		RelayModuleConfigNum.crc16 = 0;
 	}
@@ -61,6 +67,7 @@ void ReadRelayModuleConfig(void)
 {
 	u16 crc16_cal = 0;
 	u8 i = 0;
+	u8 j = 0;
 
 	ReadRelayModuleConfigNum();
 
@@ -76,21 +83,44 @@ void ReadRelayModuleConfig(void)
 		{
 			WriteRelayModuleConfig(i,1,0);
 		}
+		else
+		{
+			memset(&RelayModuleState[i],0,sizeof(RelayModuleState_S));
+			
+			RelayModuleState[i].address = RelayModuleConfig[i].address;
+			RelayModuleState[i].channel = RelayModuleConfig[i].channel;
+			RelayModuleState[i].interval_time = RelayModuleConfig[i].interval_time;
+			
+			if(RelayModuleConfig[i].loop_num <= MAX_RELAY_MODULE_LOOP_CH_NUM)
+			{
+				for(j = 0; j < RelayModuleConfig[i].loop_num; j ++)
+				{
+					RelayModuleState[i].loop_channel_bit |= (1 << j);
+				}
+			}
+			else
+			{
+				RelayModuleState[i].loop_channel_bit = 0;
+			}
+		}
+		
 	}
 }
 
 void WriteRelayModuleConfig(u8 i,u8 reset,u8 write_enable)
 {
+	u8 j = 0; 
+	
 	if(reset == 1)
 	{
 		RelayModuleConfig[i].address = 0xFF;
 		RelayModuleConfig[i].channel = 0xFF;
 		RelayModuleConfig[i].loop_num = 0;
 		RelayModuleConfig[i].interval_time = 0;
-		memset(RelayModuleConfig[i].module,0,16);
+		memset(RelayModuleConfig[i].module,0,MAX_RELAY_MODULE_MODULE_NAME_LEN);
 		RelayModuleConfig[i].loop_enable = 0xFFFF;
-		memset(RelayModuleConfig[i].loop_group,0,12 * 16);
-		memset(RelayModuleConfig[i].loop_alarm_thre,0,12 * 5);
+		memset(RelayModuleConfig[i].loop_group,0,MAX_RELAY_MODULE_LOOP_CH_NUM * MAX_RELAY_MODULE_LOOP_GROUP_NUM);
+		memset(RelayModuleConfig[i].loop_alarm_thre,0,MAX_RELAY_MODULE_LOOP_CH_NUM * 5);
 
 		RelayModuleConfig[i].crc16 = 0;
 	}
@@ -102,6 +132,24 @@ void WriteRelayModuleConfig(u8 i,u8 reset,u8 write_enable)
 		CAT25X_Write((u8 *)&RelayModuleConfig[i],
 		             RELAY_MODULE_CONF_ADD + i * RELAY_MODULE_CONF_LEN,
 		             RELAY_MODULE_CONF_LEN);
+	}
+	
+	memset(&RelayModuleState[i],0,sizeof(RelayModuleState_S));
+	
+	RelayModuleState[i].address = RelayModuleConfig[i].address;
+	RelayModuleState[i].channel = RelayModuleConfig[i].channel;
+	RelayModuleState[i].interval_time = RelayModuleConfig[i].interval_time;
+	
+	if(RelayModuleConfig[i].loop_num <= MAX_RELAY_MODULE_LOOP_CH_NUM)
+	{
+		for(j = 0; j < RelayModuleConfig[i].loop_num; j ++)
+		{
+			RelayModuleState[i].loop_channel_bit |= (1 << j);
+		}
+	}
+	else
+	{
+		RelayModuleState[i].loop_channel_bit = 0;
 	}
 }
 
@@ -219,6 +267,48 @@ void WriteRelayAppointmentNum(u8 reset,u8 write_enable)
 	}
 }
 
+//读取继电器模块预约控制
+u8 ReadRelayAppointment(u8 i,RelaySenceConfig_S *appointment)
+{
+	u8 ret = 0;
+	u16 crc16_cal = 0;
+	
+	if(appointment == NULL)
+	{
+		return ret;
+	}
+
+	CAT25X_Read((u8 *)appointment,
+	            RELAY_MODULE_APPOINTMENT_ADD + RELAY_MODULE_APPOINTMENT_LEN * i,
+	            sizeof(RelaySenceConfig_S));
+
+	crc16_cal = CRC16((u8 *)appointment,RELAY_MODULE_APPOINTMENT_LEN - 2);
+
+	if(crc16_cal == appointment->crc16)
+	{
+		ret = 1;
+	}
+	
+	return ret;
+}
+
+void WriteRelayAppointment(u8 i,RelaySenceConfig_S *appointment,u8 reset,u8 write_enable)
+{
+	if(reset == 1)
+	{
+		memset(appointment,0,sizeof(RelaySenceConfig_S));
+	}
+
+	if(write_enable == 1)
+	{
+		appointment->crc16 = CRC16((u8 *)appointment,RELAY_MODULE_APPOINTMENT_LEN - 2);
+
+		CAT25X_Write((u8 *)appointment,
+		             RELAY_MODULE_APPOINTMENT_ADD + RELAY_MODULE_APPOINTMENT_LEN * i,
+		             RELAY_MODULE_APPOINTMENT_LEN);
+	}
+}
+
 //读取继电器模块策略数量
 void ReadRelayStrategyNum(void)
 {
@@ -256,6 +346,48 @@ void WriteRelayStrategyNum(u8 reset,u8 write_enable)
 	}
 }
 
+//读取继电器模块单条策略
+u8 ReadRelayStrategy(u8 i,RelayTask_S *strategy)
+{
+	u8 ret = 0;
+	u16 crc16_cal = 0;
+	
+	if(strategy == NULL)
+	{
+		return ret;
+	}
+
+	CAT25X_Read((u8 *)strategy,
+	            RELAY_MODULE_STRATEGY_ADD + RELAY_MODULE_STRATEGY_LEN * i,
+	            sizeof(RelayTask_S));
+
+	crc16_cal = CRC16((u8 *)strategy,RELAY_MODULE_STRATEGY_LEN - 2);
+
+	if(crc16_cal == strategy->crc16)
+	{
+		ret = 1;
+	}
+	
+	return ret;
+}
+
+void WriteRelayStrategy(u8 i,RelayTask_S *strategy,u8 reset,u8 write_enable)
+{
+	if(reset == 1)
+	{
+		memset(strategy,0,sizeof(RelayTask_S));
+	}
+
+	if(write_enable == 1)
+	{
+		strategy->crc16 = CRC16((u8 *)strategy,RELAY_MODULE_STRATEGY_LEN - 2);
+
+		CAT25X_Write((u8 *)strategy,
+		             RELAY_MODULE_STRATEGY_ADD + RELAY_MODULE_STRATEGY_LEN * i,
+		             RELAY_MODULE_STRATEGY_LEN);
+	}
+}
+
 //读取预约控制配置
 void ReadRelayAppointmentGroup(void)
 {
@@ -265,19 +397,19 @@ void ReadRelayAppointmentGroup(void)
 
 	ReadRelayAppointmentNum();
 
-	if(RelayAppointmentNum.number == 0)	//无预约控制
-	{
-		return;
-	}
-
 	RelayAppointmentGroup = (pRelayAppointment)pvPortMalloc(sizeof(RelayAppointment_S));
 
 	if(RelayAppointmentGroup == NULL)
 	{
 		return;
 	}
-
+	
 	memset(RelayAppointmentGroup,0,sizeof(RelayAppointment_S));
+	
+	if(RelayAppointmentNum.number == 0)	//无预约控制
+	{
+		return;
+	}
 
 	for(i = 0; i < RelayAppointmentNum.number; i ++)
 	{
@@ -322,11 +454,6 @@ void ReadRelayStrategyGroups(void)
 
 	ReadRelayStrategyNum();
 
-	if(RelayStrategyNum.number == 0)	//无策略
-	{
-		return;
-	}
-
 	for(i = 0; i < MAX_RELAY_MODULE_STRATEGY_GROUP_NUM; i ++)
 	{
 		RelayStrategyGroup[i] = (pRelayStrategy)pvPortMalloc(sizeof(RelayStrategy_S));
@@ -334,7 +461,14 @@ void ReadRelayStrategyGroups(void)
 		if(RelayStrategyGroup[i] != NULL)
 		{
 			memset(RelayStrategyGroup[i],0,sizeof(RelayStrategy_S));
+			
+			RelayStrategyGroup[i]->group_id = i + 1;
 		}
+	}
+	
+	if(RelayStrategyNum.number == 0)	//无策略
+	{
+		return;
 	}
 
 	for(i = 0; i < RelayStrategyNum.number; i ++)
@@ -570,13 +704,15 @@ void RelayStrategyAdd(pRelayStrategy strategy)
 			else
 			{
 				if(temp_strategy->action_time <= strategy->action_time &&
-				   strategy->action_time > temp_strategy->next->action_time)	//按照时间先后顺序排序
+				   strategy->action_time < temp_strategy->next->action_time)	//按照时间先后顺序排序
 				{
 					strategy->next = temp_strategy->next;
 					temp_strategy->next = strategy;
 
 					strategy->prev = strategy->next->prev;
 					strategy->next->prev = strategy;
+					
+					break;
 				}
 			}
 		}
@@ -589,7 +725,7 @@ void RelayStrategyAdd(pRelayStrategy strategy)
 }
 
 //删除策略组 组号group_id
-void RelayStrategyDelete(u8 group_id)
+void RelayStrategyGroupDelete(u8 group_id)
 {
 	u8 i = 0;
 	pRelayStrategy head_strategy = NULL;
@@ -634,6 +770,23 @@ void RelayStrategyDelete(u8 group_id)
 	if(xSchedulerRunning == 1)
 	{
 		xSemaphoreGive(xMutex_RelayStrategy);
+	}
+}
+
+//删除所有策略组
+void RelayAllStrategyGroupDelete(void)
+{
+	u8 i = 0;
+	u8 group_id = 0;
+	
+	for(i = 0; i < MAX_RELAY_MODULE_STRATEGY_GROUP_NUM; i ++)
+	{
+		if(RelayStrategyGroup[i] != NULL)
+		{
+			group_id = RelayStrategyGroup[i]->group_id;
+		
+			RelayStrategyGroupDelete(group_id);
+		}
 	}
 }
 
@@ -701,6 +854,7 @@ void RelayAppointmentGroupDelete(void)
 	}
 }
 
+//通过策略组号获取策略组
 pRelayStrategy GetRelayStrategyGroupByGroupID(u8 group_id)
 {
 	u8 i = 0;
@@ -767,56 +921,64 @@ pRelayStrategy RefreshCurrentRelayStrategyGroup(void)
 
 								for(j = 0; j < temp_appointment->time_range_num; j ++)				//轮训判断当前预约控制的时间限制
 								{
-									if(temp_appointment->range[i].s_month  == 0 &&
-									   temp_appointment->range[i].s_date   == 0 &&
-									   temp_appointment->range[i].s_hour   == 0 &&
-									   temp_appointment->range[i].s_minute == 0 &&
-									   temp_appointment->range[i].e_month  == 0 &&
-									   temp_appointment->range[i].e_date   == 0 &&
-									   temp_appointment->range[i].e_hour   == 0 &&
-									   temp_appointment->range[i].e_minute == 0)					//对时间没有限制
+									if(temp_appointment->range[j].s_month  == 0 &&
+									   temp_appointment->range[j].s_date   == 0 &&
+									   temp_appointment->range[j].s_hour   == 0 &&
+									   temp_appointment->range[j].s_minute == 0 &&
+									   temp_appointment->range[j].e_month  == 0 &&
+									   temp_appointment->range[j].e_date   == 0 &&
+									   temp_appointment->range[j].e_hour   == 0 &&
+									   temp_appointment->range[j].e_minute == 0)					//对时间没有限制
 									{
-										if(temp_appointment->range[i].week_enable == 0)				//对星期没有限制
+										if(temp_appointment->range[j].week_enable == 0)				//对星期没有限制
 										{
-											group_id_priority[k ++].group_id = temp_appointment->group_id;
-											group_id_priority[k ++].priority = temp_appointment->priority;
+											group_id_priority[k].group_id = temp_appointment->group_id;
+											group_id_priority[k].priority = temp_appointment->priority;
+											
+											k ++;
 										}
 										else														//对星期有限制
 										{
-											if(temp_appointment->range[i].week_enable & (1 << (calendar.week - 1)) != 0)
+											if(temp_appointment->range[j].week_enable & (1 << (calendar.week - 1)) != 0)
 											{
-												group_id_priority[k ++].group_id = temp_appointment->group_id;
-												group_id_priority[k ++].priority = temp_appointment->priority;
+												group_id_priority[k].group_id = temp_appointment->group_id;
+												group_id_priority[k].priority = temp_appointment->priority;
+												
+												k ++;
 											}
 										}
 									}
 									else															//对时间有限制
 									{
-										start_min = get_minutes_by_calendar(temp_appointment->range[i].s_month,
-								                                            temp_appointment->range[i].s_date,
-								                                            temp_appointment->range[i].s_hour,
-								                                            temp_appointment->range[i].s_minute);	//获取当前系统分钟数
+										start_min = get_minutes_by_calendar(temp_appointment->range[j].s_month,
+								                                            temp_appointment->range[j].s_date,
+								                                            temp_appointment->range[j].s_hour,
+								                                            temp_appointment->range[j].s_minute);	//获取当前系统分钟数
 
-										end_min = get_minutes_by_calendar(temp_appointment->range[i].e_month,
-								                                          temp_appointment->range[i].e_date,
-								                                          temp_appointment->range[i].e_hour,
-								                                          temp_appointment->range[i].e_minute);		//获取当前系统分钟数
+										end_min = get_minutes_by_calendar(temp_appointment->range[j].e_month,
+								                                          temp_appointment->range[j].e_date,
+								                                          temp_appointment->range[j].e_hour,
+								                                          temp_appointment->range[j].e_minute);		//获取当前系统分钟数
 
 										if(start_min <= end_min)													//开始时间小于等于结束时间 没有跨年
 										{
 											if(start_min <= current_min && current_min <= end_min)					//时间合法
 											{
-												if(temp_appointment->range[i].week_enable == 0)				//对星期没有限制
+												if(temp_appointment->range[j].week_enable == 0)				//对星期没有限制
 												{
-													group_id_priority[k ++].group_id = temp_appointment->group_id;
-													group_id_priority[k ++].priority = temp_appointment->priority;
+													group_id_priority[k].group_id = temp_appointment->group_id;
+													group_id_priority[k].priority = temp_appointment->priority;
+													
+													k ++;
 												}
 												else														//对星期有限制
 												{
-													if(temp_appointment->range[i].week_enable & (1 << (calendar.week - 1)) != 0)
+													if(temp_appointment->range[j].week_enable & (1 << (calendar.week - 1)) != 0)
 													{
-														group_id_priority[k ++].group_id = temp_appointment->group_id;
-														group_id_priority[k ++].priority = temp_appointment->priority;
+														group_id_priority[k].group_id = temp_appointment->group_id;
+														group_id_priority[k].priority = temp_appointment->priority;
+														
+														k ++;
 													}
 												}
 											}
@@ -827,15 +989,19 @@ pRelayStrategy RefreshCurrentRelayStrategyGroup(void)
 											{
 												if(temp_appointment->range[i].week_enable == 0)				//对星期没有限制
 												{
-													group_id_priority[k ++].group_id = temp_appointment->group_id;
-													group_id_priority[k ++].priority = temp_appointment->priority;
+													group_id_priority[k].group_id = temp_appointment->group_id;
+													group_id_priority[k].priority = temp_appointment->priority;
+													
+													k ++;
 												}
 												else														//对星期有限制
 												{
 													if(temp_appointment->range[i].week_enable & (1 << (calendar.week - 1)) != 0)
 													{
-														group_id_priority[k ++].group_id = temp_appointment->group_id;
-														group_id_priority[k ++].priority = temp_appointment->priority;
+														group_id_priority[k].group_id = temp_appointment->group_id;
+														group_id_priority[k].priority = temp_appointment->priority;
+														
+														k ++;
 													}
 												}
 											}
@@ -843,15 +1009,19 @@ pRelayStrategy RefreshCurrentRelayStrategyGroup(void)
 											{
 												if(temp_appointment->range[i].week_enable == 0)				//对星期没有限制
 												{
-													group_id_priority[k ++].group_id = temp_appointment->group_id;
-													group_id_priority[k ++].priority = temp_appointment->priority;
+													group_id_priority[k].group_id = temp_appointment->group_id;
+													group_id_priority[k].priority = temp_appointment->priority;
+													
+													k ++;
 												}
 												else														//对星期有限制
 												{
 													if(temp_appointment->range[i].week_enable & (1 << (calendar.week - 1)) != 0)
 													{
-														group_id_priority[k ++].group_id = temp_appointment->group_id;
-														group_id_priority[k ++].priority = temp_appointment->priority;
+														group_id_priority[k].group_id = temp_appointment->group_id;
+														group_id_priority[k].priority = temp_appointment->priority;
+														
+														k ++;
 													}
 												}
 											}
@@ -886,7 +1056,6 @@ pRelayStrategy RefreshCurrentRelayStrategyGroup(void)
 						group_id = group_id_priority[index].group_id;
 					}
 				}
-
 			break;
 
 			case 2:

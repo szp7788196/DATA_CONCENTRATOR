@@ -45,9 +45,9 @@ void ConcentratorAlarmPowerFailure(void)
 			{
 				cnt ++;
 
-				if(cnt == 600)									//低电压持续约30秒
+				if(cnt == 300)									//低电压持续约30秒
 				{
-					cnt = 600;
+					cnt = 300;
 
 					occur = 1;									//发生断电告警
 
@@ -68,9 +68,9 @@ void ConcentratorAlarmPowerFailure(void)
 			{
 				cnt --;
 
-				if(cnt == -600)									//低电压持续约30秒
+				if(cnt == -300)									//低电压持续约30秒
 				{
-					cnt = -600;
+					cnt = -300;
 
 					occur = 0;									//发生断电告警
 
@@ -91,7 +91,15 @@ void ConcentratorAlarmPowerFailure(void)
 
 			if(alarm_report != NULL)
 			{
-				alarm_report->record_type = 1;
+				if(cnt == 300)
+				{
+					alarm_report->record_type = 1;
+				}
+				else if(cnt == -300)
+				{
+					alarm_report->record_type = 0;
+				}
+				
 				alarm_report->device_type = (u8)CONCENTRATOR;
 				alarm_report->alarm_type = CONCENTRATOR_POWER_OFF;
 

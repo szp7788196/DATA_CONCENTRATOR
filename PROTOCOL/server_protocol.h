@@ -98,7 +98,7 @@ typedef struct	ServerFrameStruct			//帧结构
 	u32 gateway_id;							//网关ID
 	u32 device_id;							//设备ID
 	
-	u8 para_num;							//参数个数
+	u16 para_num;							//参数个数
 	
 	Parameter_S *para;						//具体参数
 	

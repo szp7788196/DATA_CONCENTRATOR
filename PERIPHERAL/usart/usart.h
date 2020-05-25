@@ -31,7 +31,7 @@ extern u8 Usart5RecvEnd;
 
 
 void USART1_Init(u32 BaudRate);
-void USART5_Init(u32 BaudRate);
+void USART5_Init(u32 BaudRate,u16 check_mode);
 u8 UsartSendString(USART_TypeDef* USARTx,u8 *str, u16 len);
 
 

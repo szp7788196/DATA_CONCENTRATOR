@@ -351,7 +351,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F40XX,USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>..\CORE;..\DEVICEDRIVER\led;..\FREERTOS\include;..\FREERTOS\portable\RVDS\ARM_CM4F;..\FWLIB\inc;..\PERIPHERAL\usart;..\PERIPHERAL\watch_dog;..\PROTOCOL;..\SYSTEM\delay;..\SYSTEM\sys;..\USER;..\DEVICEDRIVER\dp83848;..\ETHERNET;..\LWIP\lwip-1.4.1\src\include;..\LWIP\lwip-1.4.1\src\include\lwip;..\LWIP\lwip-1.4.1\src\include\ipv4;..\LWIP\lwip-1.4.1\src\include\netif;..\LWIP\lwip-1.4.1\port\STM32F4x7;..\LWIP\lwip-1.4.1\port\STM32F4x7\FreeRTOS;..\DEVICEDRIVER\key;..\PERIPHERAL\spi;..\PERIPHERAL\iic;..\PERIPHERAL\stmflash;..\DEVICEDRIVER\kc;..\DEVICEDRIVER\kr;..\DEVICEDRIVER\rx8010s;..\DEVICEDRIVER\cat25x;..\DEVICEDRIVER\w25qxx;..\FATFS;..\FATFS\src;..\FATFS\exfuns;..\DEVICEDRIVER\ht7038;..\MEMORY;..\MIDDLEWARE;..\DEVICEDRIVER\ec20;..\EXTERNALDEVICE\concentrator;..\DEVICEDRIVER\battery;..\EXTERNALDEVICE\relay;..\EXTERNALDEVICE\relay</IncludePath>
+              <IncludePath>..\CORE;..\DEVICEDRIVER\led;..\FREERTOS\include;..\FREERTOS\portable\RVDS\ARM_CM4F;..\FWLIB\inc;..\PERIPHERAL\usart;..\PERIPHERAL\watch_dog;..\PROTOCOL;..\SYSTEM\delay;..\SYSTEM\sys;..\USER;..\DEVICEDRIVER\dp83848;..\ETHERNET;..\LWIP\lwip-1.4.1\src\include;..\LWIP\lwip-1.4.1\src\include\lwip;..\LWIP\lwip-1.4.1\src\include\ipv4;..\LWIP\lwip-1.4.1\src\include\netif;..\LWIP\lwip-1.4.1\port\STM32F4x7;..\LWIP\lwip-1.4.1\port\STM32F4x7\FreeRTOS;..\DEVICEDRIVER\key;..\PERIPHERAL\spi;..\PERIPHERAL\iic;..\PERIPHERAL\stmflash;..\DEVICEDRIVER\kc;..\DEVICEDRIVER\kr;..\DEVICEDRIVER\rx8010s;..\DEVICEDRIVER\cat25x;..\DEVICEDRIVER\w25qxx;..\FATFS;..\FATFS\src;..\FATFS\exfuns;..\DEVICEDRIVER\ht7038;..\MEMORY;..\MIDDLEWARE;..\DEVICEDRIVER\ec20;..\DEVICEDRIVER\battery;..\EXTERNALDEVICE\concentrator;..\EXTERNALDEVICE\relay;..\EXTERNALDEVICE\input_collector</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -441,6 +441,21 @@
               <FileName>task_electricity_meter.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\USER\task_electricity_meter.c</FilePath>
+            </File>
+            <File>
+              <FileName>task_relay.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\USER\task_relay.c</FilePath>
+            </File>
+            <File>
+              <FileName>task_rs485.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\USER\task_rs485.c</FilePath>
+            </File>
+            <File>
+              <FileName>task_input_collector.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\USER\task_input_collector.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1056,6 +1071,26 @@
               <FileName>relay_comm.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\EXTERNALDEVICE\relay\relay_comm.c</FilePath>
+            </File>
+            <File>
+              <FileName>relay_event.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\EXTERNALDEVICE\relay\relay_event.c</FilePath>
+            </File>
+            <File>
+              <FileName>input_collector_conf.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\EXTERNALDEVICE\input_collector\input_collector_conf.c</FilePath>
+            </File>
+            <File>
+              <FileName>input_collector_comm.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\EXTERNALDEVICE\input_collector\input_collector_comm.c</FilePath>
+            </File>
+            <File>
+              <FileName>input_collector_event.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\EXTERNALDEVICE\input_collector\input_collector_event.c</FilePath>
             </File>
           </Files>
         </Group>

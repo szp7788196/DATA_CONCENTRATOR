@@ -177,42 +177,49 @@ s8 GetServerFrameStruct(ServerFrameStruct_S *server_frame_struct,ServerFrame_S *
 {
 	u8 ret = 0;
 	u32 crc32_cal = 0;
+	
+	memset(server_frame_struct,0,sizeof(ServerFrameStruct_S));
 
 	if(rx_frame->len < 28)
 	{
 		return -1;
 	}
 
-	server_frame_struct->connection_mode 	= rx_frame->connection_mode;
-	server_frame_struct->start 				= rx_frame->buf[0];
-	server_frame_struct->msg_type 			= rx_frame->buf[1];
-	server_frame_struct->serial_num 		= (((u32)rx_frame->buf[2] << 24) +
-										      ((u32)rx_frame->buf[3] << 16) +
-	                                          ((u32)rx_frame->buf[4] << 8) +
-	                                          (u32)rx_frame->buf[5]);
-	server_frame_struct->msg_len 			= (((u16)rx_frame->buf[6] << 8) +
-	                                          (u16)rx_frame->buf[7]);
-	server_frame_struct->err_code 			= rx_frame->buf[8];
-	server_frame_struct->crc32 				= (((u32)rx_frame->buf[13] << 24) +
-	                                          ((u32)rx_frame->buf[14] << 16) +
-	                                          ((u32)rx_frame->buf[15] << 8) +
-	                                          (u32)rx_frame->buf[16]);
-	server_frame_struct->msg_id 			= (((u16)rx_frame->buf[17] << 8) +
-	                                          (u16)rx_frame->buf[18]);
-	server_frame_struct->gateway_id 		= (((u32)rx_frame->buf[19] << 24) +
-	                                          ((u32)rx_frame->buf[20] << 16) +
-											  ((u32)rx_frame->buf[21] << 8) +
-											  (u32)rx_frame->buf[22]);
-	server_frame_struct->device_id 			= (((u32)rx_frame->buf[23] << 24) +
-                                              ((u32)rx_frame->buf[24] << 16) +
-											  ((u32)rx_frame->buf[25] << 8) +
-											  (u32)rx_frame->buf[26]);
-	server_frame_struct->stop				= rx_frame->buf[rx_frame->len - 1];
-
+	server_frame_struct->crc32 = (((u32)rx_frame->buf[13] << 24) +
+								 ((u32)rx_frame->buf[14] << 16) +
+								 ((u32)rx_frame->buf[15] << 8) +
+								 (u32)rx_frame->buf[16]);
+	
 	crc32_cal = CRC32((u8*)&rx_frame->buf[17],rx_frame->len - 18);
 
 	if(crc32_cal == server_frame_struct->crc32)
 	{
+		server_frame_struct->connection_mode 	= rx_frame->connection_mode;
+		server_frame_struct->start 				= rx_frame->buf[0];
+		server_frame_struct->msg_type 			= rx_frame->buf[1];
+		server_frame_struct->serial_num 		= (((u32)rx_frame->buf[2] << 24) +
+												  ((u32)rx_frame->buf[3] << 16) +
+												  ((u32)rx_frame->buf[4] << 8) +
+												  (u32)rx_frame->buf[5]);
+		server_frame_struct->msg_len 			= (((u16)rx_frame->buf[6] << 8) +
+												  (u16)rx_frame->buf[7]);
+		server_frame_struct->err_code 			= rx_frame->buf[8];
+//		server_frame_struct->crc32 				= (((u32)rx_frame->buf[13] << 24) +
+//												  ((u32)rx_frame->buf[14] << 16) +
+//												  ((u32)rx_frame->buf[15] << 8) +
+//												  (u32)rx_frame->buf[16]);
+		server_frame_struct->msg_id 			= (((u16)rx_frame->buf[17] << 8) +
+												  (u16)rx_frame->buf[18]);
+		server_frame_struct->gateway_id 		= (((u32)rx_frame->buf[19] << 24) +
+												  ((u32)rx_frame->buf[20] << 16) +
+												  ((u32)rx_frame->buf[21] << 8) +
+												  (u32)rx_frame->buf[22]);
+		server_frame_struct->device_id 			= (((u32)rx_frame->buf[23] << 24) +
+												  ((u32)rx_frame->buf[24] << 16) +
+												  ((u32)rx_frame->buf[25] << 8) +
+												  (u32)rx_frame->buf[26]);
+		server_frame_struct->stop				= rx_frame->buf[rx_frame->len - 1];
+		
 		if(server_frame_struct->msg_type == (u8)SERVER_REQUEST_DOWN ||
 	       server_frame_struct->msg_type == (u8)SERVER_RESPONSE_DOWN ||
 	       server_frame_struct->msg_type == (u8)SYNC_RESPONSE)
@@ -388,6 +395,10 @@ u8 CopyServerFrameStruct(ServerFrameStruct_S *s_server_frame_struct,ServerFrameS
 	if(s_server_frame_struct == NULL || d_server_frame_struct == NULL)
 	{
 		return 0;
+	}
+	else
+	{
+		memset(d_server_frame_struct,0,sizeof(ServerFrameStruct_S));
 	}
 
 	d_server_frame_struct->connection_mode 	= s_server_frame_struct->connection_mode;

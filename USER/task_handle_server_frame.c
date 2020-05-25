@@ -28,7 +28,7 @@ void vTaskHANDLE_SERVER_FRAME(void *pvParameters)
 			DeleteServerFrame(rx_frame);
 		}
 
-		delay_ms(50);
+		delay_ms(100);
 	}
 }
 

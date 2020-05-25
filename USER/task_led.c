@@ -9,6 +9,8 @@
 #include "ht7038.h"
 #include "history_record.h"
 #include "common.h"
+#include "sun_rise_set.h"
+#include "concentrator_conf.h"
 
 
 
@@ -20,10 +22,27 @@ void vTaskLED(void *pvParameters)
 {
 	u32 cnt = 0;
 	u8 led_state = 0;
+	u8 date = 0;
 
-	while(1)											//循环一次延时约20ms
+	while(1)											//循环一次延时约100ms
 	{
+		if(date != calendar.w_date)						//计算新一天的日出日落时间
+		{
+			date = calendar.w_date;
+			
+			SunRiseSetTime = GetSunTime(calendar.w_year,
+			                            calendar.w_month,
+			                            calendar.w_date,
+			                            ConcentratorLocationConfig.longitude,
+			                            ConcentratorLocationConfig.latitude);
+		}
+		
 		FreeHeapSize = xPortGetFreeHeapSize();
+		
+		if(cnt % 50 == 0)
+		{
+			printf("FreeHeapSize:%d\r\n",FreeHeapSize);
+		}
 		
 		if(cnt % 10 == 0)								//每1秒喂一次看门狗
 		{

@@ -1,6 +1,8 @@
 #include "rtos_task.h"
 #include "common.h"
 #include "server_protocol.h"
+#include "history_record.h"
+#include "relay_conf.h"
 #include "task_led.h"
 #include "task_4g.h"
 #include "task_electricity_meter.h"
@@ -8,7 +10,10 @@
 #include "task_handle_server_frame.h"
 #include "task_concentrator.h"
 #include "task_store.h"
-#include "history_record.h"
+#include "task_relay.h"
+#include "task_rs485.h"
+#include "task_input_collector.h"
+
 
 
 
@@ -23,39 +28,60 @@ void AppTaskCreate(void)
 //				&xHandleTaskLWIP_INIT); 			/* 任务句柄  */
 
 	xTaskCreate(vTask4G,    						/* 指示灯任务  */
-				" ",  						/* 任务名称    */
+				"",  								/* 任务名称    */
 				1024,         						/* stack大小,单位word,也就是4字节 */
 				NULL,        						/* 任务参数  */
 				configMAX_PRIORITIES - 0,           /* 任务优先级*/
 				&xHandleTask4G);
 
 	xTaskCreate(vTaskHANDLE_SERVER_FRAME,    		/* 指示灯任务  */
-				" ",  		/* 任务名称    */
+				"",  								/* 任务名称    */
 				1024,         						/* stack大小,单位word,也就是4字节 */
 				NULL,        						/* 任务参数  */
 				configMAX_PRIORITIES - 1,           /* 任务优先级*/
 				&xHandleTaskHANDLE_SERVER_FRAME); 	/* 任务句柄  */
-	
+
 	xTaskCreate(vTaskCONCENTRATOR,    				/* 指示灯任务  */
-				" ",  				/* 任务名称    */
+				"",  								/* 任务名称    */
 				1024,         						/* stack大小,单位word,也就是4字节 */
 				NULL,        						/* 任务参数  */
 				configMAX_PRIORITIES - 2,           /* 任务优先级*/
 				&xHandleTaskCONCENTRATOR); 			/* 任务句柄  */
-				
-	xTaskCreate(vTaskSTORE,    						/* 指示灯任务  */
+
+	xTaskCreate(vTaskRELAY,    						/* 指示灯任务  */
 				"",  								/* 任务名称    */
 				1024,         						/* stack大小,单位word,也就是4字节 */
 				NULL,        						/* 任务参数  */
-				configMAX_PRIORITIES - 7,           /* 任务优先级*/
-				&xHandleTaskSTORE); 				/* 任务句柄  */
-
+				configMAX_PRIORITIES - 3,           /* 任务优先级*/
+				&xHandleTaskRELAY); 				/* 任务句柄  */
+				
+	xTaskCreate(vTaskINPUT_COLLECTOR,    			/* 指示灯任务  */
+				"",  								/* 任务名称    */
+				1024,         						/* stack大小,单位word,也就是4字节 */
+				NULL,        						/* 任务参数  */
+				configMAX_PRIORITIES - 4,           /* 任务优先级*/
+				&xHandleTaskINPUT_COLLECTOR); 		/* 任务句柄  */
+				
 	xTaskCreate(vTaskELECTRICITY_METER,    			/* 指示灯任务  */
 				"",  								/* 任务名称    */
 				128,         						/* stack大小,单位word,也就是4字节 */
 				NULL,        						/* 任务参数  */
-				configMAX_PRIORITIES - 8,           /* 任务优先级*/
+				configMAX_PRIORITIES - 6,           /* 任务优先级*/
 				&xHandleTaskELECTRICITY_METER); 	/* 任务句柄  */
+
+	xTaskCreate(vTaskRS485,    						/* 指示灯任务  */
+				"",  								/* 任务名称    */
+				128,         						/* stack大小,单位word,也就是4字节 */
+				NULL,        						/* 任务参数  */
+				configMAX_PRIORITIES - 7,           /* 任务优先级*/
+				&xHandleTaskRS485);
+
+	xTaskCreate(vTaskSTORE,    						/* 指示灯任务  */
+				"",  								/* 任务名称    */
+				1024,         						/* stack大小,单位word,也就是4字节 */
+				NULL,        						/* 任务参数  */
+				configMAX_PRIORITIES - 8,           /* 任务优先级*/
+				&xHandleTaskSTORE); 				/* 任务句柄  */
 
 	xTaskCreate(vTaskLED,    						/* 指示灯任务  */
 				"",  								/* 任务名称    */
@@ -93,39 +119,45 @@ void AppObjCreate(void)
     {
 
     }
-	
+
 	xMutex_SPI_FLASH = xSemaphoreCreateMutex();
 	if(xMutex_SPI_FLASH == NULL)
     {
 
     }
-	
+
 	xMutex_Push_xQueue_AlarmReportSend = xSemaphoreCreateMutex();
 	if(xMutex_Push_xQueue_AlarmReportSend == NULL)
     {
 
     }
-	
+
 	xMutex_Push_xQueue_AlarmReportStore = xSemaphoreCreateMutex();
 	if(xMutex_Push_xQueue_AlarmReportStore == NULL)
     {
 
     }
-	
+
 	xMutex_TransServerFrameStruct = xSemaphoreCreateMutex();
 	if(xMutex_TransServerFrameStruct == NULL)
     {
 
     }
-	
+
 	xMutex_RelayStrategy = xSemaphoreCreateMutex();
 	if(xMutex_RelayStrategy == NULL)
     {
 
     }
-	
+
 	xMutex_RelayAppointment = xSemaphoreCreateMutex();
 	if(xMutex_RelayAppointment == NULL)
+    {
+
+    }
+
+	xMutex_Rs485Rs485Frame = xSemaphoreCreateMutex();
+	if(xMutex_Rs485Rs485Frame == NULL)
     {
 
     }
@@ -160,63 +192,105 @@ void AppObjCreate(void)
     {
 
     }
-	
+
 	xQueue_ConcentratorFrameStruct = xQueueCreate(25, sizeof(ServerFrame_S *));
     if(xQueue_ConcentratorFrameStruct == NULL)
     {
 
     }
-	
+
 	xQueue_LampControllerFrameStruct = xQueueCreate(25, sizeof(ServerFrameStruct_S *));
     if(xQueue_LampControllerFrameStruct == NULL)
     {
 
     }
-	
+
 	xQueue_RelayFrameStruct = xQueueCreate(25, sizeof(ServerFrameStruct_S *));
     if(xQueue_RelayFrameStruct == NULL)
     {
 
     }
-	
+
 	xQueue_InputCollectorFrameStruct = xQueueCreate(25, sizeof(ServerFrameStruct_S *));
     if(xQueue_InputCollectorFrameStruct == NULL)
     {
 
     }
-	
+
 	xQueue_ElectricMeterFrameStruct = xQueueCreate(25, sizeof(ServerFrameStruct_S *));
     if(xQueue_ElectricMeterFrameStruct == NULL)
     {
 
     }
-	
+
 	xQueue_LumeterFrameStruct = xQueueCreate(25, sizeof(ServerFrameStruct_S *));
     if(xQueue_LumeterFrameStruct == NULL)
     {
 
     }
-	
+
 	xQueue_AlarmReportSend = xQueueCreate(20, sizeof(AlarmReport_S *));
     if(xQueue_AlarmReportSend == NULL)
     {
 
     }
-	
+
 	xQueue_AlarmReportStore = xQueueCreate(20, sizeof(AlarmReport_S *));
     if(xQueue_AlarmReportStore == NULL)
     {
 
     }
-	
+
 	xQueue_AlarmReportRead = xQueueCreate(20, sizeof(AlarmReport_S *));
     if(xQueue_AlarmReportRead == NULL)
     {
 
     }
-	
+
 	xQueue_HistoryRecordRead = xQueueCreate(20, sizeof(AlarmReport_S *));
     if(xQueue_HistoryRecordRead == NULL)
+    {
+
+    }
+
+	xQueue_RelayModuleState = xQueueCreate(10, sizeof(RelayModuleState_S *));
+    if(xQueue_RelayModuleState == NULL)
+    {
+
+    }
+	
+	xQueue_InputCollectorState = xQueueCreate(10, sizeof(RelayModuleState_S *));
+    if(xQueue_InputCollectorState == NULL)
+    {
+
+    }
+
+	xQueue_Rs485Rs485Frame = xQueueCreate(40, sizeof(Rs485Frame_S *));
+    if(xQueue_Rs485Rs485Frame == NULL)
+    {
+
+    }
+
+	xQueue_RelayRs485Frame = xQueueCreate(10, sizeof(Rs485Frame_S *));
+    if(xQueue_RelayRs485Frame == NULL)
+    {
+
+    }
+
+	xQueue_InputCollectorRs485Frame = xQueueCreate(10, sizeof(Rs485Frame_S *));
+    if(xQueue_InputCollectorRs485Frame == NULL)
+    {
+
+    }
+
+	xQueue_ElectricMeterRs485Frame = xQueueCreate(10, sizeof(Rs485Frame_S *));
+    if(xQueue_ElectricMeterRs485Frame == NULL)
+    {
+
+    }
+
+	xQueue_LumeterRs485Frame = xQueueCreate(10, sizeof(Rs485Frame_S *));
+    if(xQueue_LumeterRs485Frame == NULL)
     {
 
     }

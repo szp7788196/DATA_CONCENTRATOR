@@ -740,7 +740,7 @@ void DeleteAlarmReport(AlarmReport_S *alarm_report)
 		if(alarm_report->device_channel != NULL)
 		{
 			vPortFree(alarm_report->device_channel);
-			alarm_report->current_value = NULL;
+			alarm_report->device_channel = NULL;
 		}
 
 		if(alarm_report->current_value != NULL)

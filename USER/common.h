@@ -65,13 +65,13 @@
 #define DEFAULT_SWITCH_TIME_ADD					1895		//默认开关灯时间
 #define DEFAULT_SWITCH_TIME_LEN					6
 
-#define RELAY_MODULE_APPOINTMENT_NUM_ADD		1877		//继电器模块配置地址
+#define RELAY_MODULE_APPOINTMENT_NUM_ADD		1877		//继电器模块策略配置数量地址
 #define RELAY_MODULE_APPOINTMENT_NUM_LEN		6
 
-#define RELAY_MODULE_STRATEGY_NUM_ADD			1883		//继电器模块配置地址
+#define RELAY_MODULE_STRATEGY_NUM_ADD			1883		//继电器模块预约配置数量地址
 #define RELAY_MODULE_STRATEGY_NUM_LEN			6
 
-#define RELAY_MODULE_CONF_NUM_ADD				1889		//继电器模块配置地址
+#define RELAY_MODULE_CONF_NUM_ADD				1889		//继电器模块配置数量地址
 #define RELAY_MODULE_CONF_NUM_LEN				6
 
 #define RELAY_MODULE_CONF_ADD					1901		//继电器模块配置地址
@@ -88,6 +88,18 @@
 
 #define RELAY_MODULE_STRATEGY_SWITCH_ADD		1848		//策略组(模式)切换配置
 #define RELAY_MODULE_STRATEGY_SWITCH_LEN		29
+
+#define INPUT_COLLECTOR_BASIC_CONF_ADD		15790		//输入量采集模块基础配置
+#define INPUT_COLLECTOR_BASIC_CONF_LEN		5
+
+#define INPUT_COLLECTOR_CONF_NUM_ADD			15795		//输入量采集模块配置数量地址
+#define INPUT_COLLECTOR_CONF_NUM_LEN			6
+
+#define INPUT_COLLECTOR_CONF_ADD				15801		//输入量采集模块配置地址
+#define INPUT_COLLECTOR_CONF_LEN				259
+
+#define INPUT_COLLECTOR_ALARM_CONF_ADD			18391		//输入量采集模块告警参数配置
+#define INPUT_COLLECTOR_ALARM_CONF_LEN			4
 
 
 
@@ -224,6 +236,15 @@ static u8 auchCRCLo[] =
 };
 
 
+typedef struct	Uint32TypeNumber
+{
+	u32 number;
+	
+	u16 crc16;
+	
+}__attribute__((packed))Uint32TypeNumber_S;
+
+
 extern SemaphoreHandle_t  xMutex_SPI2;
 extern SemaphoreHandle_t  xMutex_RTC;
 extern SemaphoreHandle_t  xMutex_Push_xQueue_ServerFrameRx;
@@ -234,6 +255,7 @@ extern SemaphoreHandle_t  xMutex_Push_xQueue_AlarmReportStore;
 extern SemaphoreHandle_t  xMutex_TransServerFrameStruct;
 extern SemaphoreHandle_t  xMutex_RelayStrategy;
 extern SemaphoreHandle_t  xMutex_RelayAppointment;
+extern SemaphoreHandle_t  xMutex_Rs485Rs485Frame;
 
 
 extern QueueHandle_t xQueue_ServerFrameRx;
@@ -251,12 +273,24 @@ extern QueueHandle_t xQueue_AlarmReportSend;
 extern QueueHandle_t xQueue_AlarmReportStore;
 extern QueueHandle_t xQueue_AlarmReportRead;
 extern QueueHandle_t xQueue_HistoryRecordRead;
+extern QueueHandle_t xQueue_RelayModuleState;
+extern QueueHandle_t xQueue_InputCollectorState;
+extern QueueHandle_t xQueue_Rs485Rs485Frame;
+extern QueueHandle_t xQueue_RelayRs485Frame;
+extern QueueHandle_t xQueue_InputCollectorRs485Frame;
+extern QueueHandle_t xQueue_ElectricMeterRs485Frame;
+extern QueueHandle_t xQueue_LumeterRs485Frame;
 
 
 extern time_t SysTick1s;
+extern time_t SysTick10ms;
 
 time_t GetSysTick1s(void);
+time_t GetSysTick10ms(void);
 u8 char_upper(u8 c);
+u8 myisspace(int x);
+u8 myisdigit(int x);
+int myatoi(const char *nptr);
 void myitoa(int num,char *str,int radix);
 u8 GetDatBit(u32 dat);
 u32 GetADV(u8 len);
@@ -264,6 +298,7 @@ void IntToString(u8 *DString,u32 Dint,u8 zero_num);
 void TimeToString(u8 *str,u16 year, u8 month, u8 date, u8 hour, u8 minute, u8 second);
 void Int4BitToString(u8 *str,u16 num);
 void HexToStr(char *pbDest, u8 *pbSrc, u16 len);
+int my_toupper( int ch);
 void StrToHex(u8 *pbDest, char *pbSrc, u16 len);
 
 u32 CRC32(const u8 *buf, u32 size);

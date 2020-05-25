@@ -52,7 +52,7 @@ void vTaskCONCENTRATOR(void *pvParameters)
 			NVIC_SystemReset();
 		}
 
-		delay_ms(50);
+		delay_ms(100);
 	}
 }
 

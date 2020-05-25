@@ -1,0 +1,28 @@
+<html>
+<body>
+<pre>
+<h1>礦ision Build Log</h1>
+<h2>Project:</h2>
+F:\SZP\项目\集中控制器\程序软件\APP\MDK-ARM\DataConcentrator.uvproj
+Project File Date:  05/18/2020
+
+<h2>Output:</h2>
+Build target 'DataConcentrator'
+linking...
+..\OUTPUT\Obj\DataConcentrator.axf: Error: L6218E: Undefined symbol vTaskINPUT_COLLECTOR (referred from rtos_task.o).
+..\OUTPUT\Obj\DataConcentrator.axf: Error: L6218E: Undefined symbol xHandleTaskINPUT_COLLECTOR (referred from rtos_task.o).
+"..\OUTPUT\Obj\DataConcentrator.axf" - 2 Errors, 0 Warning(s).
+Target not created
+Build target 'DataConcentrator'
+linking...
+..\OUTPUT\Obj\DataConcentrator.axf: Error: L6218E: Undefined symbol InputCollectorEventCheckPolling (referred from task_input_collector.o).
+"..\OUTPUT\Obj\DataConcentrator.axf" - 1 Errors, 0 Warning(s).
+Target not created
+Build target 'DataConcentrator'
+linking...
+Program Size: Code=130068 RO-data=3772 RW-data=15144 ZI-data=135504  
+FromELF: creating hex file...
+After Build - User command #1: C:\Keil\ARM\ARMCC\bin\fromelf.exe  --bin -o   ..\OUTPUT\Obj\DataConcentrator.bin ..\OUTPUT\Obj\DataConcentrator.axf
+"..\OUTPUT\Obj\DataConcentrator.axf" - 0 Errors, 0 Warning(s).
+Clean started: Project: 'DataConcentrator'
+   deleting intermediate output files for target 'DataConcentrator'

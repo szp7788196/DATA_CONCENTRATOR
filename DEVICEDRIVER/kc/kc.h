@@ -1,6 +1,11 @@
 #ifndef _KC_H
 #define _KC_H
 #include "sys.h"
+#include "relay_comm.h"
+#include "task_rs485.h"
+#include "server_protocol.h"
+#include "common.h"
+
 
 
 #define KC1                  		PEout(10)          
@@ -17,6 +22,12 @@
 void KC_Init(void);
 
 
+
+void ControlAllBuiltInRelay(RelayModuleState_S state);
+void ControlAllBuiltOutRelay(RelayModuleState_S state);
+void GetBuiltOutRelayState(RelayModuleState_S state);
+u16 PackBuiltOutRelayFrame(u8 address,u8 fun_code,u8 *inbuf,u16 inbuf_len,u8 *outbuf);
+void AnalysisBuiltOutRelayFrame(u8 *buf,u16 len,RelayModuleCollectState_S *collect_state);
 
 
 

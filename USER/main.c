@@ -16,6 +16,7 @@
 #include "ec20.h"
 #include "concentrator_conf.h"
 #include "exfuns.h"
+#include "input_collector_conf.h"
 
 
 //u8 eprombuf[100];
@@ -38,7 +39,7 @@ int main(void)
 	TIM2_Init(100);										//定时器2初始化
 
 	USART1_Init(115200);								//维护串口初始化
-	USART5_Init(9600);									//RS485串口
+	USART5_Init(9600,USART_Parity_No);					//RS485串口
 	USART6_Init(115200);								//4G模块串口
 
 	RX8010S_Init();										//外部RTC初始化
@@ -46,11 +47,10 @@ int main(void)
 	W25QXX_Init();										//外部FLASH初始化
 	HT7038_Init();										//电能计量芯片初始化
 	EC20_Init();										//4G模块初始化
+	
+//	siiize = sizeof(InputCollectorConfig_S);
 
 	init_mount_flash();									//初始化并挂载flash
-
-//	siiize = search_str("0123456789", "45678");
-//	siiize = sizeof(ConcentratorLocationConfig_S);
 
 	ReadTotalConfigurationParameters();					//读取所有配置参数
 

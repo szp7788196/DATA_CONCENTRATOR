@@ -1,6 +1,7 @@
 #include "common.h"
 #include "concentrator_conf.h"
 #include "relay_conf.h"
+#include "input_collector_conf.h"
 
 SemaphoreHandle_t  xMutex_SPI2 = NULL;
 SemaphoreHandle_t  xMutex_RTC = NULL;
@@ -12,6 +13,7 @@ SemaphoreHandle_t  xMutex_Push_xQueue_AlarmReportStore = NULL;
 SemaphoreHandle_t  xMutex_TransServerFrameStruct = NULL;
 SemaphoreHandle_t  xMutex_RelayStrategy = NULL;
 SemaphoreHandle_t  xMutex_RelayAppointment = NULL;
+SemaphoreHandle_t  xMutex_Rs485Rs485Frame = NULL;
 
 
 
@@ -23,34 +25,40 @@ QueueHandle_t xQueue_4gFrameTx = NULL;
 QueueHandle_t xQueue_WifiFrameTx = NULL;
 QueueHandle_t xQueue_EthFrameTx = NULL;
 QueueHandle_t xQueue_NB_IoTFrameTx = NULL;
-
 QueueHandle_t xQueue_ConcentratorFrameStruct = NULL;
 QueueHandle_t xQueue_LampControllerFrameStruct = NULL;
 QueueHandle_t xQueue_RelayFrameStruct = NULL;
 QueueHandle_t xQueue_InputCollectorFrameStruct = NULL;
 QueueHandle_t xQueue_ElectricMeterFrameStruct = NULL;
 QueueHandle_t xQueue_LumeterFrameStruct = NULL;
-
 QueueHandle_t xQueue_AlarmReportSend = NULL;
 QueueHandle_t xQueue_AlarmReportStore = NULL;
 QueueHandle_t xQueue_AlarmReportRead = NULL;
-
 QueueHandle_t xQueue_HistoryRecordRead = NULL;
-
+QueueHandle_t xQueue_RelayModuleState = NULL;
+QueueHandle_t xQueue_InputCollectorState = NULL;
+QueueHandle_t xQueue_Rs485Rs485Frame = NULL;
+QueueHandle_t xQueue_RelayRs485Frame = NULL;
+QueueHandle_t xQueue_InputCollectorRs485Frame = NULL;
+QueueHandle_t xQueue_ElectricMeterRs485Frame = NULL;
+QueueHandle_t xQueue_LumeterRs485Frame = NULL;
 
 
 
 
 time_t SysTick1s = 86400;
+time_t SysTick10ms = 0;
 
 //获取系统1秒滴答时钟
 time_t GetSysTick1s(void)
 {
-	time_t sec = 0;
+	return SysTick1s;
+}
 
-	sec = SysTick1s;
-
-	return sec;
+//获取系统1秒滴答时钟
+time_t GetSysTick10ms(void)
+{
+	return SysTick10ms;
 }
 
 //将小写字母转换为大写字母
@@ -64,6 +72,51 @@ u8 char_upper(u8 c)
 	else 
 		return c;
 }
+
+u8 myisspace(int x)
+{
+	if(x == ' ' || x == '\t' || x == '\n' || x == '\f' || x == '\b' || x == '\r')
+		return 1;
+	else  
+		return 0;
+}
+u8 myisdigit(int x)
+{
+	if(x <= '9' && x >= '0')         
+		return 1; 
+	else 
+		return 0;
+ 
+}
+int myatoi(const char *nptr)
+{
+	int c;              /* current char */
+	int total;         /* current total */
+	int sign;           /* if '-', then negative, otherwise positive */
+
+	/* skip whitespace */
+	while ( myisspace((int)(unsigned char)*nptr) )
+		++nptr;
+
+	c = (int)(unsigned char)*nptr++;
+	sign = c;           /* save sign indication */
+	if (c == '-' || c == '+')
+		c = (int)(unsigned char)*nptr++;    /* skip sign */
+
+	total = 0;
+
+	while (myisdigit(c)) 
+	{
+		total = 10 * total + (c - '0');     /* accumulate digit */
+		c = (int)(unsigned char)*nptr++;    /* get next char */
+	}
+
+	if (sign == '-')
+		return -total;
+	else
+		return total;   /* return result, negated if necessary */
+}
+
 
 void myitoa(int num,char *str,int radix)
 {
@@ -223,6 +276,16 @@ void HexToStr(char *pbDest, u8 *pbSrc, u16 len)
 	pbDest[len * 2] = '\0';
 }
 
+//小写字母转换为大写字母。
+int my_toupper( int ch)
+{
+
+	if ((unsigned int)(ch - 'a') < 26)
+		ch += 'A' - 'a';
+
+	return ch;
+}
+
 /*
 // C prototype : void StrToHex(BYTE *pbDest, BYTE *pbSrc, int nLen)
 // parameter(s): [OUT] pbDest - 输出缓冲区
@@ -242,11 +305,11 @@ void StrToHex(u8 *pbDest, char *pbSrc, u16 len)
 		h1 = pbSrc[2 * i];
 		h2 = pbSrc[2 * i + 1];
 
-		s1 = toupper(h1) - 0x30;
+		s1 = my_toupper(h1) - 0x30;
 		if (s1 > 9)
 		s1 -= 7;
 
-		s2 = toupper(h2) - 0x30;
+		s2 = my_toupper(h2) - 0x30;
 		if (s2 > 9)
 		s2 -= 7;
 
@@ -593,9 +656,13 @@ void ReadTotalConfigurationParameters(void)
 	ReadFrameWareState();					//读取固件升级状态
 	ReadRelayModuleConfig();				//读取继电器模块配置
 	ReadRelayAlarmConfig();					//读取继电器模块告警参数配置
-	ReadRelayAppointmentGroup();			//读取继电器模块预约控制
-	ReadRelayStrategyGroups();				//读取继电器模块策略组
-	ReadRelayStrategyGroupSwitch();			//读取继电器模块策略组切换配置
+//	ReadRelayAppointmentGroup();			//读取继电器模块预约控制
+//	ReadRelayStrategyGroups();				//读取继电器模块策略组
+//	ReadRelayStrategyGroupSwitch();			//读取继电器模块策略组切换配置
+	
+	ReadInputCollectorBasicConfig();		//读取输入量检测模块基础配置参数
+	ReadInputCollectorConfig();				//读取输入量检测模块基础配置参数
+	ReadInputCollectorAlarmConfig();		//读取输入量检测模块告警配置参数
 }
 
 

@@ -2,6 +2,7 @@
 #define __KR_H
 
 #include "sys.h"
+#include "input_collector_conf.h"
 
 
 #define KR1                  	PFin(8) 
@@ -19,9 +20,10 @@ void KR_Init(void);
 
 
 
-
-
-
+void GetAllBuiltInInputCollectorState(InputCollectorState_S *state);
+void GetBuiltOutInputCollectorState(InputCollectorState_S state);
+u16 PackBuiltOutInputCollectorFrame(u8 address,u8 fun_code,u8 *inbuf,u16 inbuf_len,u8 *outbuf);
+void AnalysisBuiltOutInputCollectorFrame(u8 *buf,u16 len,InputCollectorCollectState_S *collect_state);
 
 
 

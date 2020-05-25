@@ -3,6 +3,7 @@
 #include "string.h"
 #include "FreeRTOS.h"					//FreeRTOS使用
 #include "common.h"
+#include "rx8010s.h"
 
 #if 1
 #pragma import(__use_no_semihosting)
@@ -47,6 +48,8 @@ void USART1_Init(u32 BaudRate)
   	USART_InitTypeDef USART_InitStructure;
     NVIC_InitTypeDef NVIC_InitStructure;
 
+	USART_DeInit(USART1);
+	
 	USART_Cmd(USART1, DISABLE);
 
     RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
@@ -89,12 +92,14 @@ void USART1_Init(u32 BaudRate)
     NVIC_Init(&NVIC_InitStructure);
 }
 
-void USART5_Init(u32 BaudRate)
+void USART5_Init(u32 BaudRate,u16 check_mode)
 {
 	//GPIO端口设置
 	GPIO_InitTypeDef GPIO_InitStructure;
 	USART_InitTypeDef USART_InitStructure;
 	NVIC_InitTypeDef NVIC_InitStructure;
+	
+	USART_DeInit(UART5);
 	
 	USART_Cmd(UART5, DISABLE);
 
@@ -123,9 +128,16 @@ void USART5_Init(u32 BaudRate)
 
 	//USART2 初始化设置
 	USART_InitStructure.USART_BaudRate = BaudRate;//波特率设置
-	USART_InitStructure.USART_WordLength = USART_WordLength_8b;//字长为8位数据格式
+	if(check_mode == USART_Parity_No)
+	{
+		USART_InitStructure.USART_WordLength = USART_WordLength_8b;//字长为8位数据格式
+	}
+	else if(check_mode == USART_Parity_Even)
+	{
+		USART_InitStructure.USART_WordLength = USART_WordLength_9b;//字长为8位数据格式
+	}
 	USART_InitStructure.USART_StopBits = USART_StopBits_1;//一个停止位
-	USART_InitStructure.USART_Parity = USART_Parity_No;//无奇偶校验位
+	USART_InitStructure.USART_Parity = check_mode;//无奇偶校验位
 	USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;//无硬件数据流控制
 	USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;	//收发模式
 	USART_Init(UART5, &USART_InitStructure); //初始化串口5
@@ -276,6 +288,8 @@ void TIM2_IRQHandler(void)
 	if(TIM_GetITStatus(TIM2, TIM_IT_Update) != RESET) 
 	{
 		TIM_ClearITPendingBit(TIM2, TIM_IT_Update); 
+		
+		SysTick10ms ++;
 		
 		if((cnt ++) >= 100)
 		{
