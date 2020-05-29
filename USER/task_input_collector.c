@@ -78,6 +78,8 @@ void InputCollectorRecvAndHandleDeviceFrame(void)
 					InputCollectorState[i].d_current_state = collect_state.d_collect_state;
 					InputCollectorState[i].a_current_state[0] = collect_state.a_collect_state[0];
 					InputCollectorState[i].a_current_state[1] = collect_state.a_collect_state[1];
+					
+					break;
 				}
 			}
 		}

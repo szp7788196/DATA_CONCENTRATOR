@@ -12,7 +12,10 @@ void vTaskELECTRICITY_METER(void *pvParameters);
 
 
 
+void ElectricityMeterCollectCurrentState(void);
 
+void ElectricityMeterCollectCurrentState(void);
+void ElectricityMeterRecvAndHandleDeviceFrame(void);
 
 
 

@@ -69,16 +69,26 @@ void InputCollectorDetectA_QuantityStateChanges(void)
 			{
 				for(j = 0; j < InputCollectorConfig[i].a_loop_num; j ++)
 				{
-					if(abs(InputCollectorState[i].a_current_state[j] - InputCollectorState[i].a_mirror_state[j]) >= InputCollectorConfig[i].a_quantity_range)
+					if(InputCollectorConfig[i].a_quantity_range != 0.0f)
 					{
-						if(cnt[i][j] < InputCollectorConfig[i].confirm_time)
+						if(abs(InputCollectorState[i].a_current_state[j] - InputCollectorState[i].a_mirror_state[j]) >= InputCollectorConfig[i].a_quantity_range)
 						{
-							cnt[i][j] ++;
-						}
+							if(cnt[i][j] < InputCollectorConfig[i].confirm_time)
+							{
+								cnt[i][j] ++;
+							}
 
-						if(cnt[i][j] == InputCollectorConfig[i].confirm_time)									//低电压持续约30秒
+							if(cnt[i][j] == InputCollectorConfig[i].confirm_time)									//低电压持续约30秒
+							{
+								InputCollectorState[i].a_current_state[j] = InputCollectorState[i].a_mirror_state[j];
+								
+								occur[i] = 1;
+							}
+						}
+						else
 						{
-							occur[i] = 1;
+							cnt[i][j] = 0;
+							occur[i] = 0;
 						}
 					}
 					else
@@ -93,8 +103,6 @@ void InputCollectorDetectA_QuantityStateChanges(void)
 					InputCollectorState_S *module_state = NULL;
 
 					occur[i] = 0;
-
-					InputCollectorState[i].d_mirror_state = InputCollectorState[i].d_current_state;
 
 					module_state = (InputCollectorState_S *)pvPortMalloc(sizeof(InputCollectorState_S));
 
@@ -383,7 +391,7 @@ void InputCollectorA_OverQuantityAbnormal(void)
 				{
 					memcpy(&max_value,(void *)&InputCollectorConfig[i].a_alarm_thre[j].max_value,8);
 					
-					if(max_value != 0xFFFFFFFFFFFFFFFF)
+					if(max_value != 0xFFFFFFFFFFFFFFFF && InputCollectorConfig[i].a_alarm_thre[j].max_value != 0.0f)
 					{
 						if(occur[i][j] == 0)
 						{
@@ -391,7 +399,7 @@ void InputCollectorA_OverQuantityAbnormal(void)
 							{
 								cnt[i][j] ++;
 
-								if(cnt[i][j] == InputCollectorConfig[i].d_alarm_thre[j].confirm_time)
+								if(cnt[i][j] == InputCollectorConfig[i].a_alarm_thre[j].confirm_time)
 								{
 									cnt[i][j] = InputCollectorConfig[i].a_alarm_thre[j].confirm_time;
 
@@ -651,7 +659,7 @@ void InputCollectorA_UnderQuantityAbnormal(void)
 				{
 					memcpy(&min_value,(void *)&InputCollectorConfig[i].a_alarm_thre[j].min_value,8);
 					
-					if(min_value != 0xFFFFFFFFFFFFFFFF)
+					if(min_value != 0xFFFFFFFFFFFFFFFF && InputCollectorConfig[i].a_alarm_thre[j].min_value != 0.0f)
 					{
 						if(occur[i][j] == 0)
 						{
@@ -659,7 +667,7 @@ void InputCollectorA_UnderQuantityAbnormal(void)
 							{
 								cnt[i][j] ++;
 
-								if(cnt[i][j] == InputCollectorConfig[i].d_alarm_thre[j].confirm_time)
+								if(cnt[i][j] == InputCollectorConfig[i].a_alarm_thre[j].confirm_time)
 								{
 									cnt[i][j] = InputCollectorConfig[i].a_alarm_thre[j].confirm_time;
 

@@ -224,6 +224,8 @@ void USART1_IRQHandler(void)                	//串口1中断服务程序
 		
 		Usart1FrameLen = Usart1RxCnt;
 		
+		Usart1RxCnt = 0;
+		
 		Usart1RecvEnd = 0xAA;
 	}
 }
@@ -253,6 +255,8 @@ void UART5_IRQHandler(void)                	//串口1中断服务程序
 		USART_ClearFlag(UART5,USART_FLAG_IDLE);//清楚空闲标志位
 		
 		Usart5FrameLen = Usart5RxCnt;
+		
+		Usart5RxCnt = 0;
 		
 		Usart5RecvEnd = 0xAA;
 	}

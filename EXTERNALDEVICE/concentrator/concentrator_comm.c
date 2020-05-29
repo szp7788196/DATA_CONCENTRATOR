@@ -7,6 +7,7 @@
 #include "stmflash.h"
 #include "relay_comm.h"
 #include "input_collector_comm.h"
+#include "electricity_meter_comm.h"
 
 
 //不需要存储的数据
@@ -625,12 +626,13 @@ void AutoSendFrameToServer(void)
 	{
 		retry_times1 = 0;
 
-		SendHeartBeatToServer();						//发送心跳包
-		SendOtaCompleteNoticeToServer();				//发送升级完成通知包
-		SendOtaRequestToServer();						//发送固件请求包
-		SendAlarmReportToServer();						//发送告警上报包
-		RelaySendStateChangesReportToServer();			//发送继电器状态变化包
-		InputCollectorSendStateChangesReportToServer();	//发送输入量采集模块状态变化包
+		SendHeartBeatToServer();							//发送心跳包
+		SendOtaCompleteNoticeToServer();					//发送升级完成通知包
+		SendOtaRequestToServer();							//发送固件请求包
+		SendAlarmReportToServer();							//发送告警上报包
+		RelaySendStateChangesReportToServer();				//发送继电器状态变化包
+		InputCollectorSendStateChangesReportToServer();		//发送输入量采集模块状态变化包
+		ElectricityMeterSendStateChangesReportToServer();	//发送电表状态变化包
 	}
 }
 
@@ -799,7 +801,7 @@ u8 TransparentTransmission(ServerFrameStruct_S *server_frame_struct)
 			break;
 
 			case 1:
-				device_type = ELECTRIC_METER;
+				device_type = ELECTRICITY_METER;
 			break;
 
 			case 2:
@@ -807,7 +809,7 @@ u8 TransparentTransmission(ServerFrameStruct_S *server_frame_struct)
 			break;
 
 			case 3:
-				device_type = ELECTRIC_METER;
+				device_type = ELECTRICITY_METER;
 			break;
 
 			case 4:

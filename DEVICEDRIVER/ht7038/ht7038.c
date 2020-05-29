@@ -207,226 +207,226 @@ u32 HT7038GetSingleParameter(u8 ReadAddr)
 	return value;
 }
 
-void HT7038GetParameters(void)
-{
-	float temp = 0.0f;
-	
-	s32 value = 0;
+//void HT7038GetParameters(void)
+//{
+//	float temp = 0.0f;
+//	
+//	s32 value = 0;
 
-	double active_energy[4] = {0.0f};
-	double reactive_energy[4] = {0.0f};
-	double apparent_energy[4] = {0.0f};
-	
-	//读取电压
-	value = HT7038GetSingleParameter(HT7038_REG_RMS_VOL_A);
-	BuiltInMeter.voltage[0] = (float)value / 8192.0f;
+//	double active_energy[4] = {0.0f};
+//	double reactive_energy[4] = {0.0f};
+//	double apparent_energy[4] = {0.0f};
+//	
+//	//读取电压
+//	value = HT7038GetSingleParameter(HT7038_REG_RMS_VOL_A);
+//	BuiltInMeter.voltage[0] = (float)value / 8192.0f;
 
-	value = HT7038GetSingleParameter(HT7038_REG_RMS_VOL_B);
-	BuiltInMeter.voltage[1] = (float)value / 8192.0f;
+//	value = HT7038GetSingleParameter(HT7038_REG_RMS_VOL_B);
+//	BuiltInMeter.voltage[1] = (float)value / 8192.0f;
 
-	value = HT7038GetSingleParameter(HT7038_REG_RMS_VOL_C);
-	BuiltInMeter.voltage[2] = (float)value / 8192.0f;
+//	value = HT7038GetSingleParameter(HT7038_REG_RMS_VOL_C);
+//	BuiltInMeter.voltage[2] = (float)value / 8192.0f;
 
-	//读取电流
-	value = HT7038GetSingleParameter(HT7038_REG_RMS_CURRENT_A);
-	BuiltInMeter.current[0] = (float)value / 8192.0f / 10.2f * 40.0f / 16.0f;
-	if((BuiltInMeter.current[0] > 0.0f) && (BuiltInMeter.current[0] < 0.3f))
-	{
-		BuiltInMeter.current[0] = BuiltInMeter.current[0] - 0.2f;
-	}
-	
-	value = HT7038GetSingleParameter(HT7038_REG_RMS_CURRENT_B);
-	BuiltInMeter.current[1] = (float)value / 8192.0f / 10.2f * 40.0f / 16.0f;
-	if((BuiltInMeter.current[1] > 0.0f) && (BuiltInMeter.current[1] < 0.3f))
-	{
-		BuiltInMeter.current[1] = BuiltInMeter.current[1] - 0.2f;
-	}
-	
-	value = HT7038GetSingleParameter(HT7038_REG_RMS_CURRENT_C);
-	BuiltInMeter.current[2] = (float)value / 8192.0f / 10.2f * 40.0f / 16.0f;
-	if((BuiltInMeter.current[2] > 0.0f) && (BuiltInMeter.current[0] < 0.3f))
-	{
-		BuiltInMeter.current[2] = BuiltInMeter.current[2] - 0.2f;
-	}
-	
-	value = HT7038GetSingleParameter(HT7038_REG_RMS_CURRENT_ABC);
-	BuiltInMeter.current[3] = (float)value / 8192.0f / 10.2f * 40.0f / 16.0f;
-	if((BuiltInMeter.current[3] > 0.0f) && (BuiltInMeter.current[3] < 0.3f))
-	{
-		BuiltInMeter.current[3] = BuiltInMeter.current[3] - 0.2f;
-	}
+//	//读取电流
+//	value = HT7038GetSingleParameter(HT7038_REG_RMS_CURRENT_A);
+//	BuiltInMeter.current[0] = (float)value / 8192.0f / 10.2f * 40.0f / 16.0f;
+//	if((BuiltInMeter.current[0] > 0.0f) && (BuiltInMeter.current[0] < 0.3f))
+//	{
+//		BuiltInMeter.current[0] = BuiltInMeter.current[0] - 0.2f;
+//	}
+//	
+//	value = HT7038GetSingleParameter(HT7038_REG_RMS_CURRENT_B);
+//	BuiltInMeter.current[1] = (float)value / 8192.0f / 10.2f * 40.0f / 16.0f;
+//	if((BuiltInMeter.current[1] > 0.0f) && (BuiltInMeter.current[1] < 0.3f))
+//	{
+//		BuiltInMeter.current[1] = BuiltInMeter.current[1] - 0.2f;
+//	}
+//	
+//	value = HT7038GetSingleParameter(HT7038_REG_RMS_CURRENT_C);
+//	BuiltInMeter.current[2] = (float)value / 8192.0f / 10.2f * 40.0f / 16.0f;
+//	if((BuiltInMeter.current[2] > 0.0f) && (BuiltInMeter.current[0] < 0.3f))
+//	{
+//		BuiltInMeter.current[2] = BuiltInMeter.current[2] - 0.2f;
+//	}
+//	
+//	value = HT7038GetSingleParameter(HT7038_REG_RMS_CURRENT_ABC);
+//	BuiltInMeter.current[3] = (float)value / 8192.0f / 10.2f * 40.0f / 16.0f;
+//	if((BuiltInMeter.current[3] > 0.0f) && (BuiltInMeter.current[3] < 0.3f))
+//	{
+//		BuiltInMeter.current[3] = BuiltInMeter.current[3] - 0.2f;
+//	}
 
-	//读取有功功率
-	value = HT7038GetSingleParameter(HT7038_REG_ACTIVE_POWER_A);
-	if(value & (1 << 23))
-	{
-		value = value - 0x01000000;
-	}
-	BuiltInMeter.active_power[0] = (float)value * HT7038_K;
-	
-	value = HT7038GetSingleParameter(HT7038_REG_ACTIVE_POWER_B);
-	if(value & (1 << 23))
-	{
-		value = value - 0x01000000;
-	}
-	BuiltInMeter.active_power[1] = (float)value * HT7038_K;
-	
-	value = HT7038GetSingleParameter(HT7038_REG_ACTIVE_POWER_C);
-	if(value & (1 << 23))
-	{
-		value = value - 0x01000000;
-	}
-	BuiltInMeter.active_power[2] = (float)value * HT7038_K;
-	
-	value = HT7038GetSingleParameter(HT7038_REG_ACTIVE_POWER_ABC);
-	if(value & (1 << 23))
-	{
-		value = value - 0x01000000;
-	}
-	BuiltInMeter.active_power[3] = (float)value * HT7038_K;
-		
-	//读取无功功率
-	value = HT7038GetSingleParameter(HT7038_REG_REACTIVE_POWER_A);
-	if(value & (1 << 23))
-	{
-		value = value - 0x01000000;
-	}
-	BuiltInMeter.reactive_power[0] = (float)value * HT7038_K;
-	
-	value = HT7038GetSingleParameter(HT7038_REG_REACTIVE_POWER_B);
-	if(value & (1 << 23))
-	{
-		value = value - 0x01000000;
-	}
-	BuiltInMeter.reactive_power[1] = (float)value * HT7038_K;
-	
-	value = HT7038GetSingleParameter(HT7038_REG_REACTIVE_POWER_B);
-	if(value & (1 << 23))
-	{
-		value = value - 0x01000000;
-	}
-	BuiltInMeter.reactive_power[2] = (float)value * HT7038_K;
-	
-	value = HT7038GetSingleParameter(HT7038_REG_REACTIVE_POWER_A);
-	if(value & (1 << 23))
-	{
-		value = value - 0x01000000;
-	}
-	BuiltInMeter.reactive_power[3] = (float)value * HT7038_K;
-	
-	//读取视在功率
-	value = HT7038GetSingleParameter(HT7038_REG_APPARENT_POWER_A);
-	if(value & (1 << 23))
-	{
-		value = value - 0x01000000;
-	}
-	BuiltInMeter.apparent_power[0] = (float)value * HT7038_K;
-	
-	value = HT7038GetSingleParameter(HT7038_REG_APPARENT_POWER_B);
-	if(value & (1 << 23))
-	{
-		value = value - 0x01000000;
-	}
-	BuiltInMeter.apparent_power[1] = (float)value * HT7038_K;
-	
-	value = HT7038GetSingleParameter(HT7038_REG_APPARENT_POWER_C);
-	if(value & (1 << 23))
-	{
-		value = value - 0x01000000;
-	}
-	BuiltInMeter.apparent_power[2] = (float)value * HT7038_K;
-	
-	value = HT7038GetSingleParameter(HT7038_REG_APPARENT_POWER_ABC);
-	if(value & (1 << 23))
-	{
-		value = value - 0x01000000;
-	}
-	BuiltInMeter.apparent_power[3] = (float)value * HT7038_K;
-	
-	//读取功率因数
-	value = HT7038GetSingleParameter(HT7038_REG_PFACTOR_A);
-	if(value & (1 << 23))
-	{
-		value = value - 0x01000000;
-	}
-	BuiltInMeter.power_factor[0] = (float)value / 0x800000;
-	
-	value = HT7038GetSingleParameter(HT7038_REG_PFACTOR_B);
-	if(value & (1 << 23))
-	{
-		value = value - 0x01000000;
-	}
-	BuiltInMeter.power_factor[1] = (float)value / 0x800000;
-	
-	value = HT7038GetSingleParameter(HT7038_REG_PFACTOR_C);
-	if(value & (1 << 23))
-	{
-		value = value - 0x01000000;
-	}
-	BuiltInMeter.power_factor[2] = (float)value / 0x800000;
-	
-	value = HT7038GetSingleParameter(HT7038_REG_PFACTOR_ABC);
-	if(value & (1 << 23))
-	{
-		value = value - 0x01000000;
-	}
-	BuiltInMeter.power_factor[3] = (float)value / 0x800000;
-	
-	//读取有功电能
-	value = HT7038GetSingleParameter(HT7038_REG_ACTIVE_ENERGY_A);
-	temp = (float)value / 6400.0f / 12.0f;
-	BuiltInMeter.active_energy[0] = (double)(active_energy[0] + temp);
-	
-	value = HT7038GetSingleParameter(HT7038_REG_ACTIVE_ENERGY_B);
-	temp = (float)value / 6400.0f / 12.0f;
-	BuiltInMeter.active_energy[1] = (double)(active_energy[1] + temp);
-	
-	value = HT7038GetSingleParameter(HT7038_REG_ACTIVE_ENERGY_C);
-	temp = (float)value / 6400.0f / 12.0f;
-	BuiltInMeter.active_energy[2] = (double)(active_energy[2] + temp);
-	
-	value = HT7038GetSingleParameter(HT7038_REG_ACTIVE_ENERGY_ABC);
-	temp = (float)value / 6400.0f / 12.0f;
-	BuiltInMeter.active_energy[3] = (double)(active_energy[3] + temp);
-	
-	//读取无功电能
-	value = HT7038GetSingleParameter(HT7038_REG_REACTIVE_ENERGY_A);
-	temp = (float)value / 6400.0f / 12.0f;
-	BuiltInMeter.reactive_energy[0] = (double)(reactive_energy[0] + temp);
-	
-	value = HT7038GetSingleParameter(HT7038_REG_REACTIVE_ENERGY_B);
-	temp = (float)value / 6400.0f / 12.0f;
-	BuiltInMeter.reactive_energy[1] = (double)(reactive_energy[1] + temp);
-	
-	value = HT7038GetSingleParameter(HT7038_REG_REACTIVE_ENERGY_C);
-	temp = (float)value / 6400.0f / 12.0f;
-	BuiltInMeter.reactive_energy[2] = (double)(reactive_energy[2] + temp);
-	
-	value = HT7038GetSingleParameter(HT7038_REG_REACTIVE_ENERGY_ABC);
-	temp = (float)value / 6400.0f / 12.0f;
-	BuiltInMeter.reactive_energy[3] = (double)(reactive_energy[3] + temp);
-	
-	//读取视在电能
-	value = HT7038GetSingleParameter(HT7038_REG_APPARENT_ENERGY_A);
-	temp = (float)value / 6400.0f / 12.0f;
-	BuiltInMeter.apparent_energy[0] = (double)(apparent_energy[0] + temp);
-	
-	value = HT7038GetSingleParameter(HT7038_REG_APPARENT_ENERGY_B);
-	temp = (float)value / 6400.0f / 12.0f;
-	BuiltInMeter.apparent_energy[1] = (double)(apparent_energy[1] + temp);
-	
-	value = HT7038GetSingleParameter(HT7038_REG_APPARENT_ENERGY_C);
-	temp = (float)value / 6400.0f / 12.0f;
-	BuiltInMeter.apparent_energy[2] = (double)(apparent_energy[2] + temp);
-	
-	value = HT7038GetSingleParameter(HT7038_REG_APPARENT_ENERGY_ABC);
-	temp = (float)value / 6400.0f / 12.0f;
-	BuiltInMeter.apparent_energy[3] = (double)(apparent_energy[3] + temp);
-	
-	//读取频率
-	value = HT7038GetSingleParameter(HT7038_REG_FREQUENCY);
-	BuiltInMeter.frequency = (float)value / 0x2000;
-}
+//	//读取有功功率
+//	value = HT7038GetSingleParameter(HT7038_REG_ACTIVE_POWER_A);
+//	if(value & (1 << 23))
+//	{
+//		value = value - 0x01000000;
+//	}
+//	BuiltInMeter.active_power[0] = (float)value * HT7038_K;
+//	
+//	value = HT7038GetSingleParameter(HT7038_REG_ACTIVE_POWER_B);
+//	if(value & (1 << 23))
+//	{
+//		value = value - 0x01000000;
+//	}
+//	BuiltInMeter.active_power[1] = (float)value * HT7038_K;
+//	
+//	value = HT7038GetSingleParameter(HT7038_REG_ACTIVE_POWER_C);
+//	if(value & (1 << 23))
+//	{
+//		value = value - 0x01000000;
+//	}
+//	BuiltInMeter.active_power[2] = (float)value * HT7038_K;
+//	
+//	value = HT7038GetSingleParameter(HT7038_REG_ACTIVE_POWER_ABC);
+//	if(value & (1 << 23))
+//	{
+//		value = value - 0x01000000;
+//	}
+//	BuiltInMeter.active_power[3] = (float)value * HT7038_K;
+//		
+//	//读取无功功率
+//	value = HT7038GetSingleParameter(HT7038_REG_REACTIVE_POWER_A);
+//	if(value & (1 << 23))
+//	{
+//		value = value - 0x01000000;
+//	}
+//	BuiltInMeter.reactive_power[0] = (float)value * HT7038_K;
+//	
+//	value = HT7038GetSingleParameter(HT7038_REG_REACTIVE_POWER_B);
+//	if(value & (1 << 23))
+//	{
+//		value = value - 0x01000000;
+//	}
+//	BuiltInMeter.reactive_power[1] = (float)value * HT7038_K;
+//	
+//	value = HT7038GetSingleParameter(HT7038_REG_REACTIVE_POWER_B);
+//	if(value & (1 << 23))
+//	{
+//		value = value - 0x01000000;
+//	}
+//	BuiltInMeter.reactive_power[2] = (float)value * HT7038_K;
+//	
+//	value = HT7038GetSingleParameter(HT7038_REG_REACTIVE_POWER_A);
+//	if(value & (1 << 23))
+//	{
+//		value = value - 0x01000000;
+//	}
+//	BuiltInMeter.reactive_power[3] = (float)value * HT7038_K;
+//	
+//	//读取视在功率
+//	value = HT7038GetSingleParameter(HT7038_REG_APPARENT_POWER_A);
+//	if(value & (1 << 23))
+//	{
+//		value = value - 0x01000000;
+//	}
+//	BuiltInMeter.apparent_power[0] = (float)value * HT7038_K;
+//	
+//	value = HT7038GetSingleParameter(HT7038_REG_APPARENT_POWER_B);
+//	if(value & (1 << 23))
+//	{
+//		value = value - 0x01000000;
+//	}
+//	BuiltInMeter.apparent_power[1] = (float)value * HT7038_K;
+//	
+//	value = HT7038GetSingleParameter(HT7038_REG_APPARENT_POWER_C);
+//	if(value & (1 << 23))
+//	{
+//		value = value - 0x01000000;
+//	}
+//	BuiltInMeter.apparent_power[2] = (float)value * HT7038_K;
+//	
+//	value = HT7038GetSingleParameter(HT7038_REG_APPARENT_POWER_ABC);
+//	if(value & (1 << 23))
+//	{
+//		value = value - 0x01000000;
+//	}
+//	BuiltInMeter.apparent_power[3] = (float)value * HT7038_K;
+//	
+//	//读取功率因数
+//	value = HT7038GetSingleParameter(HT7038_REG_PFACTOR_A);
+//	if(value & (1 << 23))
+//	{
+//		value = value - 0x01000000;
+//	}
+//	BuiltInMeter.power_factor[0] = (float)value / 0x800000;
+//	
+//	value = HT7038GetSingleParameter(HT7038_REG_PFACTOR_B);
+//	if(value & (1 << 23))
+//	{
+//		value = value - 0x01000000;
+//	}
+//	BuiltInMeter.power_factor[1] = (float)value / 0x800000;
+//	
+//	value = HT7038GetSingleParameter(HT7038_REG_PFACTOR_C);
+//	if(value & (1 << 23))
+//	{
+//		value = value - 0x01000000;
+//	}
+//	BuiltInMeter.power_factor[2] = (float)value / 0x800000;
+//	
+//	value = HT7038GetSingleParameter(HT7038_REG_PFACTOR_ABC);
+//	if(value & (1 << 23))
+//	{
+//		value = value - 0x01000000;
+//	}
+//	BuiltInMeter.power_factor[3] = (float)value / 0x800000;
+//	
+//	//读取有功电能
+//	value = HT7038GetSingleParameter(HT7038_REG_ACTIVE_ENERGY_A);
+//	temp = (float)value / 6400.0f / 12.0f;
+//	BuiltInMeter.active_energy[0] = (double)(active_energy[0] + temp);
+//	
+//	value = HT7038GetSingleParameter(HT7038_REG_ACTIVE_ENERGY_B);
+//	temp = (float)value / 6400.0f / 12.0f;
+//	BuiltInMeter.active_energy[1] = (double)(active_energy[1] + temp);
+//	
+//	value = HT7038GetSingleParameter(HT7038_REG_ACTIVE_ENERGY_C);
+//	temp = (float)value / 6400.0f / 12.0f;
+//	BuiltInMeter.active_energy[2] = (double)(active_energy[2] + temp);
+//	
+//	value = HT7038GetSingleParameter(HT7038_REG_ACTIVE_ENERGY_ABC);
+//	temp = (float)value / 6400.0f / 12.0f;
+//	BuiltInMeter.active_energy[3] = (double)(active_energy[3] + temp);
+//	
+//	//读取无功电能
+//	value = HT7038GetSingleParameter(HT7038_REG_REACTIVE_ENERGY_A);
+//	temp = (float)value / 6400.0f / 12.0f;
+//	BuiltInMeter.reactive_energy[0] = (double)(reactive_energy[0] + temp);
+//	
+//	value = HT7038GetSingleParameter(HT7038_REG_REACTIVE_ENERGY_B);
+//	temp = (float)value / 6400.0f / 12.0f;
+//	BuiltInMeter.reactive_energy[1] = (double)(reactive_energy[1] + temp);
+//	
+//	value = HT7038GetSingleParameter(HT7038_REG_REACTIVE_ENERGY_C);
+//	temp = (float)value / 6400.0f / 12.0f;
+//	BuiltInMeter.reactive_energy[2] = (double)(reactive_energy[2] + temp);
+//	
+//	value = HT7038GetSingleParameter(HT7038_REG_REACTIVE_ENERGY_ABC);
+//	temp = (float)value / 6400.0f / 12.0f;
+//	BuiltInMeter.reactive_energy[3] = (double)(reactive_energy[3] + temp);
+//	
+//	//读取视在电能
+//	value = HT7038GetSingleParameter(HT7038_REG_APPARENT_ENERGY_A);
+//	temp = (float)value / 6400.0f / 12.0f;
+//	BuiltInMeter.apparent_energy[0] = (double)(apparent_energy[0] + temp);
+//	
+//	value = HT7038GetSingleParameter(HT7038_REG_APPARENT_ENERGY_B);
+//	temp = (float)value / 6400.0f / 12.0f;
+//	BuiltInMeter.apparent_energy[1] = (double)(apparent_energy[1] + temp);
+//	
+//	value = HT7038GetSingleParameter(HT7038_REG_APPARENT_ENERGY_C);
+//	temp = (float)value / 6400.0f / 12.0f;
+//	BuiltInMeter.apparent_energy[2] = (double)(apparent_energy[2] + temp);
+//	
+//	value = HT7038GetSingleParameter(HT7038_REG_APPARENT_ENERGY_ABC);
+//	temp = (float)value / 6400.0f / 12.0f;
+//	BuiltInMeter.apparent_energy[3] = (double)(apparent_energy[3] + temp);
+//	
+//	//读取频率
+//	value = HT7038GetSingleParameter(HT7038_REG_FREQUENCY);
+//	BuiltInMeter.frequency = (float)value / 0x2000;
+//}
 
 
 

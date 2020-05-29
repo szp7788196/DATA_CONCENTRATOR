@@ -16,7 +16,7 @@ void vTaskRS485(void *pvParameters)
 	{
 		RecvRs485FrameQueueAndSendToDeviceAndWaitResponse();
 
-		delay_ms(100);
+		delay_ms(200);
 	}
 }
 
@@ -36,22 +36,13 @@ void RecvRs485FrameQueueAndSendToDeviceAndWaitResponse(void)
 
 	if(xResult == pdPASS)
 	{
-		if(send_rs485_frame->device_type == ELECTRIC_METER && 
-		   send_rs485_frame->buf[0] == 0xFE && 
-		   send_rs485_frame->buf[1] == 0xFE && 
-		   send_rs485_frame->buf[2] == 0xFE && 
-		   send_rs485_frame->buf[3] == 0xFE)
-		{
-			USART5_Init(9600,USART_Parity_Even);
-		}
-		
 		re_send_times = 0;
 		responsed = 0;
 
 		RE_SEND:
 		UsartSendString(UART5,send_rs485_frame->buf, send_rs485_frame->len);
 
-		time_out = 350;
+		time_out = 100;
 
 		while(time_out)
 		{
@@ -92,8 +83,8 @@ void RecvRs485FrameQueueAndSendToDeviceAndWaitResponse(void)
 									xQueue_Rs485XxFrame = xQueue_InputCollectorRs485Frame;
 								break;
 
-								case (u8)ELECTRIC_METER:			//电表
-									xQueue_Rs485XxFrame = xQueue_ElectricMeterRs485Frame;
+								case (u8)ELECTRICITY_METER:			//电表
+									xQueue_Rs485XxFrame = xQueue_ElectricityMeterRs485Frame;
 								break;
 
 								case (u8)LUMETER:					//光感传感器
@@ -127,15 +118,13 @@ void RecvRs485FrameQueueAndSendToDeviceAndWaitResponse(void)
 		{
 			re_send_times ++;
 
-			if(re_send_times <= 3)
+			if(re_send_times <= 2)
 			{
 				goto RE_SEND;
 			}
 		}
 
 		DeleteRs485Frame(send_rs485_frame);
-		
-		USART5_Init(9600,USART_Parity_No);
 	}
 }
 

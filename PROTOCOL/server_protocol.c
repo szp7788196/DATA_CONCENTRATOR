@@ -61,8 +61,8 @@ u8 TransServerFrameStructToOtherTask(ServerFrameStruct_S *server_frame_struct,DE
 			xQueue_DeviceXxFrameStruct = xQueue_InputCollectorFrameStruct;
 		break;
 
-		case (u8)ELECTRIC_METER:
-			xQueue_DeviceXxFrameStruct = xQueue_ElectricMeterFrameStruct;
+		case (u8)ELECTRICITY_METER:
+			xQueue_DeviceXxFrameStruct = xQueue_ElectricityMeterFrameStruct;
 		break;
 
 		case (u8)LUMETER:

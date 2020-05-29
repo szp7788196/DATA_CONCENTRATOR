@@ -1,22 +1,19 @@
-#include "input_collector_comm.h"
+#include "electricity_meter_comm.h"
 #include "concentrator_comm.h"
 #include "common.h"
 
+u8 ElectricityMeterStateChangesReportResponse = 0;
 
-u8 InputCollectorStateChangesReportResponse = 0;
 
-//发送状态变化事件
-void InputCollectorSendStateChangesReportFrameToServer(InputCollectorState_S *module_state)
+void ElectricityMeterSendStateChangesReportFrameToServer(ElectricityMeterState_S *module_state)
 {
 	u8 i = 0;
 	u8 m = 0;
-	u8 n = 0;
-	u8 a_loop_num = 0;
 	char tmp[25] = {0};
 	char *buf = NULL;
 	ServerFrameStruct_S *server_frame_struct = NULL;		//用于响应服务器
 
-	buf = (char *)pvPortMalloc(400 * sizeof(char));
+	buf = (char *)pvPortMalloc(500 * sizeof(char));
 
 	if(buf != NULL)
 	{
@@ -29,8 +26,8 @@ void InputCollectorSendStateChangesReportFrameToServer(InputCollectorState_S *mo
 			server_frame_struct->msg_type 	= (u8)DEVICE_REQUEST_UP;	//响应服务器类型
 			server_frame_struct->msg_len 	= 10;
 			server_frame_struct->err_code 	= (u8)NO_ERR;
-			server_frame_struct->msg_id		= 0x0371;
-			server_frame_struct->para_num	= 6;
+			server_frame_struct->msg_id		= 0x0471;
+			server_frame_struct->para_num	= module_state->ch_num + 1 + 3;
 
 			server_frame_struct->para = (Parameter_S *)pvPortMalloc(server_frame_struct->para_num * sizeof(Parameter_S));
 
@@ -60,27 +57,9 @@ void InputCollectorSendStateChangesReportFrameToServer(InputCollectorState_S *mo
 				}
 				i ++;
 
-				server_frame_struct->para[i].type = 0x3003;
+				server_frame_struct->para[i].type = 0x8003;
 				memset(buf,0,25);
-				if(module_state->d_channel_bit != 0)
-				{
-					sprintf(buf, "%04x",module_state->d_channel_bit);
-					server_frame_struct->para[i].len = strlen(buf);
-				}
-				else
-				{
-					server_frame_struct->para[i].len = 0;
-				}
-				server_frame_struct->para[i].value = (u8 *)pvPortMalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
-				if(server_frame_struct->para[i].value != NULL)
-				{
-					memcpy(server_frame_struct->para[i].value,buf,server_frame_struct->para[i].len + 1);
-				}
-				i ++;
-
-				server_frame_struct->para[i].type = 0x3004;
-				memset(buf,0,25);
-				sprintf(buf, "%04x",module_state->d_current_state);
+				sprintf(buf, "%d",module_state->ch_num);
 				server_frame_struct->para[i].len = strlen(buf);
 				server_frame_struct->para[i].value = (u8 *)pvPortMalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
 				if(server_frame_struct->para[i].value != NULL)
@@ -89,53 +68,58 @@ void InputCollectorSendStateChangesReportFrameToServer(InputCollectorState_S *mo
 				}
 				i ++;
 
-				server_frame_struct->para[i].type = 0x3005;
-				memset(buf,0,25);
-				if(module_state->a_channel_bit != 0)
+				for(m = 0; m < module_state->ch_num + 1; m ++)
 				{
-					sprintf(buf, "%04x",module_state->a_channel_bit);
-					server_frame_struct->para[i].len = strlen(buf);
-				}
-				else
-				{
-					server_frame_struct->para[i].len = 0;
-				}
-				server_frame_struct->para[i].value = (u8 *)pvPortMalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
-				if(server_frame_struct->para[i].value != NULL)
-				{
-					memcpy(server_frame_struct->para[i].value,buf,server_frame_struct->para[i].len + 1);
-				}
-				i ++;
+					server_frame_struct->para[i].type = 0x8004 + m;
+					memset(buf,0,500);
 
-				server_frame_struct->para[i].type = 0x4006;
-				memset(buf,0,400);
-				
-				for(n = 0; n < MAX_INPUT_COLLECTOR_A_LOOP_CH_NUM; n ++)
-				{
-					if(module_state->a_channel_bit & (1 << n))
-					{
-						a_loop_num ++;
-					}
-				}
-				
-				for(m = 0; m < a_loop_num; m ++)
-				{
 					memset(tmp,0,25);
-					sprintf(tmp, "%f",module_state->a_current_state[m]);
+					sprintf(tmp, "%0.2f",module_state->current_para[m].voltage);
 					strcat(buf,tmp);
-					
-					if(m < a_loop_num - 1)
+					strcat(buf,",");
+
+					memset(tmp,0,25);
+					sprintf(tmp, "%0.3f",module_state->current_para[m].current);
+					strcat(buf,tmp);
+					strcat(buf,",");
+
+					memset(tmp,0,25);
+					sprintf(tmp, "%0.3f",module_state->current_para[m].active_power);
+					strcat(buf,tmp);
+					strcat(buf,",");
+
+					memset(tmp,0,25);
+					sprintf(tmp, "%0.2f",module_state->current_para[m].active_energy);
+					strcat(buf,tmp);
+					strcat(buf,",");
+
+					memset(tmp,0,25);
+					sprintf(tmp, "%0.2f",module_state->current_para[m].reactive_energy);
+					strcat(buf,tmp);
+					strcat(buf,",");
+
+					memset(tmp,0,25);
+					sprintf(tmp, "%0.2f",module_state->current_para[m].power_factor);
+					strcat(buf,tmp);
+					strcat(buf,",");
+
+					memset(tmp,0,25);
+					sprintf(tmp, "%0.2f",module_state->current_para[m].frequency);
+					strcat(buf,tmp);
+					strcat(buf,",");
+
+					memset(tmp,0,25);
+					sprintf(tmp, "%0.2f",module_state->current_para[m].line_voltage);
+					strcat(buf,tmp);
+
+					server_frame_struct->para[i].len = strlen(buf);
+					server_frame_struct->para[i].value = (u8 *)pvPortMalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
+					if(server_frame_struct->para[i].value != NULL)
 					{
-						strcat(buf,",");
+						memcpy(server_frame_struct->para[i].value,buf,server_frame_struct->para[i].len + 1);
 					}
+					i ++;
 				}
-				server_frame_struct->para[i].len = strlen(buf);
-				server_frame_struct->para[i].value = (u8 *)pvPortMalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
-				if(server_frame_struct->para[i].value != NULL)
-				{
-					memcpy(server_frame_struct->para[i].value,buf,server_frame_struct->para[i].len + 1);
-				}
-				i ++;
 			}
 
 			ConvertFrameStructToFrame(server_frame_struct);
@@ -146,14 +130,14 @@ void InputCollectorSendStateChangesReportFrameToServer(InputCollectorState_S *mo
 }
 
 //向服务器发送状态变化事件
-void InputCollectorSendStateChangesReportToServer(void)
+void ElectricityMeterSendStateChangesReportToServer(void)
 {
 	BaseType_t xResult;
-	static InputCollectorState_S *module_state = NULL;
+	static ElectricityMeterState_S *module_state = NULL;
 	static time_t time_5 = 0;
 	static u8 retry_times5 = 0;
 
-	if(InputCollectorStateChangesReportResponse == 0)
+	if(ElectricityMeterStateChangesReportResponse == 0)
 	{
 		if(module_state != NULL)
 		{
@@ -163,22 +147,22 @@ void InputCollectorSendStateChangesReportToServer(void)
 
 		if(module_state == NULL)
 		{
-			xResult = xQueueReceive(xQueue_InputCollectorState,(void *)&module_state,(TickType_t)pdMS_TO_TICKS(1));
+			xResult = xQueueReceive(xQueue_ElectricityMeterState,(void *)&module_state,(TickType_t)pdMS_TO_TICKS(1));
 
 			if(xResult == pdPASS)
 			{
-				InputCollectorStateChangesReportResponse = 1;
+				ElectricityMeterStateChangesReportResponse = 1;
 
 				time_5 = GetSysTick1s();
 				retry_times5 = 0;
 
 				RE_SEND_STATE_CHANGES_REPORT:
-				InputCollectorSendStateChangesReportFrameToServer(module_state);
+				ElectricityMeterSendStateChangesReportFrameToServer(module_state);
 			}
 		}
 	}
 
-	if(InputCollectorStateChangesReportResponse == 1)
+	if(ElectricityMeterStateChangesReportResponse == 1)
 	{
 		if(GetSysTick1s() - time_5 >= ConcentratorBasicConfig.command_response_timeout)
 		{
@@ -192,7 +176,7 @@ void InputCollectorSendStateChangesReportToServer(void)
 			{
 				retry_times5 = 0;
 
-				InputCollectorStateChangesReportResponse = 0;
+				ElectricityMeterStateChangesReportResponse = 0;
 
 				vPortFree(module_state);
 				module_state = NULL;
@@ -201,13 +185,16 @@ void InputCollectorSendStateChangesReportToServer(void)
 	}
 }
 
+
+
+
 //处理接收到的报文
-void InputCollectorRecvAndHandleFrameStruct(void)
+void ElectricityMeterRecvAndHandleFrameStruct(void)
 {
 	BaseType_t xResult;
 	ServerFrameStruct_S *server_frame_struct = NULL;
 
-	xResult = xQueueReceive(xQueue_InputCollectorFrameStruct,(void *)&server_frame_struct,(TickType_t)pdMS_TO_TICKS(1));
+	xResult = xQueueReceive(xQueue_ElectricityMeterFrameStruct,(void *)&server_frame_struct,(TickType_t)pdMS_TO_TICKS(1));
 
 	if(xResult == pdPASS )
 	{
@@ -217,48 +204,48 @@ void InputCollectorRecvAndHandleFrameStruct(void)
 
 			break;
 
-			case 0x0370:	//状态查询
-				InputCollectorGetCurrentState(server_frame_struct);
+			case 0x0470:	//状态查询
+				ElectricityMeterGetCurrentState(server_frame_struct);
 			break;
 
-			case 0x0371:	//状态上报
-				InputCollectorStateChangesReportResponse = 0;
+			case 0x0471:	//状态上报
+				ElectricityMeterStateChangesReportResponse = 0;
 			break;
 
-			case 0x0372:	//状态历史查询
+			case 0x0472:	//状态历史查询
 
 			break;
 
-			case 0x03A0:	//告警上报
+			case 0x04A0:	//告警上报
 				AlarmReportResponse = 0;
 			break;
 
-			case 0x03A1:	//告警解除
+			case 0x04A1:	//告警解除
 				AlarmReportResponse = 0;
 			break;
 
-			case 0x03A2:	//事件上报
+			case 0x04A2:	//事件上报
 
 			break;
 
-			case 0x03A3:	//告警配置
-				InputCollectorSetAlarmConfiguration(server_frame_struct);
+			case 0x04A3:	//告警配置
+				ElectricityMeterSetAlarmConfiguration(server_frame_struct);
 			break;
 
-			case 0x03A4:	//告警配置查询
-				InputCollectorGetAlarmConfiguration(server_frame_struct);
+			case 0x04A4:	//告警配置查询
+				ElectricityMeterGetAlarmConfiguration(server_frame_struct);
 			break;
 
-			case 0x03A5:	//告警历史查询
-				InputCollectorGetAlarmReportHistory(server_frame_struct);
+			case 0x04A5:	//告警历史查询
+				ElectricityMeterGetAlarmReportHistory(server_frame_struct);
 			break;
 
-			case 0x03D0:	//基础配置
-				InputCollectorSetBasicConfiguration(server_frame_struct);
+			case 0x04D0:	//基础配置
+				ElectricityMeterSetBasicConfiguration(server_frame_struct);
 			break;
 
-			case 0x03D1:	//查询基础配置
-				InputCollectorGetBasicConfiguration(server_frame_struct);
+			case 0x04D1:	//查询基础配置
+				ElectricityMeterGetBasicConfiguration(server_frame_struct);
 			break;
 
 			default:
@@ -270,7 +257,7 @@ void InputCollectorRecvAndHandleFrameStruct(void)
 }
 
 //状态查询
-u8 InputCollectorGetCurrentState(ServerFrameStruct_S *server_frame_struct)
+u8 ElectricityMeterGetCurrentState(ServerFrameStruct_S *server_frame_struct)
 {
 	u8 i = 0;
 	u8 j = 0;
@@ -281,9 +268,9 @@ u8 InputCollectorGetCurrentState(ServerFrameStruct_S *server_frame_struct)
 	u8 module_num = 0;
 	u8 add = 0;
 	u8 ch = 0;
+	char *msg = NULL;
 	char tmp[25] = {0};
 	char *buf = NULL;
-	char *msg = NULL;
 
 	ServerFrameStruct_S *resp_server_frame_struct = NULL;		//用于响应服务器
 
@@ -301,7 +288,7 @@ u8 InputCollectorGetCurrentState(ServerFrameStruct_S *server_frame_struct)
 
 			ret = ConvertFrameStructToFrame(resp_server_frame_struct);
 
-			buf = (char *)pvPortMalloc(400 * sizeof(char));
+			buf = (char *)pvPortMalloc(500 * sizeof(char));
 
 			if(buf != NULL)
 			{
@@ -309,12 +296,12 @@ u8 InputCollectorGetCurrentState(ServerFrameStruct_S *server_frame_struct)
 
 				for(k = 0; k < module_num; k ++)
 				{
-					for(j = 0; j < InputCollectorConfigNum.number; j ++)
+					for(j = 0; j < ElectricityMeterConfigNum.number; j ++)
 					{
 						n = 0;
-						
+
 						msg = (char *)server_frame_struct->para[k * 2 + 0].value;
-						
+
 						while(*msg != '\0')
 						tmp[n ++] = *(msg ++);
 						tmp[n] = '\0';
@@ -328,7 +315,7 @@ u8 InputCollectorGetCurrentState(ServerFrameStruct_S *server_frame_struct)
 
 						ch = myatoi((char *)server_frame_struct->para[k * 2 + 1].value);
 
-						if(add == InputCollectorState[j].address && ch == InputCollectorState[j].channel)
+						if(add == ElectricityMeterState[j].address && ch == ElectricityMeterState[j].channel)
 						{
 							ServerFrameStruct_S *state_server_frame_struct = NULL;		//用于响应服务器
 
@@ -342,7 +329,7 @@ u8 InputCollectorGetCurrentState(ServerFrameStruct_S *server_frame_struct)
 								state_server_frame_struct->msg_len 	= 10;
 								state_server_frame_struct->err_code = (u8)NO_ERR;
 
-								state_server_frame_struct->para_num = 6;
+								state_server_frame_struct->para_num = ElectricityMeterState[j].ch_num + 1 + 3;
 
 								state_server_frame_struct->para = (Parameter_S *)pvPortMalloc(state_server_frame_struct->para_num * sizeof(Parameter_S));
 
@@ -352,7 +339,7 @@ u8 InputCollectorGetCurrentState(ServerFrameStruct_S *server_frame_struct)
 
 									state_server_frame_struct->para[i].type = 0x3001;
 									memset(buf,0,25);
-									sprintf(buf, "%x",InputCollectorState[j].address);
+									sprintf(buf, "%x",ElectricityMeterState[j].address);
 									state_server_frame_struct->para[i].len = strlen(buf);
 									state_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((state_server_frame_struct->para[i].len + 1) * sizeof(u8));
 									if(state_server_frame_struct->para[i].value != NULL)
@@ -363,7 +350,7 @@ u8 InputCollectorGetCurrentState(ServerFrameStruct_S *server_frame_struct)
 
 									state_server_frame_struct->para[i].type = 0x4002;
 									memset(buf,0,25);
-									sprintf(buf, "%d",InputCollectorState[j].channel);
+									sprintf(buf, "%d",ElectricityMeterState[j].channel);
 									state_server_frame_struct->para[i].len = strlen(buf);
 									state_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((state_server_frame_struct->para[i].len + 1) * sizeof(u8));
 									if(state_server_frame_struct->para[i].value != NULL)
@@ -372,27 +359,9 @@ u8 InputCollectorGetCurrentState(ServerFrameStruct_S *server_frame_struct)
 									}
 									i ++;
 
-									state_server_frame_struct->para[i].type = 0x3003;
+									state_server_frame_struct->para[i].type = 0x8003;
 									memset(buf,0,25);
-									if(InputCollectorState[j].d_channel_bit != 0)
-									{
-										sprintf(buf, "%04x",InputCollectorState[j].d_channel_bit);
-										state_server_frame_struct->para[i].len = strlen(buf);
-									}
-									else
-									{
-										state_server_frame_struct->para[i].len = 0;
-									}
-									state_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((state_server_frame_struct->para[i].len + 1) * sizeof(u8));
-									if(state_server_frame_struct->para[i].value != NULL)
-									{
-										memcpy(state_server_frame_struct->para[i].value,buf,state_server_frame_struct->para[i].len + 1);
-									}
-									i ++;
-
-									state_server_frame_struct->para[i].type = 0x3004;
-									memset(buf,0,25);
-									sprintf(buf, "%04x",InputCollectorState[j].d_current_state);
+									sprintf(buf, "%d",ElectricityMeterState[j].ch_num);
 									state_server_frame_struct->para[i].len = strlen(buf);
 									state_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((state_server_frame_struct->para[i].len + 1) * sizeof(u8));
 									if(state_server_frame_struct->para[i].value != NULL)
@@ -401,46 +370,60 @@ u8 InputCollectorGetCurrentState(ServerFrameStruct_S *server_frame_struct)
 									}
 									i ++;
 
-									state_server_frame_struct->para[i].type = 0x3005;
-									memset(buf,0,25);
-									if(InputCollectorState[j].a_channel_bit != 0)
+									for(m = 0; m < ElectricityMeterState[j].ch_num + 1; m ++)
 									{
-										sprintf(buf, "%04x",InputCollectorState[j].a_channel_bit);
-										state_server_frame_struct->para[i].len = strlen(buf);
-									}
-									else
-									{
-										state_server_frame_struct->para[i].len = 0;
-									}
-									state_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((state_server_frame_struct->para[i].len + 1) * sizeof(u8));
-									if(state_server_frame_struct->para[i].value != NULL)
-									{
-										memcpy(state_server_frame_struct->para[i].value,buf,state_server_frame_struct->para[i].len + 1);
-									}
-									i ++;
+										state_server_frame_struct->para[i].type = 0x8004 + m;
+										memset(buf,0,500);
 
-									state_server_frame_struct->para[i].type = 0x4006;
-									memset(buf,0,400);
-									for(m = 0; m < InputCollectorConfig[j].a_loop_num; m ++)
-									{
 										memset(tmp,0,25);
-										sprintf(tmp, "%f",InputCollectorState[j].a_current_state[m]);
+										sprintf(tmp, "%0.2f",ElectricityMeterState[j].current_para[m].voltage);
 										strcat(buf,tmp);
-										
-										if(m < InputCollectorConfig[j].a_loop_num - 1)
+										strcat(buf,",");
+
+										memset(tmp,0,25);
+										sprintf(tmp, "%0.3f",ElectricityMeterState[j].current_para[m].current);
+										strcat(buf,tmp);
+										strcat(buf,",");
+
+										memset(tmp,0,25);
+										sprintf(tmp, "%0.3f",ElectricityMeterState[j].current_para[m].active_power);
+										strcat(buf,tmp);
+										strcat(buf,",");
+
+										memset(tmp,0,25);
+										sprintf(tmp, "%0.2f",ElectricityMeterState[j].current_para[m].active_energy);
+										strcat(buf,tmp);
+										strcat(buf,",");
+
+										memset(tmp,0,25);
+										sprintf(tmp, "%0.2f",ElectricityMeterState[j].current_para[m].reactive_energy);
+										strcat(buf,tmp);
+										strcat(buf,",");
+
+										memset(tmp,0,25);
+										sprintf(tmp, "%0.2f",ElectricityMeterState[j].current_para[m].power_factor);
+										strcat(buf,tmp);
+										strcat(buf,",");
+
+										memset(tmp,0,25);
+										sprintf(tmp, "%0.2f",ElectricityMeterState[j].current_para[m].frequency);
+										strcat(buf,tmp);
+										strcat(buf,",");
+
+										memset(tmp,0,25);
+										sprintf(tmp, "%0.2f",ElectricityMeterState[j].current_para[m].line_voltage);
+										strcat(buf,tmp);
+
+										state_server_frame_struct->para[i].len = strlen(buf);
+										state_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((state_server_frame_struct->para[i].len + 1) * sizeof(u8));
+										if(state_server_frame_struct->para[i].value != NULL)
 										{
-											strcat(buf,",");
+											memcpy(state_server_frame_struct->para[i].value,buf,state_server_frame_struct->para[i].len + 1);
 										}
+										i ++;
 									}
-									state_server_frame_struct->para[i].len = strlen(buf);
-									state_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((state_server_frame_struct->para[i].len + 1) * sizeof(u8));
-									if(state_server_frame_struct->para[i].value != NULL)
-									{
-										memcpy(state_server_frame_struct->para[i].value,buf,state_server_frame_struct->para[i].len + 1);
-									}
-									i ++;
 								}
-								
+
 								ret = ConvertFrameStructToFrame(state_server_frame_struct);
 							}
 						}
@@ -456,7 +439,7 @@ u8 InputCollectorGetCurrentState(ServerFrameStruct_S *server_frame_struct)
 }
 
 //设置告警配置参数
-u8 InputCollectorSetAlarmConfiguration(ServerFrameStruct_S *server_frame_struct)
+u8 ElectricityMeterSetAlarmConfiguration(ServerFrameStruct_S *server_frame_struct)
 {
 	u8 ret = 0;
 	u8 i = 0;
@@ -467,6 +450,7 @@ u8 InputCollectorSetAlarmConfiguration(ServerFrameStruct_S *server_frame_struct)
 	u8 add = 0;
 	u8 ch = 0;
 	u8 loop_ch = 0;
+	u8 para_id = 0;
 	u8 seg_num = 0;
 	char tmp[10];
 	char *msg = NULL;
@@ -478,7 +462,7 @@ u8 InputCollectorSetAlarmConfiguration(ServerFrameStruct_S *server_frame_struct)
 		switch(server_frame_struct->para[j].type)
 		{
 			case 0x6001:
-				InputCollectorAlarmConfig.d_quantity_abnormal_alarm_enable = myatoi((char *)server_frame_struct->para[i].value);
+				ElectricityMeterAlarmConfig.electrical_parameters_thre_over_alarm_enable = myatoi((char *)server_frame_struct->para[i].value);
 			break;
 
 			case 0x4002:
@@ -501,7 +485,7 @@ u8 InputCollectorSetAlarmConfiguration(ServerFrameStruct_S *server_frame_struct)
 					msg = (char *)server_frame_struct->para[j].value;
 
 					i = 0;
-					
+
 					for(n = 0; n < seg_num; n ++)
 					{
 						while(*msg != ',')
@@ -523,10 +507,10 @@ u8 InputCollectorSetAlarmConfiguration(ServerFrameStruct_S *server_frame_struct)
 						msg = msg + 1;
 						ch = myatoi(tmp);
 
-						for(m = 0; m < InputCollectorConfigNum.number; m ++)
+						for(m = 0; m < ElectricityMeterConfigNum.number; m ++)
 						{
-							if(add == InputCollectorConfig[m].address &&
-							   ch == InputCollectorConfig[m].channel)
+							if(add == ElectricityMeterConfig[m].address &&
+							   ch == ElectricityMeterConfig[m].channel)
 							{
 								break;
 							}
@@ -538,128 +522,28 @@ u8 InputCollectorSetAlarmConfiguration(ServerFrameStruct_S *server_frame_struct)
 						i = 0;
 						msg = msg + 1;
 						loop_ch = myatoi(tmp);
-						if(loop_ch < MAX_INPUT_COLLECTOR_D_LOOP_CH_NUM)
-						{
-							if(loop_ch == 0)
-							{
-								loop_ch = 1;
-							}
-							
-							InputCollectorConfig[m].d_alarm_thre[loop_ch - 1].channel = loop_ch;
-
-							while(*msg != ',')
-							tmp[i ++] = *(msg ++);
-							tmp[i] = '\0';
-							i = 0;
-							msg = msg + 1;
-							InputCollectorConfig[m].d_alarm_thre[loop_ch - 1].alarm_level = myatoi(tmp);
-
-							while(*msg != ',')
-							tmp[i ++] = *(msg ++);
-							tmp[i] = '\0';
-							i = 0;
-							msg = msg + 1;
-							InputCollectorConfig[m].d_alarm_thre[loop_ch - 1].confirm_time = myatoi(tmp);
-
-							while(*msg != ',')
-							tmp[i ++] = *(msg ++);
-							tmp[i] = '\0';
-							i = 0;
-							msg = msg + 1;
-							InputCollectorConfig[m].d_alarm_thre[loop_ch - 1].switch_run_mode = myatoi(tmp);
-
-							while(*msg != ',')
-							tmp[i ++] = *(msg ++);
-							tmp[i] = '\0';
-							i = 0;
-							msg = msg + 1;
-							InputCollectorConfig[m].d_alarm_thre[loop_ch - 1].resume_run_mode = myatoi(tmp);
-							
-							while(*msg != ',' && *msg != '|' && *msg != '\0')
-							tmp[i ++] = *(msg ++);
-							tmp[i] = '\0';
-							i = 0;
-							msg = msg + 1;
-							InputCollectorConfig[m].d_alarm_thre[loop_ch - 1].relay_action = myatoi(tmp);
-						}
-					}
-
-					for(k = 0; k < InputCollectorConfigNum.number; k ++)
-					{
-						WriteInputCollectorConfig(k,0,1);
-					}
-				}
-			break;
-
-			case 0x6003:
-				InputCollectorAlarmConfig.a_quantity_abnormal_alarm_enable = myatoi((char *)server_frame_struct->para[i].value);
-			break;
-
-			case 0x4004:
-				msg = (char *)server_frame_struct->para[j].value;
-
-				if(server_frame_struct->para[j].len != 0)
-				{
-					seg_num = 0;
-
-					while(*msg != '\0')
-					{
-						if(*(msg ++) == '|')
-						{
-							seg_num ++;
-						}
-					}
-
-					seg_num ++;
-
-					msg = (char *)server_frame_struct->para[j].value;
-
-					i = 0;
-					
-					for(n = 0; n < seg_num; n ++)
-					{
-						while(*msg != ',')
-						tmp[i ++] = *(msg ++);
-						tmp[i] = '\0';
-						msg = msg + 1;
-						if(i == 1)
-						{
-							tmp[1] = tmp[0];
-							tmp[0] = '0';
-						}
-						StrToHex(&add,tmp,1);
-						i = 0;
 
 						while(*msg != ',')
 						tmp[i ++] = *(msg ++);
 						tmp[i] = '\0';
 						i = 0;
 						msg = msg + 1;
-						ch = myatoi(tmp);
+						para_id = myatoi(tmp);
 
-						for(m = 0; m < InputCollectorConfigNum.number; m ++)
+						if(loop_ch < MAX_ELECTRICITY_METER_CH_NUM && para_id < MAX_ELECTRICITY_METER_ALARM_PARA_NUM)
 						{
-							if(add == InputCollectorConfig[m].address &&
-							   ch == InputCollectorConfig[m].channel)
-							{
-								break;
-							}
-						}
+//							if(loop_ch == 0)
+//							{
+//								loop_ch = 1;
+//							}
 
-						while(*msg != ',')
-						tmp[i ++] = *(msg ++);
-						tmp[i] = '\0';
-						i = 0;
-						msg = msg + 1;
-						loop_ch = myatoi(tmp);
-						if(loop_ch < MAX_INPUT_COLLECTOR_A_LOOP_CH_NUM)
-						{
-							if(loop_ch == 0)
+							if(para_id == 0)
 							{
-								loop_ch = 1;
+								para_id = 1;
 							}
-							
-							InputCollectorConfig[m].a_alarm_thre[loop_ch - 1].channel = loop_ch;
+
+							ElectricityMeterConfig[m].alarm_thre[loop_ch][para_id - 1].channel = loop_ch;
+							ElectricityMeterConfig[m].alarm_thre[loop_ch][para_id - 1].para_id = para_id;
 
 							while(*msg != ',')
 							tmp[i ++] = *(msg ++);
@@ -668,13 +552,13 @@ u8 InputCollectorSetAlarmConfiguration(ServerFrameStruct_S *server_frame_struct)
 							msg = msg + 1;
 							if(tmp[0] == 'N' && tmp[1] == 'A')
 							{
-								memset((void *)&InputCollectorConfig[m].a_alarm_thre[loop_ch - 1].min_value,0xFF,8);
+								memset((void *)&ElectricityMeterConfig[m].alarm_thre[loop_ch][para_id - 1].min_value,0xFF,8);
 							}
 							else
 							{
-								InputCollectorConfig[m].a_alarm_thre[loop_ch - 1].min_value = atof(tmp);
+								ElectricityMeterConfig[m].alarm_thre[loop_ch][para_id - 1].min_value = atof(tmp);
 							}
-							
+
 							while(*msg != ',')
 							tmp[i ++] = *(msg ++);
 							tmp[i] = '\0';
@@ -682,46 +566,46 @@ u8 InputCollectorSetAlarmConfiguration(ServerFrameStruct_S *server_frame_struct)
 							msg = msg + 1;
 							if(tmp[0] == 'N' && tmp[1] == 'A')
 							{
-								memset((void *)&InputCollectorConfig[m].a_alarm_thre[loop_ch - 1].max_value,0xFF,8);
+								memset((void *)&ElectricityMeterConfig[m].alarm_thre[loop_ch][para_id - 1].max_value,0xFF,8);
 							}
 							else
 							{
-								InputCollectorConfig[m].a_alarm_thre[loop_ch - 1].max_value = atof(tmp);
+								ElectricityMeterConfig[m].alarm_thre[loop_ch][para_id - 1].max_value = atof(tmp);
 							}
-							
-							while(*msg != ',')
-							tmp[i ++] = *(msg ++);
-							tmp[i] = '\0';
-							i = 0;
-							msg = msg + 1;
-							InputCollectorConfig[m].a_alarm_thre[loop_ch - 1].confirm_time = myatoi(tmp);
 
 							while(*msg != ',')
 							tmp[i ++] = *(msg ++);
 							tmp[i] = '\0';
 							i = 0;
 							msg = msg + 1;
-							InputCollectorConfig[m].a_alarm_thre[loop_ch - 1].switch_run_mode = myatoi(tmp);
+							ElectricityMeterConfig[m].alarm_thre[loop_ch][para_id - 1].confirm_time = myatoi(tmp);
 
 							while(*msg != ',')
 							tmp[i ++] = *(msg ++);
 							tmp[i] = '\0';
 							i = 0;
 							msg = msg + 1;
-							InputCollectorConfig[m].a_alarm_thre[loop_ch - 1].resume_run_mode = myatoi(tmp);
-							
+							ElectricityMeterConfig[m].alarm_thre[loop_ch][para_id - 1].switch_run_mode = myatoi(tmp);
+
+							while(*msg != ',')
+							tmp[i ++] = *(msg ++);
+							tmp[i] = '\0';
+							i = 0;
+							msg = msg + 1;
+							ElectricityMeterConfig[m].alarm_thre[loop_ch][para_id - 1].resume_run_mode = myatoi(tmp);
+
 							while(*msg != ',' && *msg != '|' && *msg != '\0')
 							tmp[i ++] = *(msg ++);
 							tmp[i] = '\0';
 							i = 0;
 							msg = msg + 1;
-							InputCollectorConfig[m].a_alarm_thre[loop_ch - 1].relay_action = myatoi(tmp);
+							ElectricityMeterConfig[m].alarm_thre[loop_ch][para_id - 1].relay_action = myatoi(tmp);
 						}
 					}
 
-					for(k = 0; k < InputCollectorConfigNum.number; k ++)
+					for(k = 0; k < ElectricityMeterConfigNum.number; k ++)
 					{
-						WriteInputCollectorConfig(k,0,1);
+						WriteElectricityMeterConfig(k,0,1);
 					}
 				}
 			break;
@@ -744,17 +628,18 @@ u8 InputCollectorSetAlarmConfiguration(ServerFrameStruct_S *server_frame_struct)
 		ret = ConvertFrameStructToFrame(resp_server_frame_struct);
 	}
 
-	WriteInputCollectorAlarmConfig(0,1);
+	WriteElectricityMeterAlarmConfig(0,1);
 
 	return ret;
 }
 
 //获取告警配置参数
-u8 InputCollectorGetAlarmConfiguration(ServerFrameStruct_S *server_frame_struct)
+u8 ElectricityMeterGetAlarmConfiguration(ServerFrameStruct_S *server_frame_struct)
 {
 	u8 i = 0;
-	u8 j = 0;
+	u8 k = 0;
 	u8 m = 0;
+	u8 n = 0;
 	u8 ret = 0;
 	long long thre = {0};
 	char tmp[25] = {0};
@@ -766,7 +651,7 @@ u8 InputCollectorGetAlarmConfiguration(ServerFrameStruct_S *server_frame_struct)
 
 	if(resp_server_frame_struct != NULL)
 	{
-		buf = (char *)pvPortMalloc(1700 * sizeof(char));
+		buf = (char *)pvPortMalloc(4096 * sizeof(char));
 
 		if(buf != NULL)
 		{
@@ -775,7 +660,7 @@ u8 InputCollectorGetAlarmConfiguration(ServerFrameStruct_S *server_frame_struct)
 			resp_server_frame_struct->msg_type 	= (u8)DEVICE_RESPONSE_UP;	//响应服务器类型
 			resp_server_frame_struct->msg_len 	= 10;
 			resp_server_frame_struct->err_code 	= (u8)NO_ERR;
-			resp_server_frame_struct->para_num 	= 4;
+			resp_server_frame_struct->para_num 	= 2;
 
 			resp_server_frame_struct->para = (Parameter_S *)pvPortMalloc(resp_server_frame_struct->para_num * sizeof(Parameter_S));
 
@@ -783,7 +668,7 @@ u8 InputCollectorGetAlarmConfiguration(ServerFrameStruct_S *server_frame_struct)
 			{
 				resp_server_frame_struct->para[i].type = 0x6101;
 				memset(buf,0,2);
-				sprintf(buf, "%d",InputCollectorAlarmConfig.d_quantity_abnormal_alarm_enable);
+				sprintf(buf, "%d",ElectricityMeterAlarmConfig.electrical_parameters_thre_over_alarm_enable);
 				resp_server_frame_struct->para[i].len = strlen(buf);
 				resp_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
 				if(resp_server_frame_struct->para[i].value != NULL)
@@ -793,148 +678,84 @@ u8 InputCollectorGetAlarmConfiguration(ServerFrameStruct_S *server_frame_struct)
 				i ++;
 
 				resp_server_frame_struct->para[i].type = 0x4102;
-				memset(buf,0,1700);
-				memset(tmp,0,10);
-				
-				for(m = 0; m < InputCollectorConfigNum.number; m ++)
+				memset(buf,0,4096);
+				memset(tmp,0,25);
+
+				for(m = 0; m < ElectricityMeterConfigNum.number; m ++)
 				{
-					for(j = 0; j < InputCollectorConfig[m].d_loop_num; j ++)
+					for(k = 0; k < ElectricityMeterConfig[m].ch_num; k ++)
 					{
-						if(InputCollectorConfig[m].d_alarm_thre[j].channel == j + 1)
+						for(n = 0; n < MAX_ELECTRICITY_METER_ALARM_PARA_NUM; n ++)
 						{
-							memset(tmp,0,10);
-							sprintf(tmp, "%x",InputCollectorConfig[m].address);
-							strcat(buf,tmp);
-							strcat(buf,",");
-
-							memset(tmp,0,10);
-							sprintf(tmp, "%d",InputCollectorConfig[m].channel);
-							strcat(buf,tmp);
-							strcat(buf,",");
-
-							memset(tmp,0,10);
-							sprintf(tmp, "%d",InputCollectorConfig[m].d_alarm_thre[j].channel);
-							strcat(buf,tmp);
-							strcat(buf,",");
-
-							memset(tmp,0,10);
-							sprintf(tmp, "%d",InputCollectorConfig[m].d_alarm_thre[j].alarm_level);
-							strcat(buf,tmp);
-							strcat(buf,",");
-
-							memset(tmp,0,10);
-							sprintf(tmp, "%d",InputCollectorConfig[m].d_alarm_thre[j].confirm_time);
-							strcat(buf,tmp);
-							strcat(buf,",");
-							
-							memset(tmp,0,10);
-							sprintf(tmp, "%d",InputCollectorConfig[m].d_alarm_thre[j].switch_run_mode);
-							strcat(buf,tmp);
-							strcat(buf,",");
-							
-							memset(tmp,0,10);
-							sprintf(tmp, "%d",InputCollectorConfig[m].d_alarm_thre[j].resume_run_mode);
-							strcat(buf,tmp);
-							strcat(buf,",");
-
-							memset(tmp,0,10);
-							sprintf(tmp, "%d",InputCollectorConfig[m].d_alarm_thre[j].relay_action);
-							strcat(buf,tmp);
-							strcat(buf,"|");
-						}
-					}
-				}
-
-				buf[strlen(buf) - 1] = 0;	//去掉最后一个'|'
-				resp_server_frame_struct->para[i].len = strlen(buf);
-				resp_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
-				if(resp_server_frame_struct->para[i].value != NULL)
-				{
-					memcpy(resp_server_frame_struct->para[i].value,buf,resp_server_frame_struct->para[i].len + 1);
-				}
-				i ++;
-
-				resp_server_frame_struct->para[i].type = 0x6103;
-				memset(buf,0,2);
-				sprintf(buf, "%d",InputCollectorAlarmConfig.a_quantity_abnormal_alarm_enable);
-				resp_server_frame_struct->para[i].len = strlen(buf);
-				resp_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
-				if(resp_server_frame_struct->para[i].value != NULL)
-				{
-					memcpy(resp_server_frame_struct->para[i].value,buf,resp_server_frame_struct->para[i].len + 1);
-				}
-				i ++;
-
-				resp_server_frame_struct->para[i].type = 0x4104;
-				memset(buf,0,1700);
-				memset(tmp,0,10);
-
-				for(m = 0; m < InputCollectorConfigNum.number; m ++)
-				{
-					for(j = 0; j < InputCollectorConfig[m].a_loop_num; j ++)
-					{
-						if(InputCollectorConfig[m].a_alarm_thre[j].channel == j + 1)
-						{
-							memset(tmp,0,10);
-							sprintf(tmp, "%x",InputCollectorConfig[m].address);
-							strcat(buf,tmp);
-							strcat(buf,",");
-
-							memset(tmp,0,10);
-							sprintf(tmp, "%d",InputCollectorConfig[m].channel);
-							strcat(buf,tmp);
-							strcat(buf,",");
-
-							memset(tmp,0,10);
-							sprintf(tmp, "%d",InputCollectorConfig[m].a_alarm_thre[j].channel);
-							strcat(buf,tmp);
-							strcat(buf,",");
-
-							memset(tmp,0,25);
-							memcpy(&thre,(void *)&InputCollectorConfig[m].a_alarm_thre[j].min_value,4);
-							if(thre == 0xFFFFFFFFFFFFFFFF)
+							if(ElectricityMeterConfig[m].alarm_thre[k][n].channel < MAX_ELECTRICITY_METER_CH_NUM &&
+							   ElectricityMeterConfig[m].alarm_thre[k][n].para_id != 0)
 							{
-								strcat(buf,"NA,");
-							}
-							else
-							{
-								sprintf(tmp, "%f",InputCollectorConfig[m].a_alarm_thre[j].min_value);
+								memset(tmp,0,10);
+								sprintf(tmp, "%x",ElectricityMeterConfig[m].address);
 								strcat(buf,tmp);
 								strcat(buf,",");
-							}
 
-							memset(tmp,0,25);
-							memcpy(&thre,(void *)&InputCollectorConfig[m].a_alarm_thre[j].max_value,4);
-							if(thre == 0xFFFFFFFFFFFFFFFF)
-							{
-								strcat(buf,"NA,");
-							}
-							else
-							{
-								sprintf(tmp, "%f",InputCollectorConfig[m].a_alarm_thre[j].max_value);
+								memset(tmp,0,10);
+								sprintf(tmp, "%d",ElectricityMeterConfig[m].channel);
 								strcat(buf,tmp);
 								strcat(buf,",");
-							}
-	
-							memset(tmp,0,10);
-							sprintf(tmp, "%d",InputCollectorConfig[m].a_alarm_thre[j].confirm_time);
-							strcat(buf,tmp);
-							strcat(buf,",");
-							
-							memset(tmp,0,10);
-							sprintf(tmp, "%d",InputCollectorConfig[m].a_alarm_thre[j].switch_run_mode);
-							strcat(buf,tmp);
-							strcat(buf,",");
-							
-							memset(tmp,0,10);
-							sprintf(tmp, "%d",InputCollectorConfig[m].a_alarm_thre[j].resume_run_mode);
-							strcat(buf,tmp);
-							strcat(buf,",");
 
-							memset(tmp,0,10);
-							sprintf(tmp, "%d",InputCollectorConfig[m].a_alarm_thre[j].relay_action);
-							strcat(buf,tmp);
-							strcat(buf,"|");
+								memset(tmp,0,10);
+								sprintf(tmp, "%d",ElectricityMeterConfig[m].alarm_thre[k][n].channel);
+								strcat(buf,tmp);
+								strcat(buf,",");
+
+								memset(tmp,0,10);
+								sprintf(tmp, "%d",ElectricityMeterConfig[m].alarm_thre[k][n].para_id);
+								strcat(buf,tmp);
+								strcat(buf,",");
+
+								memset(tmp,0,25);
+								memcpy(&thre,(void *)&ElectricityMeterConfig[m].alarm_thre[k][n].min_value,4);
+								if(thre == 0xFFFFFFFFFFFFFFFF)
+								{
+									strcat(buf,"NA,");
+								}
+								else
+								{
+									sprintf(tmp, "%f",ElectricityMeterConfig[m].alarm_thre[k][n].min_value);
+									strcat(buf,tmp);
+									strcat(buf,",");
+								}
+
+								memset(tmp,0,25);
+								memcpy(&thre,(void *)&ElectricityMeterConfig[m].alarm_thre[k][n].max_value,4);
+								if(thre == 0xFFFFFFFFFFFFFFFF)
+								{
+									strcat(buf,"NA,");
+								}
+								else
+								{
+									sprintf(tmp, "%f",ElectricityMeterConfig[m].alarm_thre[k][n].max_value);
+									strcat(buf,tmp);
+									strcat(buf,",");
+								}
+
+								memset(tmp,0,10);
+								sprintf(tmp, "%d",ElectricityMeterConfig[m].alarm_thre[k][n].confirm_time);
+								strcat(buf,tmp);
+								strcat(buf,",");
+
+								memset(tmp,0,10);
+								sprintf(tmp, "%d",ElectricityMeterConfig[m].alarm_thre[k][n].switch_run_mode);
+								strcat(buf,tmp);
+								strcat(buf,",");
+
+								memset(tmp,0,10);
+								sprintf(tmp, "%d",ElectricityMeterConfig[m].alarm_thre[k][n].resume_run_mode);
+								strcat(buf,tmp);
+								strcat(buf,",");
+
+								memset(tmp,0,10);
+								sprintf(tmp, "%d",ElectricityMeterConfig[m].alarm_thre[k][n].relay_action);
+								strcat(buf,tmp);
+								strcat(buf,"|");
+							}
 						}
 					}
 				}
@@ -963,7 +784,7 @@ u8 InputCollectorGetAlarmConfiguration(ServerFrameStruct_S *server_frame_struct)
 }
 
 //告警历史查询
-u8 InputCollectorGetAlarmReportHistory(ServerFrameStruct_S *server_frame_struct)
+u8 ElectricityMeterGetAlarmReportHistory(ServerFrameStruct_S *server_frame_struct)
 {
 	u8 ret = 0;
 	u8 i = 0;
@@ -978,7 +799,7 @@ u8 InputCollectorGetAlarmReportHistory(ServerFrameStruct_S *server_frame_struct)
 
 	if(event_history != NULL)
 	{
-		event_history->device_type = (u8)INPUT_COLLECTOR;
+		event_history->device_type = (u8)ELECTRICITY_METER;
 		event_history->event_type = (u8)TYPE_ALARM;
 
 		for(j = 0; j < server_frame_struct->para_num; j ++)
@@ -1087,7 +908,7 @@ u8 InputCollectorGetAlarmReportHistory(ServerFrameStruct_S *server_frame_struct)
 }
 
 //基本配置
-u8 InputCollectorSetBasicConfiguration(ServerFrameStruct_S *server_frame_struct)
+u8 ElectricityMeterSetBasicConfiguration(ServerFrameStruct_S *server_frame_struct)
 {
 	u8 ret = 0;
 	u8 i = 0;
@@ -1104,15 +925,15 @@ u8 InputCollectorSetBasicConfiguration(ServerFrameStruct_S *server_frame_struct)
 		switch(server_frame_struct->para[j].type)
 		{
 			case 0x8001:
-				InputCollectorBasicConfig.detect_interval = myatoi((char *)server_frame_struct->para[j].value);
+				ElectricityMeterBasicConfig.detect_interval = myatoi((char *)server_frame_struct->para[j].value);
 
-				WriteInputCollectorBasicConfig(0,1);
+				WriteElectricityMeterBasicConfig(0,1);
 			break;
 
 			case 0x6002:
-				InputCollectorBasicConfig.auto_report = myatoi((char *)server_frame_struct->para[j].value);
+				ElectricityMeterBasicConfig.auto_report = myatoi((char *)server_frame_struct->para[j].value);
 
-				WriteInputCollectorBasicConfig(0,1);
+				WriteElectricityMeterBasicConfig(0,1);
 			break;
 
 			case 0x4003:
@@ -1121,7 +942,7 @@ u8 InputCollectorSetBasicConfiguration(ServerFrameStruct_S *server_frame_struct)
 				if(server_frame_struct->para[j].len != 0)
 				{
 					seg_num = 0;
-					
+
 					while(*msg != '\0')
 					{
 						if(*(msg ++) == '|')
@@ -1132,14 +953,14 @@ u8 InputCollectorSetBasicConfiguration(ServerFrameStruct_S *server_frame_struct)
 
 					seg_num ++;
 
-					if(seg_num > MAX_INPUT_COLLECTOR_CONF_NUM)
+					if(seg_num > MAX_ELECTRICITY_METER_CONF_NUM)
 					{
-						seg_num = MAX_INPUT_COLLECTOR_CONF_NUM;
+						seg_num = MAX_ELECTRICITY_METER_CONF_NUM;
 					}
 
-					InputCollectorConfigNum.number = seg_num;
+					ElectricityMeterConfigNum.number = seg_num;
 
-					WriteInputCollectorConfigNum(0,1);
+					WriteElectricityMeterConfigNum(0,1);
 				}
 
 				msg = (char *)server_frame_struct->para[j].value;
@@ -1155,7 +976,7 @@ u8 InputCollectorSetBasicConfiguration(ServerFrameStruct_S *server_frame_struct)
 						tmp[1] = tmp[0];
 						tmp[0] = '0';
 					}
-					StrToHex(&InputCollectorConfig[k].address,tmp,1);
+					StrToHex(&ElectricityMeterConfig[k].address,tmp,1);
 					i = 0;
 
 					while(*msg != ',')
@@ -1163,50 +984,71 @@ u8 InputCollectorSetBasicConfiguration(ServerFrameStruct_S *server_frame_struct)
 					tmp[i] = '\0';
 					i = 0;
 					msg = msg + 1;
-					InputCollectorConfig[k].channel = myatoi(tmp);
+					ElectricityMeterConfig[k].channel = myatoi(tmp);
 
 					while(*msg != ',')
 					tmp[i ++] = *(msg ++);
 					tmp[i] = '\0';
 					i = 0;
 					msg = msg + 1;
-					InputCollectorConfig[k].d_loop_num = myatoi(tmp);
-					
-					while(*msg != ',')
-					tmp[i ++] = *(msg ++);
-					tmp[i] = '\0';
-					i = 0;
-					msg = msg + 1;
-					InputCollectorConfig[k].a_loop_num = myatoi(tmp);
+					ElectricityMeterConfig[k].ch_num = myatoi(tmp);
 
 					while(*msg != ',')
 					tmp[i ++] = *(msg ++);
 					tmp[i] = '\0';
 					i = 0;
 					msg = msg + 1;
-					InputCollectorConfig[k].a_quantity_range = atof(tmp);
-					
+					ElectricityMeterConfig[k].voltage_ratio = atof(tmp);
+
 					while(*msg != ',')
 					tmp[i ++] = *(msg ++);
 					tmp[i] = '\0';
 					i = 0;
 					msg = msg + 1;
-					InputCollectorConfig[k].confirm_time = myatoi(tmp);
+					ElectricityMeterConfig[k].current_ratio = atof(tmp);
+
+					while(*msg != ',')
+					tmp[i ++] = *(msg ++);
+					tmp[i] = '\0';
+					i = 0;
+					msg = msg + 1;
+					ElectricityMeterConfig[k].voltage_range_of_change = atof(tmp);
+
+					while(*msg != ',')
+					tmp[i ++] = *(msg ++);
+					tmp[i] = '\0';
+					i = 0;
+					msg = msg + 1;
+					ElectricityMeterConfig[k].current_range_of_change = atof(tmp);
+
+					while(*msg != ',')
+					tmp[i ++] = *(msg ++);
+					tmp[i] = '\0';
+					i = 0;
+					msg = msg + 1;
+					ElectricityMeterConfig[k].pf_range_of_change = atof(tmp);
+
+					while(*msg != ',')
+					tmp[i ++] = *(msg ++);
+					tmp[i] = '\0';
+					i = 0;
+					msg = msg + 1;
+					ElectricityMeterConfig[k].confirm_time = myatoi(tmp);
 
 					while(*msg != ',' && *msg != '|' && *msg != '\0')
 					tmp[i ++] = *(msg ++);
 					tmp[i] = '\0';
 					msg = msg + 1;
-					memset(InputCollectorConfig[k].module,0,MAX_INPUT_COLLECTOR_MODULE_NAME_LEN);
+					memset(ElectricityMeterConfig[k].module,0,MAX_ELECTRICITY_METER_MODULE_NAME_LEN);
 
-					if(i < MAX_INPUT_COLLECTOR_MODULE_NAME_LEN)
+					if(i < MAX_ELECTRICITY_METER_MODULE_NAME_LEN)
 					{
-						memcpy(InputCollectorConfig[k].module,tmp,i);
+						memcpy(ElectricityMeterConfig[k].module,tmp,i);
 					}
 
 					i = 0;
 
-					WriteInputCollectorConfig(k,0,1);
+					WriteElectricityMeterConfig(k,0,1);
 				}
 			break;
 
@@ -1232,7 +1074,7 @@ u8 InputCollectorSetBasicConfiguration(ServerFrameStruct_S *server_frame_struct)
 }
 
 //读取基本配置
-u8 InputCollectorGetBasicConfiguration(ServerFrameStruct_S *server_frame_struct)
+u8 ElectricityMeterGetBasicConfiguration(ServerFrameStruct_S *server_frame_struct)
 {
 	u8 i = 0;
 	u8 m = 0;
@@ -1246,7 +1088,7 @@ u8 InputCollectorGetBasicConfiguration(ServerFrameStruct_S *server_frame_struct)
 
 	if(resp_server_frame_struct != NULL)
 	{
-		buf = (char *)pvPortMalloc(600 * sizeof(char));
+		buf = (char *)pvPortMalloc(500 * sizeof(char));
 
 		if(buf != NULL)
 		{
@@ -1263,7 +1105,7 @@ u8 InputCollectorGetBasicConfiguration(ServerFrameStruct_S *server_frame_struct)
 			{
 				resp_server_frame_struct->para[i].type = 0x8101;
 				memset(buf,0,10);
-				sprintf(buf, "%d",InputCollectorBasicConfig.detect_interval);
+				sprintf(buf, "%d",ElectricityMeterBasicConfig.detect_interval);
 				resp_server_frame_struct->para[i].len = strlen(buf);
 				resp_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
 				if(resp_server_frame_struct->para[i].value != NULL)
@@ -1271,10 +1113,10 @@ u8 InputCollectorGetBasicConfiguration(ServerFrameStruct_S *server_frame_struct)
 					memcpy(resp_server_frame_struct->para[i].value,buf,resp_server_frame_struct->para[i].len + 1);
 				}
 				i ++;
-				
+
 				resp_server_frame_struct->para[i].type = 0x6102;
 				memset(buf,0,10);
-				sprintf(buf, "%d",InputCollectorBasicConfig.auto_report);
+				sprintf(buf, "%d",ElectricityMeterBasicConfig.auto_report);
 				resp_server_frame_struct->para[i].len = strlen(buf);
 				resp_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
 				if(resp_server_frame_struct->para[i].value != NULL)
@@ -1284,44 +1126,59 @@ u8 InputCollectorGetBasicConfiguration(ServerFrameStruct_S *server_frame_struct)
 				i ++;
 
 				resp_server_frame_struct->para[i].type = 0x4103;
-				memset(buf,0,600);
+				memset(buf,0,500);
 				memset(tmp,0,10);
 
-				for(m = 0; m < InputCollectorConfigNum.number; m ++)
+				for(m = 0; m < ElectricityMeterConfigNum.number; m ++)
 				{
 					memset(tmp,0,10);
-					sprintf(tmp, "%x",InputCollectorConfig[m].address);
+					sprintf(tmp, "%x",ElectricityMeterConfig[m].address);
 					strcat(buf,tmp);
 					strcat(buf,",");
 
 					memset(tmp,0,10);
-					sprintf(tmp, "%d",InputCollectorConfig[m].channel);
+					sprintf(tmp, "%d",ElectricityMeterConfig[m].channel);
 					strcat(buf,tmp);
 					strcat(buf,",");
 
 					memset(tmp,0,10);
-					sprintf(tmp, "%d",InputCollectorConfig[m].d_loop_num);
-					strcat(buf,tmp);
-					strcat(buf,",");
-					
-					memset(tmp,0,10);
-					sprintf(tmp, "%d",InputCollectorConfig[m].a_loop_num);
+					sprintf(tmp, "%d",ElectricityMeterConfig[m].ch_num);
 					strcat(buf,tmp);
 					strcat(buf,",");
 
 					memset(tmp,0,10);
-					sprintf(tmp, "%f",InputCollectorConfig[m].a_quantity_range);
+					sprintf(tmp, "%f",ElectricityMeterConfig[m].voltage_ratio);
 					strcat(buf,tmp);
 					strcat(buf,",");
-					
+
 					memset(tmp,0,10);
-					sprintf(tmp, "%d",InputCollectorConfig[m].confirm_time);
+					sprintf(tmp, "%f",ElectricityMeterConfig[m].current_ratio);
 					strcat(buf,tmp);
 					strcat(buf,",");
 
-					strcat(buf,(char *)InputCollectorConfig[m].module);
+					memset(tmp,0,10);
+					sprintf(tmp, "%f",ElectricityMeterConfig[m].voltage_range_of_change);
+					strcat(buf,tmp);
+					strcat(buf,",");
 
-					if(m < InputCollectorConfigNum.number - 1)
+					memset(tmp,0,10);
+					sprintf(tmp, "%f",ElectricityMeterConfig[m].current_range_of_change);
+					strcat(buf,tmp);
+					strcat(buf,",");
+
+					memset(tmp,0,10);
+					sprintf(tmp, "%f",ElectricityMeterConfig[m].pf_range_of_change);
+					strcat(buf,tmp);
+					strcat(buf,",");
+
+					memset(tmp,0,10);
+					sprintf(tmp, "%d",ElectricityMeterConfig[m].confirm_time);
+					strcat(buf,tmp);
+					strcat(buf,",");
+
+					strcat(buf,(char *)ElectricityMeterConfig[m].module);
+
+					if(m < ElectricityMeterConfigNum.number - 1)
 					{
 						strcat(buf,"|");
 					}
@@ -1349,35 +1206,6 @@ u8 InputCollectorGetBasicConfiguration(ServerFrameStruct_S *server_frame_struct)
 
 	return ret;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

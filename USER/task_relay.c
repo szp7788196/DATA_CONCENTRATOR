@@ -382,6 +382,8 @@ void RelayRecvAndHandleDeviceFrame(void)
 				   RelayModuleState[i].channel == collect_state.channel)
 				{
 					RelayModuleState[i].loop_collect_state = collect_state.loop_collect_state;
+					
+					break;
 				}
 			}
 		}

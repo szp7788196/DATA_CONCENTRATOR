@@ -55,7 +55,7 @@ u8 StoreAlarmToSpiFlash(AlarmReport_S *alarm_report)
 			sprintf((char *)base_path, "1:INPUT/ALARM");
 		break;
 
-		case (u8)ELECTRIC_METER:
+		case (u8)ELECTRICITY_METER:
 			sprintf((char *)base_path, "1:METER/ALARM");
 		break;
 
@@ -313,7 +313,7 @@ u16 GetAlarmEventNumFromDateSegment(EventHistory_S event_history)
 			sprintf((char *)base_path, "1:INPUT/");
 		break;
 
-		case (u8)ELECTRIC_METER:
+		case (u8)ELECTRICITY_METER:
 			sprintf((char *)base_path, "1:METER/");
 		break;
 
@@ -491,7 +491,7 @@ void GetAlarmEventContentFromDateSegmentAndSendToServer(EventHistory_S event_his
 			sprintf((char *)base_path, "1:INPUT/");
 		break;
 
-		case (u8)ELECTRIC_METER:
+		case (u8)ELECTRICITY_METER:
 			sprintf((char *)base_path, "1:METER/");
 		break;
 

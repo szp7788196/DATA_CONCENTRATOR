@@ -116,7 +116,8 @@ extern ELECTRICITY_METER_INFO BuiltInMeter;
 void HT7038_Init(void);
 u32 HT7038ReadDeviceID(void);
 void HT7038ConfigClibration(void);
-void HT7038GetParameters(void);
+u32 HT7038GetSingleParameter(u8 ReadAddr);
+//void HT7038GetParameters(void);
 
 
 

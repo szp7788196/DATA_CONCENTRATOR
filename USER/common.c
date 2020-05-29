@@ -2,6 +2,7 @@
 #include "concentrator_conf.h"
 #include "relay_conf.h"
 #include "input_collector_conf.h"
+#include "electricity_meter_conf.h"
 
 SemaphoreHandle_t  xMutex_SPI2 = NULL;
 SemaphoreHandle_t  xMutex_RTC = NULL;
@@ -29,7 +30,7 @@ QueueHandle_t xQueue_ConcentratorFrameStruct = NULL;
 QueueHandle_t xQueue_LampControllerFrameStruct = NULL;
 QueueHandle_t xQueue_RelayFrameStruct = NULL;
 QueueHandle_t xQueue_InputCollectorFrameStruct = NULL;
-QueueHandle_t xQueue_ElectricMeterFrameStruct = NULL;
+QueueHandle_t xQueue_ElectricityMeterFrameStruct = NULL;
 QueueHandle_t xQueue_LumeterFrameStruct = NULL;
 QueueHandle_t xQueue_AlarmReportSend = NULL;
 QueueHandle_t xQueue_AlarmReportStore = NULL;
@@ -37,10 +38,11 @@ QueueHandle_t xQueue_AlarmReportRead = NULL;
 QueueHandle_t xQueue_HistoryRecordRead = NULL;
 QueueHandle_t xQueue_RelayModuleState = NULL;
 QueueHandle_t xQueue_InputCollectorState = NULL;
+QueueHandle_t xQueue_ElectricityMeterState = NULL;
 QueueHandle_t xQueue_Rs485Rs485Frame = NULL;
 QueueHandle_t xQueue_RelayRs485Frame = NULL;
 QueueHandle_t xQueue_InputCollectorRs485Frame = NULL;
-QueueHandle_t xQueue_ElectricMeterRs485Frame = NULL;
+QueueHandle_t xQueue_ElectricityMeterRs485Frame = NULL;
 QueueHandle_t xQueue_LumeterRs485Frame = NULL;
 
 
@@ -654,6 +656,7 @@ void ReadTotalConfigurationParameters(void)
 	ReadConcentratorAlarmConfig();			//读取集控器告警配置参数
 	ReadConcentratorLocationConfig();		//读取经纬度年表
 	ReadFrameWareState();					//读取固件升级状态
+	
 	ReadRelayModuleConfig();				//读取继电器模块配置
 	ReadRelayAlarmConfig();					//读取继电器模块告警参数配置
 //	ReadRelayAppointmentGroup();			//读取继电器模块预约控制
@@ -663,6 +666,10 @@ void ReadTotalConfigurationParameters(void)
 	ReadInputCollectorBasicConfig();		//读取输入量检测模块基础配置参数
 	ReadInputCollectorConfig();				//读取输入量检测模块基础配置参数
 	ReadInputCollectorAlarmConfig();		//读取输入量检测模块告警配置参数
+	
+	ReadElectricityMeterBasicConfig();		//读取电表基础配置参数
+	ReadElectricityMeterConfig();			//读取电表基础配置参数
+	ReadElectricityMeterAlarmConfig();		//读取电表告警配置参数
 }
 
 

@@ -64,7 +64,7 @@ void AppTaskCreate(void)
 				
 	xTaskCreate(vTaskELECTRICITY_METER,    			/* 指示灯任务  */
 				"",  								/* 任务名称    */
-				128,         						/* stack大小,单位word,也就是4字节 */
+				1024,         						/* stack大小,单位word,也就是4字节 */
 				NULL,        						/* 任务参数  */
 				configMAX_PRIORITIES - 6,           /* 任务优先级*/
 				&xHandleTaskELECTRICITY_METER); 	/* 任务句柄  */
@@ -217,8 +217,8 @@ void AppObjCreate(void)
 
     }
 
-	xQueue_ElectricMeterFrameStruct = xQueueCreate(25, sizeof(ServerFrameStruct_S *));
-    if(xQueue_ElectricMeterFrameStruct == NULL)
+	xQueue_ElectricityMeterFrameStruct = xQueueCreate(25, sizeof(ServerFrameStruct_S *));
+    if(xQueue_ElectricityMeterFrameStruct == NULL)
     {
 
     }
@@ -264,6 +264,12 @@ void AppObjCreate(void)
     {
 
     }
+	
+	xQueue_ElectricityMeterState = xQueueCreate(10, sizeof(RelayModuleState_S *));
+    if(xQueue_ElectricityMeterState == NULL)
+    {
+
+    }
 
 	xQueue_Rs485Rs485Frame = xQueueCreate(40, sizeof(Rs485Frame_S *));
     if(xQueue_Rs485Rs485Frame == NULL)
@@ -283,8 +289,8 @@ void AppObjCreate(void)
 
     }
 
-	xQueue_ElectricMeterRs485Frame = xQueueCreate(10, sizeof(Rs485Frame_S *));
-    if(xQueue_ElectricMeterRs485Frame == NULL)
+	xQueue_ElectricityMeterRs485Frame = xQueueCreate(10, sizeof(Rs485Frame_S *));
+    if(xQueue_ElectricityMeterRs485Frame == NULL)
     {
 
     }

@@ -38,7 +38,7 @@ typedef enum
 	LAMP_CONTROLLER 		= 0x01,		//路灯控制器
 	RELAY 					= 0x02,		//继电器
 	INPUT_COLLECTOR 		= 0x03,		//输入量采集器
-	ELECTRIC_METER 			= 0x04,		//电表
+	ELECTRICITY_METER 		= 0x04,		//电表
 	LUMETER					= 0x05,		//照度计
 	
 } DEVICE_TYPE_E;

@@ -3,13 +3,13 @@
 
 
 void KR_Init(void)
-{    	 
+{
 	GPIO_InitTypeDef  GPIO_InitStructure;
 
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOF, ENABLE);	//使能GPIOF时钟
 
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2 | GPIO_Pin_3 | GPIO_Pin_4 | 
-	                              GPIO_Pin_5 | GPIO_Pin_6 | 
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2 | GPIO_Pin_3 | GPIO_Pin_4 |
+	                              GPIO_Pin_5 | GPIO_Pin_6 |
 	                              GPIO_Pin_7 | GPIO_Pin_8;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
@@ -28,7 +28,7 @@ void GetAllBuiltInInputCollectorState(InputCollectorState_S *state)
 	{
 		state->d_current_state &= ~(1 << 0);
 	}
-	
+
 	if(KR2 == 1)
 	{
 		state->d_current_state |= (1 << 1);
@@ -37,7 +37,7 @@ void GetAllBuiltInInputCollectorState(InputCollectorState_S *state)
 	{
 		state->d_current_state &= ~(1 << 1);
 	}
-	
+
 	if(KR3 == 1)
 	{
 		state->d_current_state |= (1 << 2);
@@ -46,7 +46,7 @@ void GetAllBuiltInInputCollectorState(InputCollectorState_S *state)
 	{
 		state->d_current_state &= ~(1 << 2);
 	}
-	
+
 	if(KR4 == 1)
 	{
 		state->d_current_state |= (1 << 3);
@@ -55,7 +55,7 @@ void GetAllBuiltInInputCollectorState(InputCollectorState_S *state)
 	{
 		state->d_current_state &= ~(1 << 3);
 	}
-	
+
 	if(KR5 == 1)
 	{
 		state->d_current_state |= (1 << 4);
@@ -64,7 +64,7 @@ void GetAllBuiltInInputCollectorState(InputCollectorState_S *state)
 	{
 		state->d_current_state &= ~(1 << 4);
 	}
-	
+
 	if(KR6 == 1)
 	{
 		state->d_current_state |= (1 << 5);
@@ -80,21 +80,21 @@ void GetBuiltOutInputCollectorState(InputCollectorState_S state)
 {
 	u8 outbuf[48] = {0};
 	Rs485Frame_S *frame = NULL;
-	
+
 	frame = (Rs485Frame_S *)pvPortMalloc(sizeof(Rs485Frame_S));
 
 	if(frame != NULL)
 	{
 		frame->device_type = INPUT_COLLECTOR;
-		
+
 		frame->len = PackBuiltOutInputCollectorFrame(state.address,0xE0,NULL,0,outbuf);
-		
+
 		frame->buf = (u8 *)pvPortMalloc(frame->len * sizeof(u8));
-		
+
 		if(frame->buf != NULL)
 		{
 			memcpy(frame->buf,outbuf,frame->len);
-			
+
 			xSemaphoreTake(xMutex_Rs485Rs485Frame, portMAX_DELAY);
 
 			if(xQueueSend(xQueue_Rs485Rs485Frame,(void *)&frame,(TickType_t)10) != pdPASS)
@@ -104,14 +104,14 @@ void GetBuiltOutInputCollectorState(InputCollectorState_S state)
 #endif
 				DeleteRs485Frame(frame);
 			}
-			
+
 			xSemaphoreGive(xMutex_Rs485Rs485Frame);
 		}
 		else
 		{
 			DeleteRs485Frame(frame);
 		}
-	}	
+	}
 }
 
 //合并外部输入量检测模块报文
@@ -133,9 +133,9 @@ u16 PackBuiltOutInputCollectorFrame(u8 address,u8 fun_code,u8 *inbuf,u16 inbuf_l
 	memcpy(outbuf + 10,imei,17);
 
 	*(outbuf + 27) = fun_code;
-	
+
 	*(outbuf + 28) = (u8)inbuf_len;
-	
+
 	memcpy(outbuf + 29,inbuf,inbuf_len);
 
 	*(outbuf + 29 + inbuf_len + 0) = CalCheckSum(outbuf, 29 + inbuf_len);
@@ -174,18 +174,18 @@ void AnalysisBuiltOutInputCollectorFrame(u8 *buf,u16 len,InputCollectorCollectSt
 
 	if(pos1 != 0xFFFF)
 	{
-		if(*(buf + 0) == 0x68 && 
-		   *(buf + 7) == 0x68 && 
+		if(*(buf + 0) == 0x68 &&
+		   *(buf + 7) == 0x68 &&
 		   *(buf + pos1 - 1) == 0x16)
 		{
 			read_check_sum = *(buf + pos1 - 2);
 			cal_check_sum = CalCheckSum(buf, pos1 - 2);
-			
+
 			if(read_check_sum == cal_check_sum)
 			{
 				collect_state->address = *(buf + 26);
 				collect_state->channel = 1;
-				
+
 				switch(cmd_code)
 				{
 					case 0xE0:

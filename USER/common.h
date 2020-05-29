@@ -89,8 +89,8 @@
 #define RELAY_MODULE_STRATEGY_SWITCH_ADD		1848		//策略组(模式)切换配置
 #define RELAY_MODULE_STRATEGY_SWITCH_LEN		29
 
-#define INPUT_COLLECTOR_BASIC_CONF_ADD		15790		//输入量采集模块基础配置
-#define INPUT_COLLECTOR_BASIC_CONF_LEN		5
+#define INPUT_COLLECTOR_BASIC_CONF_ADD			15790		//输入量采集模块基础配置
+#define INPUT_COLLECTOR_BASIC_CONF_LEN			5
 
 #define INPUT_COLLECTOR_CONF_NUM_ADD			15795		//输入量采集模块配置数量地址
 #define INPUT_COLLECTOR_CONF_NUM_LEN			6
@@ -100,6 +100,18 @@
 
 #define INPUT_COLLECTOR_ALARM_CONF_ADD			18391		//输入量采集模块告警参数配置
 #define INPUT_COLLECTOR_ALARM_CONF_LEN			4
+
+#define ELECTRICITY_METER_BASIC_CONF_ADD		17551		//电表基础配置
+#define ELECTRICITY_METER_BASIC_CONF_LEN		5
+
+#define ELECTRICITY_METER_CONF_NUM_ADD			17556		//电表配置数量地址
+#define ELECTRICITY_METER_CONF_NUM_LEN			6
+
+#define ELECTRICITY_METER_CONF_ADD				17562		//电表配置地址
+#define ELECTRICITY_METER_CONF_LEN				882
+
+#define ELECTRICITY_METER_ALARM_CONF_ADD		22854		//电表告警参数配置
+#define ELECTRICITY_METER_ALARM_CONF_LEN		3
 
 
 
@@ -267,7 +279,7 @@ extern QueueHandle_t xQueue_ConcentratorFrameStruct;
 extern QueueHandle_t xQueue_LampControllerFrameStruct;
 extern QueueHandle_t xQueue_RelayFrameStruct;
 extern QueueHandle_t xQueue_InputCollectorFrameStruct;
-extern QueueHandle_t xQueue_ElectricMeterFrameStruct;
+extern QueueHandle_t xQueue_ElectricityMeterFrameStruct;
 extern QueueHandle_t xQueue_LumeterFrameStruct;
 extern QueueHandle_t xQueue_AlarmReportSend;
 extern QueueHandle_t xQueue_AlarmReportStore;
@@ -275,10 +287,11 @@ extern QueueHandle_t xQueue_AlarmReportRead;
 extern QueueHandle_t xQueue_HistoryRecordRead;
 extern QueueHandle_t xQueue_RelayModuleState;
 extern QueueHandle_t xQueue_InputCollectorState;
+extern QueueHandle_t xQueue_ElectricityMeterState;
 extern QueueHandle_t xQueue_Rs485Rs485Frame;
 extern QueueHandle_t xQueue_RelayRs485Frame;
 extern QueueHandle_t xQueue_InputCollectorRs485Frame;
-extern QueueHandle_t xQueue_ElectricMeterRs485Frame;
+extern QueueHandle_t xQueue_ElectricityMeterRs485Frame;
 extern QueueHandle_t xQueue_LumeterRs485Frame;
 
 

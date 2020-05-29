@@ -315,6 +315,7 @@ u8 RelayLoopControl(ServerFrameStruct_S *server_frame_struct)
 	u8 i = 0;
 	u8 j = 0;
 	u8 k = 0;
+	u8 n = 0;
 	u8 tmp_h = 0;
 	u8 tmp_l = 0;
 	u16 loop_ch = 0;
@@ -348,7 +349,21 @@ u8 RelayLoopControl(ServerFrameStruct_S *server_frame_struct)
 			{
 				for(j = 0; j < RelayModuleConfigNum.number; j ++)
 				{
-					add = myatoi((char *)server_frame_struct->para[k * 4 + 0].value);
+					n = 0;
+						
+					msg = (char *)server_frame_struct->para[k * 4 + 0].value;
+					
+					while(*msg != '\0')
+					tmp[n ++] = *(msg ++);
+					tmp[n] = '\0';
+					msg = msg + 1;
+					if(n == 1)
+					{
+						tmp[1] = tmp[0];
+						tmp[0] = '0';
+					}
+					StrToHex(&add,tmp,1);
+					
 					ch = myatoi((char *)server_frame_struct->para[k * 4 + 1].value);
 
 					if(add == RelayModuleState[j].address && ch == RelayModuleState[j].channel)
@@ -1020,45 +1035,49 @@ u8 RelaySetAlarmConfiguration(ServerFrameStruct_S *server_frame_struct)
 						i = 0;
 						msg = msg + 1;
 						loop_ch = myatoi(tmp);
-						if(loop_ch == 0)
+						
+						if(loop_ch < MAX_RELAY_MODULE_LOOP_CH_NUM)
 						{
-							loop_ch = 1;
+							if(loop_ch == 0)
+							{
+								loop_ch = 1;
+							}
+							RelayModuleConfig[m].loop_alarm_thre[loop_ch - 1][0] = loop_ch;
+
+							while(*msg != ',')
+							tmp[i ++] = *(msg ++);
+							tmp[i] = '\0';
+							i = 0;
+							msg = msg + 1;
+							RelayModuleConfig[m].loop_alarm_thre[loop_ch - 1][1] = myatoi(tmp);
+
+							while(*msg != ',')
+							tmp[i ++] = *(msg ++);
+							tmp[i] = '\0';
+							msg = msg + 1;
+							if(i == 1)
+							{
+								tmp[1] = tmp[0];
+								tmp[0] = '0';
+							}
+							StrToHex(&add,tmp,1);
+							i = 0;
+							RelayModuleConfig[m].loop_alarm_thre[loop_ch - 1][2] = add;
+
+							while(*msg != ',')
+							tmp[i ++] = *(msg ++);
+							tmp[i] = '\0';
+							i = 0;
+							msg = msg + 1;
+							RelayModuleConfig[m].loop_alarm_thre[loop_ch - 1][3] = myatoi(tmp);
+
+							while(*msg != ',' && *msg != '|' && *msg != '\0')
+							tmp[i ++] = *(msg ++);
+							tmp[i] = '\0';
+							i = 0;
+							msg = msg + 1;
+							RelayModuleConfig[m].loop_alarm_thre[loop_ch - 1][4] = myatoi(tmp);
 						}
-						RelayModuleConfig[m].loop_alarm_thre[loop_ch - 1][0] = loop_ch;
-
-						while(*msg != ',')
-						tmp[i ++] = *(msg ++);
-						tmp[i] = '\0';
-						i = 0;
-						msg = msg + 1;
-						RelayModuleConfig[m].loop_alarm_thre[loop_ch - 1][1] = myatoi(tmp);
-
-						while(*msg != ',')
-						tmp[i ++] = *(msg ++);
-						tmp[i] = '\0';
-						msg = msg + 1;
-						if(i == 1)
-						{
-							tmp[1] = tmp[0];
-							tmp[0] = '0';
-						}
-						StrToHex(&add,tmp,1);
-						i = 0;
-						RelayModuleConfig[m].loop_alarm_thre[loop_ch - 1][2] = add;
-
-						while(*msg != ',')
-						tmp[i ++] = *(msg ++);
-						tmp[i] = '\0';
-						i = 0;
-						msg = msg + 1;
-						RelayModuleConfig[m].loop_alarm_thre[loop_ch - 1][3] = myatoi(tmp);
-
-						while(*msg != ',' && *msg != '|' && *msg != '\0')
-						tmp[i ++] = *(msg ++);
-						tmp[i] = '\0';
-						i = 0;
-						msg = msg + 1;
-						RelayModuleConfig[m].loop_alarm_thre[loop_ch - 1][4] = myatoi(tmp);
 					}
 
 					for(k = 0; k < RelayModuleConfigNum.number; k ++)
