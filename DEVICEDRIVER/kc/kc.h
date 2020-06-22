@@ -17,7 +17,7 @@
 
 
 
-
+extern u16 BuiltInRelayState;
 
 void KC_Init(void);
 

@@ -16,8 +16,11 @@
 
 
 
-void KR_Init(void);
+extern u8 BuiltInInputCollectorState;
 
+
+void KR_Init(void);
+void GetKrState(void);
 
 
 void GetAllBuiltInInputCollectorState(InputCollectorState_S *state);

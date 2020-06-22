@@ -2,6 +2,8 @@
 #define __USART6_H
 
 #include "sys.h"
+#include "ringbuf.h"
+#include "fifo.h"
 
 
 
@@ -9,7 +11,7 @@
 #define CMD_BUF_MAX_LEN		512
 
 
-
+extern RingBuf ring_fifo;
 extern int8_t dl_buf_id;
 
 

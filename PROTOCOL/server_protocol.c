@@ -124,7 +124,7 @@ void InitServerFrameStruct(ServerFrameStruct_S *server_frame_struct)
 		server_frame_struct->err_code 			= 0x00;
 		server_frame_struct->crc32 				= 0x00000000;
 		server_frame_struct->msg_id 			= 0x0000;
-		server_frame_struct->gateway_id 		= 0x0000000A;
+		server_frame_struct->gateway_id 		= ConcentratorGateWayID.number;
 		server_frame_struct->device_id 			= 0x00000000;
 		server_frame_struct->para_num			= 0;
 		server_frame_struct->stop				= 0x03;

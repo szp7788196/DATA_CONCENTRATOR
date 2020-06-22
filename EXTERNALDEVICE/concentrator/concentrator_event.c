@@ -1,7 +1,7 @@
 #include "concentrator_event.h"
 #include "concentrator_conf.h"
 #include "history_record.h"
-#include "ht7038.h"
+#include "e_meter.h"
 #include "string.h"
 #include "battery.h"
 #include "common.h"
@@ -29,13 +29,13 @@ void ConcentratorAlarmPowerFailure(void)
 
 	if(ConcentratorAlarmConfig.power_off_alarm_enable == 1)		//告警以使能
 	{
-		voltage = BuiltInMeter.voltage[PHASE_A];
+		voltage = BulitInMeterParas.voltage[PHASE_A];
 
 		for(i = PHASE_A; i <= PHASE_C; i ++)					//选取ABC三项中电压最大的一相
 		{
-			if (voltage < BuiltInMeter.voltage[i])
+			if (voltage < BulitInMeterParas.voltage[i])
 			{
-				voltage = BuiltInMeter.voltage[i];
+				voltage = BulitInMeterParas.voltage[i];
 			}
 		}
 

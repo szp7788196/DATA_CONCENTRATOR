@@ -5,7 +5,6 @@
 
 float HT7038_K = 0.0;
 
-ELECTRICITY_METER_INFO BuiltInMeter;
 
 void HT7038_Init(void)
 {

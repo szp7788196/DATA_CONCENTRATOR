@@ -6,12 +6,47 @@
 
 
 //需要存储的数据
+Uint32TypeNumber_S ConcentratorGateWayID;					//网关ID
+
 RUN_MODE_E RunMode = MODE_AUTO;								//运行模式
+ConcentratorLocalNetConfig_S ConcentratorLocalNetConfig;	//本地网络参数
 ConcentratorBasicConfig_S ConcentratorBasicConfig;			//基本配置信息
 ConcentratorAlarmConfig_S ConcentratorAlarmConfig;			//告警配置参数
 ConcentratorLocationConfig_S ConcentratorLocationConfig;	//经纬度年表配置
 FrameWareState_S FrameWareState;							//固件升级状态
 
+
+//读取网关ID
+void ReadConcentratorGateWayID(void)
+{
+	u16 crc16_cal = 0;
+
+	CAT25X_Read((u8 *)&ConcentratorGateWayID,CONCENTRATOR_GATE_WAY_ADD,sizeof(Uint32TypeNumber_S));
+
+	crc16_cal = CRC16((u8 *)&ConcentratorGateWayID,CONCENTRATOR_GATE_WAY_LEN - 2);
+
+	if(crc16_cal != ConcentratorGateWayID.crc16)
+	{
+		WriteConcentratorGateWayID(1,0);
+	}
+}
+
+void WriteConcentratorGateWayID(u8 reset,u8 write_enable)
+{
+	if(reset == 1)
+	{
+		ConcentratorGateWayID.number = 0x0000000A;
+
+		ConcentratorGateWayID.crc16 = 0;
+	}
+
+	if(write_enable == 1)
+	{
+		ConcentratorGateWayID.crc16 = CRC16((u8 *)&ConcentratorGateWayID,CONCENTRATOR_GATE_WAY_LEN - 2);
+
+		CAT25X_Write((u8 *)&ConcentratorGateWayID,CONCENTRATOR_GATE_WAY_ADD,CONCENTRATOR_GATE_WAY_LEN);
+	}
+}
 
 //读取运行模式
 void ReadRunMode(void)
@@ -130,6 +165,63 @@ void WriteConcentratorBasicConfig(u8 reset,u8 write_enable)
 		ConcentratorBasicConfig.crc16 = CRC16((u8 *)&ConcentratorBasicConfig,CONCENTRATOR_BASIC_CONF_LEN - 2);
 
 		CAT25X_Write((u8 *)&ConcentratorBasicConfig,CONCENTRATOR_BASIC_CONF_ADD,CONCENTRATOR_BASIC_CONF_LEN);
+	}
+}
+
+void ReadConcentratorLocalNetConfig(void)
+{
+	u16 crc16_cal = 0;
+
+	CAT25X_Read((u8 *)&ConcentratorLocalNetConfig,CONCENTRATOR_LOCAL_NET_CONF_ADD,sizeof(ConcentratorLocalNetConfig_S));
+
+	crc16_cal = CRC16((u8 *)&ConcentratorLocalNetConfig,CONCENTRATOR_LOCAL_NET_CONF_LEN - 2);
+
+	if(crc16_cal != ConcentratorLocalNetConfig.crc16)
+	{
+		WriteConcentratorLocalNetConfig(1,0);
+	}
+}
+
+void WriteConcentratorLocalNetConfig(u8 reset,u8 write_enable)
+{
+	if(reset == 1)
+	{
+		ConcentratorLocalNetConfig.dhcp_enable = 0;
+		ConcentratorLocalNetConfig.local_ip[0] = 192;
+		ConcentratorLocalNetConfig.local_ip[1] = 168;
+		ConcentratorLocalNetConfig.local_ip[2] = 0;
+		ConcentratorLocalNetConfig.local_ip[3] = 10;
+		
+		ConcentratorLocalNetConfig.local_msak[0] = 255;
+		ConcentratorLocalNetConfig.local_msak[1] = 255;
+		ConcentratorLocalNetConfig.local_msak[2] = 255;
+		ConcentratorLocalNetConfig.local_msak[3] = 0;
+		
+		ConcentratorLocalNetConfig.local_gate[0] = 192;
+		ConcentratorLocalNetConfig.local_gate[1] = 168;
+		ConcentratorLocalNetConfig.local_gate[2] = 0;
+		ConcentratorLocalNetConfig.local_gate[3] = 1;
+		
+		ConcentratorLocalNetConfig.local_dns[0] = 192;
+		ConcentratorLocalNetConfig.local_dns[1] = 168;
+		ConcentratorLocalNetConfig.local_dns[2] = 0;
+		ConcentratorLocalNetConfig.local_dns[3] = 1;
+		
+		ConcentratorLocalNetConfig.remote_ip[0] = 103;
+		ConcentratorLocalNetConfig.remote_ip[1] = 48;
+		ConcentratorLocalNetConfig.remote_ip[2] = 232;
+		ConcentratorLocalNetConfig.remote_ip[3] = 119;
+		
+		ConcentratorLocalNetConfig.remote_port = 7703;
+
+		ConcentratorLocalNetConfig.crc16 = 0;
+	}
+
+	if(write_enable == 1)
+	{
+		ConcentratorLocalNetConfig.crc16 = CRC16((u8 *)&ConcentratorLocalNetConfig,CONCENTRATOR_LOCAL_NET_CONF_LEN - 2);
+
+		CAT25X_Write((u8 *)&ConcentratorLocalNetConfig,CONCENTRATOR_LOCAL_NET_CONF_ADD,CONCENTRATOR_LOCAL_NET_CONF_LEN);
 	}
 }
 

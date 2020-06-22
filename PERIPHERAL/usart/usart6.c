@@ -4,8 +4,6 @@
 #include "stdlib.h"
 #include "string.h"
 //#include "utils.h"
-#include "ringbuf.h"
-#include "fifo.h"
 #include "at_cmd.h"
 #include "ec20.h"
 #include "common.h"

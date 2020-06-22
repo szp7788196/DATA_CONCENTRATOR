@@ -3,7 +3,7 @@
 #include "common.h"
 #include "dp83848.h"
   
-#define USE_DHCP
+//#define USE_DHCP	
 
    
 
@@ -12,9 +12,12 @@ typedef struct
 {
 	u8 mac[6];      //MAC地址
 	u8 remoteip[4];	//远端主机IP地址 
+	u16 remoteport;	//远端主机端口号
 	u8 ip[4];       //本机IP地址
 	u8 netmask[4]; 	//子网掩码
 	u8 gateway[4]; 	//默认网关的IP地址
+	
+	u8 dhcpenable;	//DHCP开启标志
 	
 	vu8 dhcpstatus;	//dhcp状态 
 					//0,未获取DHCP地址;

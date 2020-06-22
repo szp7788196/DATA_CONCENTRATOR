@@ -1,6 +1,7 @@
 #include "electricity_meter_comm.h"
 #include "concentrator_comm.h"
 #include "common.h"
+#include "e_meter.h"
 
 u8 ElectricityMeterStateChangesReportResponse = 0;
 
@@ -1049,6 +1050,14 @@ u8 ElectricityMeterSetBasicConfiguration(ServerFrameStruct_S *server_frame_struc
 					i = 0;
 
 					WriteElectricityMeterConfig(k,0,1);
+					
+					if(ElectricityMeterConfig[k].address == 0 && ElectricityMeterConfig[k].channel == 0)
+					{
+						BulitInMeterRatio.voltage_ratio = ElectricityMeterConfig[k].voltage_ratio;
+						BulitInMeterRatio.current_ratio = ElectricityMeterConfig[k].current_ratio;
+						
+						WriteBulitInMeterRatio(0,1);
+					}
 				}
 			break;
 

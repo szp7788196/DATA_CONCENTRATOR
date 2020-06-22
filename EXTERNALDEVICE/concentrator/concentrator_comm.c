@@ -1444,6 +1444,9 @@ u8 SetBasicConfiguration(ServerFrameStruct_S *server_frame_struct)
 {
 	u8 ret = 0;
 	u8 j = 0;
+	u8 i = 0;
+	char *msg = NULL;
+	char tmp[10] = {0};
 
 	ServerFrameStruct_S *resp_server_frame_struct = NULL;		//用于响应服务器
 
@@ -1556,7 +1559,7 @@ u8 SetBasicConfiguration(ServerFrameStruct_S *server_frame_struct)
 			break;
 		}
 	}
-
+	
 	resp_server_frame_struct = (ServerFrameStruct_S *)pvPortMalloc(sizeof(ServerFrameStruct_S));
 
 	if(resp_server_frame_struct != NULL)
@@ -1571,6 +1574,45 @@ u8 SetBasicConfiguration(ServerFrameStruct_S *server_frame_struct)
 	}
 
 	WriteConcentratorBasicConfig(0,1);
+	
+	msg = (char *)ConcentratorBasicConfig.server_ip;
+	while(*msg != ',' && *msg != '\0')
+	tmp[i ++] = *(msg ++);
+	tmp[i] = '\0';
+	i = 0;
+	msg = msg + 1;
+	ConcentratorLocalNetConfig.remote_ip[0] = myatoi(tmp);
+	
+	msg = (char *)ConcentratorBasicConfig.server_ip;
+	while(*msg != ',' && *msg != '\0')
+	tmp[i ++] = *(msg ++);
+	tmp[i] = '\0';
+	i = 0;
+	msg = msg + 1;
+	ConcentratorLocalNetConfig.remote_ip[1] = myatoi(tmp);
+	
+	msg = (char *)ConcentratorBasicConfig.server_ip;
+	while(*msg != ',' && *msg != '\0')
+	tmp[i ++] = *(msg ++);
+	tmp[i] = '\0';
+	i = 0;
+	msg = msg + 1;
+	ConcentratorLocalNetConfig.remote_ip[2] = myatoi(tmp);
+	
+	msg = (char *)ConcentratorBasicConfig.server_ip;
+	while(*msg != ',' && *msg != '\0')
+	tmp[i ++] = *(msg ++);
+	tmp[i] = '\0';
+	i = 0;
+	msg = msg + 1;
+	
+	ConcentratorLocalNetConfig.connection_mode = ConcentratorBasicConfig.connection_mode;
+	
+	ConcentratorLocalNetConfig.remote_ip[3] = myatoi(tmp);
+	
+	ConcentratorLocalNetConfig.remote_port = myatoi((char *)ConcentratorBasicConfig.server_port);
+	
+	WriteConcentratorLocalNetConfig(0,1);
 
 	return ret;
 }

@@ -39,6 +39,7 @@ int main(void)
 	TIM2_Init(100);										//定时器2初始化
 
 	USART1_Init(115200);								//维护串口初始化
+	USART4_Init(115200);
 	USART5_Init(9600,USART_Parity_No);					//RS485串口
 	USART6_Init(115200);								//4G模块串口
 

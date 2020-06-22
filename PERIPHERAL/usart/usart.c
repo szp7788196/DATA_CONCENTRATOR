@@ -34,10 +34,15 @@ u16 Usart1FrameLen = 0;				//串口1收到的报文的长度
 u8 Usart1RxBuf[USART1_MAX_RX_LN];	//串口1接收缓存
 u8 Usart1RecvEnd = 0;				//一帧数据接收完成标志
 
-u16 Usart5RxCnt = 0;				//串口1当前收到的字节数（计数）
-u16 Usart5FrameLen = 0;				//串口1收到的报文的长度
-u8 Usart5RxBuf[USART5_MAX_RX_LN];	//串口1接收缓存
-u8 Usart5RecvEnd = 0;				//一帧数据接收完成标志
+u16 Usart4RxCnt = 0;
+u16 Usart4FrameLen = 0;
+u8 Usart4RxBuf[USART4_MAX_RX_LN];
+u8 Usart4RecvEnd = 0;
+
+u16 Usart5RxCnt = 0;
+u16 Usart5FrameLen = 0;
+u8 Usart5RxBuf[USART5_MAX_RX_LN];
+u8 Usart5RecvEnd = 0;
 
 
 
@@ -90,6 +95,47 @@ void USART1_Init(u32 BaudRate)
     NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStructure);
+}
+
+void USART4_Init(u32 BaudRate)
+{
+	GPIO_InitTypeDef GPIO_InitStructure;
+	USART_InitTypeDef USART_InitStructure;
+	NVIC_InitTypeDef NVIC_InitStructure;
+
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC,ENABLE); 
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_UART4,ENABLE);
+
+	GPIO_PinAFConfig(GPIOC,GPIO_PinSource10,GPIO_AF_UART4);
+	GPIO_PinAFConfig(GPIOC,GPIO_PinSource11,GPIO_AF_UART4); 
+
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10 | GPIO_Pin_11;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
+	GPIO_Init(GPIOC,&GPIO_InitStructure);
+
+	USART_InitStructure.USART_BaudRate = BaudRate;
+	USART_InitStructure.USART_WordLength = USART_WordLength_8b;
+	USART_InitStructure.USART_StopBits = USART_StopBits_1;
+	USART_InitStructure.USART_Parity = USART_Parity_No;
+	USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
+	USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
+	USART_Init(UART4, &USART_InitStructure);
+
+	USART_Cmd(UART4, ENABLE);
+	USART_ClearFlag(UART4, USART_FLAG_TC);
+	USART_ClearFlag(UART4, USART_FLAG_TXE);
+
+	USART_ITConfig(UART4, USART_IT_RXNE, ENABLE);
+	USART_ITConfig(UART4, USART_IT_IDLE,ENABLE);
+	
+	NVIC_InitStructure.NVIC_IRQChannel = UART4_IRQn;
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority=4;
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+	NVIC_Init(&NVIC_InitStructure);
 }
 
 void USART5_Init(u32 BaudRate,u16 check_mode)
@@ -227,6 +273,38 @@ void USART1_IRQHandler(void)                	//串口1中断服务程序
 		Usart1RxCnt = 0;
 		
 		Usart1RecvEnd = 0xAA;
+	}
+}
+
+void UART4_IRQHandler(void)                	//串口1中断服务程序
+{
+	u8  rxdata;
+	
+	if(USART_GetITStatus(UART4,USART_IT_RXNE)!=RESET)//接收中断标志位
+	{
+		USART_ClearFlag(UART4,USART_FLAG_RXNE);
+		
+		rxdata = USART_ReceiveData(UART4);
+		
+		if(Usart4RxCnt < USART4_MAX_RX_LN - 1) 
+		{
+			Usart4RxBuf[Usart4RxCnt++] = rxdata;
+		}	
+	}
+	if(USART_GetITStatus(UART4,USART_IT_IDLE)!=RESET)//空闲帧标志位
+	{
+		USART_ClearITPendingBit(UART4, USART_IT_IDLE);         //清除中断标志
+		
+		rxdata = UART4->SR;
+		rxdata = USART_ReceiveData(UART4);
+		
+		USART_ClearFlag(UART4,USART_FLAG_IDLE);//清楚空闲标志位
+		
+		Usart4FrameLen = Usart4RxCnt;
+		
+		Usart4RxCnt = 0;
+		
+		Usart4RecvEnd = 0xAA;
 	}
 }
 

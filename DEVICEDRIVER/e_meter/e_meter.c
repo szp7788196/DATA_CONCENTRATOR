@@ -1,23 +1,60 @@
 #include "e_meter.h"
 #include "ht7038.h"
 #include "task_rs485.h"
+#include "cat25x.h"
 
 
-ElectricityMeterState_S ElectricityMeterStateInner;
+BulitInMeterParas_S BulitInMeterParas;
+BulitInMeterRatio_S BulitInMeterRatio;
 
+void ReadBulitInMeterRatio(void)
+{
+	u16 crc16_cal = 0;
+
+	CAT25X_Read((u8 *)&BulitInMeterRatio,
+	            ELECTRICITY_IN_METER_RATIO_ADD,
+	            sizeof(BulitInMeterRatio_S));
+
+	crc16_cal = CRC16((u8 *)&BulitInMeterRatio,ELECTRICITY_IN_METER_RATIO_LEN - 2);
+
+	if(crc16_cal != BulitInMeterRatio.crc16)
+	{
+		WriteBulitInMeterRatio(1,0);
+	}
+}
+
+void WriteBulitInMeterRatio(u8 reset,u8 write_enable)
+{
+	if(reset == 1)
+	{
+		BulitInMeterRatio.voltage_ratio = 1.0f;
+		BulitInMeterRatio.current_ratio = 1.0f;
+
+		BulitInMeterRatio.crc16 = 0;
+	}
+
+	if(write_enable == 1)
+	{
+		BulitInMeterRatio.crc16 = CRC16((u8 *)&BulitInMeterRatio,ELECTRICITY_IN_METER_RATIO_LEN - 2);
+
+		CAT25X_Write((u8 *)&BulitInMeterRatio,
+		             ELECTRICITY_IN_METER_RATIO_ADD,
+		             ELECTRICITY_IN_METER_RATIO_LEN);
+	}
+}
 
 void HT7038GetParameters(void)
 {
 	u8 i = 0;
+	u8 got_ratio = 0;
 	float temp = 0.0f;
-	float frequency = 0;
 	s32 value = 0;
 	float voltage_ratio = 1.0f;
 	float current_ratio = 1.0f;
 
 	double active_energy[4] = {0.0f};
 	double reactive_energy[4] = {0.0f};
-//	double apparent_energy[4] = {0.0f};
+	double apparent_energy[4] = {0.0f};
 
 	for(i = 0; i < ElectricityMeterConfigNum.number; i ++)
 	{
@@ -27,37 +64,43 @@ void HT7038GetParameters(void)
 			voltage_ratio = ElectricityMeterConfig[i].voltage_ratio;
 			current_ratio = ElectricityMeterConfig[i].current_ratio;
 
+			got_ratio = 1;
 			break;
 		}
+	}
+	
+	if(got_ratio == 0)
+	{
+		voltage_ratio = BulitInMeterRatio.voltage_ratio;
+		current_ratio = BulitInMeterRatio.current_ratio;
 	}
 
 	//读取电压
 	value = HT7038GetSingleParameter(HT7038_REG_RMS_VOL_A);
-	ElectricityMeterStateInner.current_para[1].voltage = (float)value / 8192.0f * voltage_ratio;
+	BulitInMeterParas.voltage[1] = (float)value / 8192.0f * voltage_ratio;
 
 	value = HT7038GetSingleParameter(HT7038_REG_RMS_VOL_B);
-	ElectricityMeterStateInner.current_para[2].voltage = (float)value / 8192.0f * voltage_ratio;
+	BulitInMeterParas.voltage[2] = (float)value / 8192.0f * voltage_ratio;
 
 	value = HT7038GetSingleParameter(HT7038_REG_RMS_VOL_C);
-	ElectricityMeterStateInner.current_para[3].voltage = (float)value / 8192.0f * voltage_ratio;
+	BulitInMeterParas.voltage[3] = (float)value / 8192.0f * voltage_ratio;
 
-	ElectricityMeterStateInner.current_para[0].voltage = (ElectricityMeterStateInner.current_para[1].voltage +
-	                                                      ElectricityMeterStateInner.current_para[2].voltage +
-	                                                      ElectricityMeterStateInner.current_para[3].voltage) / 3.0f;
+	BulitInMeterParas.voltage[0] = (BulitInMeterParas.voltage[1] +
+								    BulitInMeterParas.voltage[2] +
+								    BulitInMeterParas.voltage[3]) / 3.0f;
 
 	//读取电流
 	value = HT7038GetSingleParameter(HT7038_REG_RMS_CURRENT_A);
-	ElectricityMeterStateInner.current_para[1].current = (float)value / 8192.0f / 10.2f * 40.0f / 16.0f * current_ratio;
+	BulitInMeterParas.current[1] = (float)value / 8192.0f / 10.2f * 40.0f / 16.0f * current_ratio;
 
 	value = HT7038GetSingleParameter(HT7038_REG_RMS_CURRENT_B);
-	ElectricityMeterStateInner.current_para[2].current = (float)value / 8192.0f / 10.2f * 40.0f / 16.0f * current_ratio;
+	BulitInMeterParas.current[2] = (float)value / 8192.0f / 10.2f * 40.0f / 16.0f * current_ratio;
 
 	value = HT7038GetSingleParameter(HT7038_REG_RMS_CURRENT_C);
-	ElectricityMeterStateInner.current_para[3].current = (float)value / 8192.0f / 10.2f * 40.0f / 16.0f * current_ratio;
+	BulitInMeterParas.current[3]= (float)value / 8192.0f / 10.2f * 40.0f / 16.0f * current_ratio;
 
 	value = HT7038GetSingleParameter(HT7038_REG_RMS_CURRENT_ABC);
-	ElectricityMeterStateInner.current_para[0].current = (float)value / 8192.0f / 10.2f * 40.0f / 16.0f * current_ratio;
-
+	BulitInMeterParas.current[0] = (float)value / 8192.0f / 10.2f * 40.0f / 16.0f * current_ratio;
 
 	//读取有功功率
 	value = HT7038GetSingleParameter(HT7038_REG_ACTIVE_POWER_A);
@@ -65,86 +108,86 @@ void HT7038GetParameters(void)
 	{
 		value = value - 0x01000000;
 	}
-	ElectricityMeterStateInner.current_para[1].active_power = (float)value * HT7038_K;
+	BulitInMeterParas.active_power[1] = (float)value * HT7038_K;
 
 	value = HT7038GetSingleParameter(HT7038_REG_ACTIVE_POWER_B);
 	if(value & (1 << 23))
 	{
 		value = value - 0x01000000;
 	}
-	ElectricityMeterStateInner.current_para[2].active_power = (float)value * HT7038_K;
+	BulitInMeterParas.active_power[2] = (float)value * HT7038_K;
 
 	value = HT7038GetSingleParameter(HT7038_REG_ACTIVE_POWER_C);
 	if(value & (1 << 23))
 	{
 		value = value - 0x01000000;
 	}
-	ElectricityMeterStateInner.current_para[3].active_power = (float)value * HT7038_K;
+	BulitInMeterParas.active_power[3] = (float)value * HT7038_K;
 
 	value = HT7038GetSingleParameter(HT7038_REG_ACTIVE_POWER_ABC);
 	if(value & (1 << 23))
 	{
 		value = value - 0x01000000;
 	}
-	ElectricityMeterStateInner.current_para[0].active_power = (float)value * HT7038_K;
+	BulitInMeterParas.active_power[0] = (float)value * HT7038_K;
 
-//	//读取无功功率
-//	value = HT7038GetSingleParameter(HT7038_REG_REACTIVE_POWER_A);
-//	if(value & (1 << 23))
-//	{
-//		value = value - 0x01000000;
-//	}
-//	ElectricityMeterStateInner.current_para[1].reactive_power = (float)value * HT7038_K;
-//
-//	value = HT7038GetSingleParameter(HT7038_REG_REACTIVE_POWER_B);
-//	if(value & (1 << 23))
-//	{
-//		value = value - 0x01000000;
-//	}
-//	ElectricityMeterStateInner.current_para[2].reactive_power = (float)value * HT7038_K;
-//
-//	value = HT7038GetSingleParameter(HT7038_REG_REACTIVE_POWER_B);
-//	if(value & (1 << 23))
-//	{
-//		value = value - 0x01000000;
-//	}
-//	ElectricityMeterStateInner.current_para[3].reactive_power = (float)value * HT7038_K;
-//
-//	value = HT7038GetSingleParameter(HT7038_REG_REACTIVE_POWER_A);
-//	if(value & (1 << 23))
-//	{
-//		value = value - 0x01000000;
-//	}
-//	ElectricityMeterStateInner.current_para[0].reactive_power = (float)value * HT7038_K;
+	//读取无功功率
+	value = HT7038GetSingleParameter(HT7038_REG_REACTIVE_POWER_A);
+	if(value & (1 << 23))
+	{
+		value = value - 0x01000000;
+	}
+	BulitInMeterParas.reactive_power[1] = (float)value * HT7038_K;
 
-//	//读取视在功率
-//	value = HT7038GetSingleParameter(HT7038_REG_APPARENT_POWER_A);
-//	if(value & (1 << 23))
-//	{
-//		value = value - 0x01000000;
-//	}
-//	BuiltInMeter.apparent_power[0] = (float)value * HT7038_K;
-//
-//	value = HT7038GetSingleParameter(HT7038_REG_APPARENT_POWER_B);
-//	if(value & (1 << 23))
-//	{
-//		value = value - 0x01000000;
-//	}
-//	BuiltInMeter.apparent_power[1] = (float)value * HT7038_K;
-//
-//	value = HT7038GetSingleParameter(HT7038_REG_APPARENT_POWER_C);
-//	if(value & (1 << 23))
-//	{
-//		value = value - 0x01000000;
-//	}
-//	BuiltInMeter.apparent_power[2] = (float)value * HT7038_K;
-//
-//	value = HT7038GetSingleParameter(HT7038_REG_APPARENT_POWER_ABC);
-//	if(value & (1 << 23))
-//	{
-//		value = value - 0x01000000;
-//	}
-//	BuiltInMeter.apparent_power[3] = (float)value * HT7038_K;
+	value = HT7038GetSingleParameter(HT7038_REG_REACTIVE_POWER_B);
+	if(value & (1 << 23))
+	{
+		value = value - 0x01000000;
+	}
+	BulitInMeterParas.reactive_power[2] = (float)value * HT7038_K;
+
+	value = HT7038GetSingleParameter(HT7038_REG_REACTIVE_POWER_B);
+	if(value & (1 << 23))
+	{
+		value = value - 0x01000000;
+	}
+	BulitInMeterParas.reactive_power[3]= (float)value * HT7038_K;
+
+	value = HT7038GetSingleParameter(HT7038_REG_REACTIVE_POWER_A);
+	if(value & (1 << 23))
+	{
+		value = value - 0x01000000;
+	}
+	BulitInMeterParas.reactive_power[0] = (float)value * HT7038_K;
+
+	//读取视在功率
+	value = HT7038GetSingleParameter(HT7038_REG_APPARENT_POWER_A);
+	if(value & (1 << 23))
+	{
+		value = value - 0x01000000;
+	}
+	BulitInMeterParas.apparent_power[1] = (float)value * HT7038_K;
+
+	value = HT7038GetSingleParameter(HT7038_REG_APPARENT_POWER_B);
+	if(value & (1 << 23))
+	{
+		value = value - 0x01000000;
+	}
+	BulitInMeterParas.apparent_power[2] = (float)value * HT7038_K;
+
+	value = HT7038GetSingleParameter(HT7038_REG_APPARENT_POWER_C);
+	if(value & (1 << 23))
+	{
+		value = value - 0x01000000;
+	}
+	BulitInMeterParas.apparent_power[3] = (float)value * HT7038_K;
+
+	value = HT7038GetSingleParameter(HT7038_REG_APPARENT_POWER_ABC);
+	if(value & (1 << 23))
+	{
+		value = value - 0x01000000;
+	}
+	BulitInMeterParas.apparent_power[0] = (float)value * HT7038_K;
 
 	//读取功率因数
 	value = HT7038GetSingleParameter(HT7038_REG_PFACTOR_A);
@@ -152,96 +195,100 @@ void HT7038GetParameters(void)
 	{
 		value = value - 0x01000000;
 	}
-	ElectricityMeterStateInner.current_para[1].power_factor = (float)value / 0x800000;
+	BulitInMeterParas.power_factor[1] = (float)value / 0x800000;
 
 	value = HT7038GetSingleParameter(HT7038_REG_PFACTOR_B);
 	if(value & (1 << 23))
 	{
 		value = value - 0x01000000;
 	}
-	ElectricityMeterStateInner.current_para[2].power_factor = (float)value / 0x800000;
+	BulitInMeterParas.power_factor[2] = (float)value / 0x800000;
 
 	value = HT7038GetSingleParameter(HT7038_REG_PFACTOR_C);
 	if(value & (1 << 23))
 	{
 		value = value - 0x01000000;
 	}
-	ElectricityMeterStateInner.current_para[3].power_factor = (float)value / 0x800000;
+	BulitInMeterParas.power_factor[3] = (float)value / 0x800000;
 
 	value = HT7038GetSingleParameter(HT7038_REG_PFACTOR_ABC);
 	if(value & (1 << 23))
 	{
 		value = value - 0x01000000;
 	}
-	ElectricityMeterStateInner.current_para[0].power_factor = (float)value / 0x800000;
+	BulitInMeterParas.power_factor[0] = (float)value / 0x800000;
 
 	//读取有功电能
 	value = HT7038GetSingleParameter(HT7038_REG_ACTIVE_ENERGY_A);
 	temp = (float)value / 6400.0f / 12.0f;
-	ElectricityMeterStateInner.current_para[1].active_energy = (double)(active_energy[0] + temp);
+	BulitInMeterParas.active_energy[1] = (double)(active_energy[0] + temp);
 
 	value = HT7038GetSingleParameter(HT7038_REG_ACTIVE_ENERGY_B);
 	temp = (float)value / 6400.0f / 12.0f;
-	ElectricityMeterStateInner.current_para[2].active_energy = (double)(active_energy[1] + temp);
+	BulitInMeterParas.active_energy[2] = (double)(active_energy[1] + temp);
 
 	value = HT7038GetSingleParameter(HT7038_REG_ACTIVE_ENERGY_C);
 	temp = (float)value / 6400.0f / 12.0f;
-	ElectricityMeterStateInner.current_para[3].active_energy = (double)(active_energy[2] + temp);
+	BulitInMeterParas.active_energy[3] = (double)(active_energy[2] + temp);
 
 	value = HT7038GetSingleParameter(HT7038_REG_ACTIVE_ENERGY_ABC);
 	temp = (float)value / 6400.0f / 12.0f;
-	ElectricityMeterStateInner.current_para[0].active_energy = (double)(active_energy[3] + temp);
+	BulitInMeterParas.active_energy[0]= (double)(active_energy[3] + temp);
 
 	//读取无功电能
 	value = HT7038GetSingleParameter(HT7038_REG_REACTIVE_ENERGY_A);
 	temp = (float)value / 6400.0f / 12.0f;
-	ElectricityMeterStateInner.current_para[1].reactive_energy = (double)(reactive_energy[0] + temp);
+	BulitInMeterParas.reactive_energy[1] = (double)(reactive_energy[0] + temp);
 
 	value = HT7038GetSingleParameter(HT7038_REG_REACTIVE_ENERGY_B);
 	temp = (float)value / 6400.0f / 12.0f;
-	ElectricityMeterStateInner.current_para[2].reactive_energy = (double)(reactive_energy[1] + temp);
+	BulitInMeterParas.reactive_energy[2] = (double)(reactive_energy[1] + temp);
 
 	value = HT7038GetSingleParameter(HT7038_REG_REACTIVE_ENERGY_C);
 	temp = (float)value / 6400.0f / 12.0f;
-	ElectricityMeterStateInner.current_para[3].reactive_energy = (double)(reactive_energy[2] + temp);
+	BulitInMeterParas.reactive_energy[3] = (double)(reactive_energy[2] + temp);
 
 	value = HT7038GetSingleParameter(HT7038_REG_REACTIVE_ENERGY_ABC);
 	temp = (float)value / 6400.0f / 12.0f;
-	ElectricityMeterStateInner.current_para[0].reactive_energy = (double)(reactive_energy[3] + temp);
+	BulitInMeterParas.reactive_energy[0] = (double)(reactive_energy[3] + temp);
 
-//	//读取视在电能
-//	value = HT7038GetSingleParameter(HT7038_REG_APPARENT_ENERGY_A);
-//	temp = (float)value / 6400.0f / 12.0f;
-//	BuiltInMeter.apparent_energy[0] = (double)(apparent_energy[0] + temp);
-//
-//	value = HT7038GetSingleParameter(HT7038_REG_APPARENT_ENERGY_B);
-//	temp = (float)value / 6400.0f / 12.0f;
-//	BuiltInMeter.apparent_energy[1] = (double)(apparent_energy[1] + temp);
-//
-//	value = HT7038GetSingleParameter(HT7038_REG_APPARENT_ENERGY_C);
-//	temp = (float)value / 6400.0f / 12.0f;
-//	BuiltInMeter.apparent_energy[2] = (double)(apparent_energy[2] + temp);
-//
-//	value = HT7038GetSingleParameter(HT7038_REG_APPARENT_ENERGY_ABC);
-//	temp = (float)value / 6400.0f / 12.0f;
-//	BuiltInMeter.apparent_energy[3] = (double)(apparent_energy[3] + temp);
+	//读取视在电能
+	value = HT7038GetSingleParameter(HT7038_REG_APPARENT_ENERGY_A);
+	temp = (float)value / 6400.0f / 12.0f;
+	BulitInMeterParas.apparent_energy[1] = (double)(apparent_energy[0] + temp);
+
+	value = HT7038GetSingleParameter(HT7038_REG_APPARENT_ENERGY_B);
+	temp = (float)value / 6400.0f / 12.0f;
+	BulitInMeterParas.apparent_energy[2] = (double)(apparent_energy[1] + temp);
+
+	value = HT7038GetSingleParameter(HT7038_REG_APPARENT_ENERGY_C);
+	temp = (float)value / 6400.0f / 12.0f;
+	BulitInMeterParas.apparent_energy[3] = (double)(apparent_energy[2] + temp);
+
+	value = HT7038GetSingleParameter(HT7038_REG_APPARENT_ENERGY_ABC);
+	temp = (float)value / 6400.0f / 12.0f;
+	BulitInMeterParas.apparent_energy[0] = (double)(apparent_energy[3] + temp);
 
 	//读取频率
 	value = HT7038GetSingleParameter(HT7038_REG_FREQUENCY);
-	frequency = (float)value / 0x2000;
-
-	ElectricityMeterStateInner.current_para[1].frequency = frequency;
-	ElectricityMeterStateInner.current_para[2].frequency = frequency;
-	ElectricityMeterStateInner.current_para[3].frequency = frequency;
-	ElectricityMeterStateInner.current_para[0].frequency = frequency;
+	BulitInMeterParas.frequency = (float)value / 0x2000;
 }
 
 //获取内置电表参数
 void ElectricityMeterGetBuiltInParas(ElectricityMeterState_S *state)
 {
-	memcpy(state->current_para,
-	       &ElectricityMeterStateInner.current_para,
-	       sizeof(ElectricityMeter_Para_S) * MAX_ELECTRICITY_METER_CH_NUM);
+	u8 i = 0;
+	
+	for(i = 0; i < 4; i ++)
+	{
+		state->current_para[i].voltage = BulitInMeterParas.voltage[i];
+		state->current_para[i].current = BulitInMeterParas.current[i];
+		state->current_para[i].active_power = BulitInMeterParas.active_power[i];
+		state->current_para[i].active_energy = BulitInMeterParas.active_energy[i];
+		state->current_para[i].reactive_energy = BulitInMeterParas.reactive_energy[i];
+		state->current_para[i].power_factor = BulitInMeterParas.power_factor[i];
+		state->current_para[i].frequency = BulitInMeterParas.frequency;
+	}	
 }
 
 //或外置电表或采集模块的参数

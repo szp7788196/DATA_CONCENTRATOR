@@ -1,7 +1,7 @@
 #include "kc.h"
 #include "delay.h"
 
-
+u16 BuiltInRelayState = 0;
 
 //RELAY IO≥ı ºªØ
 void KC_Init(void)
@@ -35,26 +35,32 @@ void ControlAllBuiltInRelay(RelayModuleState_S state)
 				{
 					case 0:
 						KC1 = 1;
+						BuiltInRelayState |= (1 << 0);
 					break;
 
 					case 1:
 						KC2 = 1;
+						BuiltInRelayState |= (1 << 1);
 					break;
 
 					case 2:
 						KC3 = 1;
+						BuiltInRelayState |= (1 << 2);
 					break;
 
 					case 3:
 						KC4 = 1;
+						BuiltInRelayState |= (1 << 3);
 					break;
 
 					case 4:
 						KC5 = 1;
+						BuiltInRelayState |= (1 << 4);
 					break;
 
 					case 5:
 						KC6 = 1;
+						BuiltInRelayState |= (1 << 5);
 					break;
 
 					default:
@@ -67,26 +73,32 @@ void ControlAllBuiltInRelay(RelayModuleState_S state)
 				{
 					case 0:
 						KC1 = 0;
+						BuiltInRelayState &= ~(1 << 0);
 					break;
 
 					case 1:
 						KC2 = 0;
+						BuiltInRelayState &= ~(1 << 1);
 					break;
 
 					case 2:
 						KC3 = 0;
+						BuiltInRelayState &= ~(1 << 2);
 					break;
 
 					case 3:
 						KC4 = 0;
+						BuiltInRelayState &= ~(1 << 3);
 					break;
 
 					case 4:
 						KC5 = 0;
+						BuiltInRelayState &= ~(1 << 4);
 					break;
 
 					case 5:
 						KC6 = 0;
+						BuiltInRelayState &= ~(1 << 5);
 					break;
 
 					default:

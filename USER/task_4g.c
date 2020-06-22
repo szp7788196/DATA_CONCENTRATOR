@@ -22,7 +22,6 @@ void vTask4G(void *pvParameters)
 	u8 refresh_state = 0;
 	time_t time_s = 0;
 
-
 	RE_INIT:
 	wait_cnt = 0;
 	ConnectState = UNKNOW_STATE;
@@ -58,6 +57,13 @@ void vTask4G(void *pvParameters)
 			ec20_get_AT_CSQ((char *)&EC20Info.csq);
 
 			SyncDataTimeFormEC20Module(43200);		//每隔12小时对时一次
+		}
+		
+		if(ConcentratorBasicConfig.connection_mode != (u8)MODE_4G)
+		{
+			ec20_set_AT_QICLOSE();
+			
+			goto RE_INIT;
 		}
 
 		switch((u8)ConnectState)

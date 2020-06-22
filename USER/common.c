@@ -3,6 +3,7 @@
 #include "relay_conf.h"
 #include "input_collector_conf.h"
 #include "electricity_meter_conf.h"
+#include "e_meter.h"
 
 SemaphoreHandle_t  xMutex_SPI2 = NULL;
 SemaphoreHandle_t  xMutex_RTC = NULL;
@@ -650,9 +651,11 @@ u8 GetMemoryForSpecifyPointer(u8 **str,u16 size, u8 *memory)
 
 void ReadTotalConfigurationParameters(void)
 {
+	ReadConcentratorGateWayID();			//读取集控器网关ID
 	ReadRunMode();							//读取集控器运行模式
 	ReadDefaultSwitchTime();				//读取默认开关灯时间
 	ReadConcentratorBasicConfig();			//读取集控器基础配置参数
+	ReadConcentratorLocalNetConfig();			//读取集控器本地网络配置
 	ReadConcentratorAlarmConfig();			//读取集控器告警配置参数
 	ReadConcentratorLocationConfig();		//读取经纬度年表
 	ReadFrameWareState();					//读取固件升级状态
@@ -667,6 +670,7 @@ void ReadTotalConfigurationParameters(void)
 	ReadInputCollectorConfig();				//读取输入量检测模块基础配置参数
 	ReadInputCollectorAlarmConfig();		//读取输入量检测模块告警配置参数
 	
+	ReadBulitInMeterRatio();				//读取内置电表变比
 	ReadElectricityMeterBasicConfig();		//读取电表基础配置参数
 	ReadElectricityMeterConfig();			//读取电表基础配置参数
 	ReadElectricityMeterAlarmConfig();		//读取电表告警配置参数

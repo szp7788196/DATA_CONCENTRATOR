@@ -56,8 +56,14 @@
 #define CONCENTRATOR_ALARM_CONF_ADD				155			//集控器告警参数配置EEPROM存储地址
 #define CONCENTRATOR_ALARM_CONF_LEN				24
 
+#define CONCENTRATOR_GATE_WAY_ADD				184			//网关ID存储地址
+#define CONCENTRATOR_GATE_WAY_LEN				6
+
 #define CONCENTRATOR_LOCATION_CONF_ADD			201			//集控器经纬度年表参数配置EEPROM存储地址
 #define CONCENTRATOR_LOCATION_CONF_LEN			1506
+
+#define CONCENTRATOR_LOCAL_NET_CONF_ADD			22901		//集控器本地网络参数配置存储地址
+#define CONCENTRATOR_LOCAL_NET_CONF_LEN			26
 
 #define FW_STATE_ADD							1721		//固件更新状态EEPROM存储地址
 #define FW_STATE_LEN							79
@@ -100,6 +106,9 @@
 
 #define INPUT_COLLECTOR_ALARM_CONF_ADD			18391		//输入量采集模块告警参数配置
 #define INPUT_COLLECTOR_ALARM_CONF_LEN			4
+
+#define ELECTRICITY_IN_METER_RATIO_ADD			190			//内置电表变比
+#define ELECTRICITY_IN_METER_RATIO_LEN			10
 
 #define ELECTRICITY_METER_BASIC_CONF_ADD		17551		//电表基础配置
 #define ELECTRICITY_METER_BASIC_CONF_LEN		5
@@ -187,7 +196,7 @@ static const uint32_t crc32tab[] =
 	0xb40bbe37L, 0xc30c8ea1L, 0x5a05df1bL, 0x2d02ef8dL 
 };
 
-static u8 auchCRCHi[] = 
+static const u8 auchCRCHi[] = 
 {
     0x00,0xC1,0x81,0x40,0x01,0xC0,0x80,0x41,0x01,0xC0,
     0x80,0x41,0x00,0xC1,0x81,0x40,0x01,0xC0,0x80,0x41,
@@ -217,7 +226,7 @@ static u8 auchCRCHi[] =
     0x80,0x41,0x00,0xC1,0x81,0x40
     } ;
     /* CRC低位字节值表*/
-static u8 auchCRCLo[] = 
+static const u8 auchCRCLo[] = 
 {
     0x00,0xC0,0xC1,0x01,0xC3,0x03,0x02,0xC2,0xC6,0x06,
     0x07,0xC7,0x05,0xC5,0xC4,0x04,0xCC,0x0C,0x0D,0xCD,

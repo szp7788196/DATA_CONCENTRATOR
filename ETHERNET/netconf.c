@@ -46,9 +46,9 @@
 /* Private variables ---------------------------------------------------------*/
 struct netif xnetif; /* network interface structure */
 extern __IO uint32_t  EthStatus;
-#ifdef USE_DHCP
+//#ifdef USE_DHCP
 __IO uint8_t DHCP_state;
-#endif /* USE_DHCP */
+//#endif /* USE_DHCP */
 
 /* Private functions ---------------------------------------------------------*/
 /**
@@ -61,31 +61,41 @@ void LwIP_Init(void)
   struct ip_addr ipaddr;
   struct ip_addr netmask;
   struct ip_addr gw;
-#ifndef USE_DHCP 
-  uint8_t iptab[4] = {0};
-  uint8_t iptxt[20];
-#endif
+	
+//#ifndef USE_DHCP
+	if(lwipdev.dhcpenable == 0)
+	{
+//		uint8_t iptab[4] = {0};
+//		uint8_t iptxt[20];
+	}
+ 
+//#endif
   /* Create tcp_ip stack thread */
   tcpip_init( NULL, NULL );	
 
   lwip_comm_default_ip_set(&lwipdev);	//设置默认IP等信息
 
   /* IP address setting */
-#ifdef USE_DHCP
-  ipaddr.addr = 0;
-  netmask.addr = 0;
-  gw.addr = 0;
-#else
-  IP4_ADDR(&ipaddr, lwipdev.ip[0], lwipdev.ip[1], lwipdev.ip[2], lwipdev.ip[3]);
-  IP4_ADDR(&netmask, lwipdev.netmask[0], lwipdev.netmask[1] , lwipdev.netmask[2], lwipdev.netmask[3]);
-  IP4_ADDR(&gw, lwipdev.gateway[0], lwipdev.gateway[1], lwipdev.gateway[2], lwipdev.gateway[3]);
+//#ifdef USE_DHCP
+	if(lwipdev.dhcpenable == 1)
+	{
+		ipaddr.addr = 0;
+		netmask.addr = 0;
+		gw.addr = 0;
+	}
+	else
+	{
+//#else
+		IP4_ADDR(&ipaddr, lwipdev.ip[0], lwipdev.ip[1], lwipdev.ip[2], lwipdev.ip[3]);
+		IP4_ADDR(&netmask, lwipdev.netmask[0], lwipdev.netmask[1] , lwipdev.netmask[2], lwipdev.netmask[3]);
+		IP4_ADDR(&gw, lwipdev.gateway[0], lwipdev.gateway[1], lwipdev.gateway[2], lwipdev.gateway[3]);
 
-  printf("网卡en的MAC地址为:................%d.%d.%d.%d.%d.%d\r\n",lwipdev.mac[0],lwipdev.mac[1],lwipdev.mac[2],lwipdev.mac[3],lwipdev.mac[4],lwipdev.mac[5]);
-  printf("静态IP地址........................%d.%d.%d.%d\r\n",lwipdev.ip[0],lwipdev.ip[1],lwipdev.ip[2],lwipdev.ip[3]);
-  printf("子网掩码..........................%d.%d.%d.%d\r\n",lwipdev.netmask[0],lwipdev.netmask[1],lwipdev.netmask[2],lwipdev.netmask[3]);
-  printf("默认网关..........................%d.%d.%d.%d\r\n",lwipdev.gateway[0],lwipdev.gateway[1],lwipdev.gateway[2],lwipdev.gateway[3]);
-  
-#endif  
+		printf("网卡en的MAC地址为:................%d.%d.%d.%d.%d.%d\r\n",lwipdev.mac[0],lwipdev.mac[1],lwipdev.mac[2],lwipdev.mac[3],lwipdev.mac[4],lwipdev.mac[5]);
+		printf("静态IP地址........................%d.%d.%d.%d\r\n",lwipdev.ip[0],lwipdev.ip[1],lwipdev.ip[2],lwipdev.ip[3]);
+		printf("子网掩码..........................%d.%d.%d.%d\r\n",lwipdev.netmask[0],lwipdev.netmask[1],lwipdev.netmask[2],lwipdev.netmask[3]);
+		printf("默认网关..........................%d.%d.%d.%d\r\n",lwipdev.gateway[0],lwipdev.gateway[1],lwipdev.gateway[2],lwipdev.gateway[3]);
+	}
+//#endif  
 
   /* - netif_add(struct netif *netif, struct ip_addr *ipaddr,
   struct ip_addr *netmask, struct ip_addr *gw,
@@ -111,25 +121,30 @@ void LwIP_Init(void)
 
     /* When the netif is fully configured this function must be called.*/
     netif_set_up(&xnetif);
-#ifdef USE_DHCP
-    DHCP_state = DHCP_START;
-
-#endif /* USE_DHCP */
+//#ifdef USE_DHCP
+	if(lwipdev.dhcpenable == 1)
+	{
+		DHCP_state = DHCP_START;
+	}
+//#endif /* USE_DHCP */
   }
   else
   {
     /*  When the netif link is down this function must be called.*/
     netif_set_down(&xnetif);
-#ifdef USE_DHCP
-    DHCP_state = DHCP_LINK_DOWN;
-#endif /* USE_DHCP */
+//#ifdef USE_DHCP
+	if(lwipdev.dhcpenable == 1)
+	{
+		DHCP_state = DHCP_LINK_DOWN;
+	}
+//#endif /* USE_DHCP */
   }
 
   /* Set the link callback function, this function is called on change of link status*/
   netif_set_link_callback(&xnetif, ETH_link_callback);
 }
 
-#ifdef USE_DHCP
+//#ifdef USE_DHCP
 
 TaskHandle_t xHandleTaskDHCP = NULL;
 /**
@@ -230,6 +245,6 @@ void LwIP_DHCP_task(void * pvParameters)
 		delay_ms(250);
 	}   
 }
-#endif  /* USE_DHCP */
+//#endif  /* USE_DHCP */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

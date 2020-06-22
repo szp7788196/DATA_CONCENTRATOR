@@ -1,6 +1,7 @@
 #include "kr.h"
 #include "task_rs485.h"
 
+u8 BuiltInInputCollectorState = 0;
 
 void KR_Init(void)
 {
@@ -17,62 +18,68 @@ void KR_Init(void)
 	GPIO_Init(GPIOF, &GPIO_InitStructure);
 }
 
-//控制集控内部继电器
-void GetAllBuiltInInputCollectorState(InputCollectorState_S *state)
+
+void GetKrState(void)
 {
 	if(KR1 == 1)
 	{
-		state->d_current_state |= (1 << 0);
+		BuiltInInputCollectorState |= (1 << 0);
 	}
 	else
 	{
-		state->d_current_state &= ~(1 << 0);
+		BuiltInInputCollectorState &= ~(1 << 0);
 	}
 
 	if(KR2 == 1)
 	{
-		state->d_current_state |= (1 << 1);
+		BuiltInInputCollectorState |= (1 << 1);
 	}
 	else
 	{
-		state->d_current_state &= ~(1 << 1);
+		BuiltInInputCollectorState &= ~(1 << 1);
 	}
 
 	if(KR3 == 1)
 	{
-		state->d_current_state |= (1 << 2);
+		BuiltInInputCollectorState |= (1 << 2);
 	}
 	else
 	{
-		state->d_current_state &= ~(1 << 2);
+		BuiltInInputCollectorState &= ~(1 << 2);
 	}
 
 	if(KR4 == 1)
 	{
-		state->d_current_state |= (1 << 3);
+		BuiltInInputCollectorState |= (1 << 3);
 	}
 	else
 	{
-		state->d_current_state &= ~(1 << 3);
+		BuiltInInputCollectorState &= ~(1 << 3);
 	}
 
 	if(KR5 == 1)
 	{
-		state->d_current_state |= (1 << 4);
+		BuiltInInputCollectorState |= (1 << 4);
 	}
 	else
 	{
-		state->d_current_state &= ~(1 << 4);
+		BuiltInInputCollectorState &= ~(1 << 4);
 	}
 
 	if(KR6 == 1)
 	{
-		state->d_current_state |= (1 << 5);
+		BuiltInInputCollectorState |= (1 << 5);
 	}
 	else
 	{
-		state->d_current_state &= ~(1 << 5);
+		BuiltInInputCollectorState &= ~(1 << 5);
 	}
+}
+
+//控制集控内部继电器
+void GetAllBuiltInInputCollectorState(InputCollectorState_S *state)
+{
+	state->d_current_state = BuiltInInputCollectorState;
 }
 
 //采集集控外部继电器模块状态

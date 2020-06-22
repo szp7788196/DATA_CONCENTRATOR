@@ -9,8 +9,15 @@ TaskHandle_t xHandleTaskINPUT_COLLECTOR = NULL;
 
 void vTaskINPUT_COLLECTOR(void *pvParameters)
 {
+	u32 cnt = 0;
+	
 	while(1)
 	{
+		if(cnt % 20)
+		{
+			GetKrState();
+		}
+		
 		InputCollectorRecvAndHandleFrameStruct();			//报文解析
 		
 		InputCollectorEventCheckPolling();					//告警等事件轮训
@@ -18,6 +25,8 @@ void vTaskINPUT_COLLECTOR(void *pvParameters)
 		InputCollectorCollectCurrentState();				//采集输入量采集模块状态
 		
 		InputCollectorRecvAndHandleDeviceFrame();			//接收并处理外置输入量采集模块返回的数据
+		
+		cnt ++;
 		
 		delay_ms(100);
 	}

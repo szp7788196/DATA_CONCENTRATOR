@@ -2,6 +2,7 @@
 #define __CONCENTRATOR_CONF_H
 
 #include "sys.h"
+#include "common.h"
 
 /********************************固件升级***************************************/
 #define FIRMWARE_FREE					0
@@ -35,6 +36,21 @@ typedef enum
 
 } RUN_MODE_E;
 
+
+typedef struct	ConcentratorLocalNetConfig	//集控器本地链接参数
+{
+	u8 connection_mode;						//连接方式
+	u8 dhcp_enable;							//DHCP使能
+	u8 local_ip[4];							//本地IP
+	u8 local_msak[4];						//本地MASK
+	u8 local_gate[4];						//本地网关
+	u8 local_dns[4];						//本地DNS
+	u8 remote_ip[4];						//远端IP
+	u16 remote_port;						//远端端口
+
+	u16 crc16;								//校验码 存储用
+
+}__attribute__((packed))ConcentratorLocalNetConfig_S;
 
 typedef struct	ConcentratorBasicConfig		//集控器基础配置参数
 {
@@ -131,8 +147,9 @@ typedef struct FrameWareState
 
 
 
-
+extern Uint32TypeNumber_S ConcentratorGateWayID;					//网关ID
 extern RUN_MODE_E RunMode;										//运行模式
+extern ConcentratorLocalNetConfig_S ConcentratorLocalNetConfig;	//本地网络参数
 extern ConcentratorBasicConfig_S ConcentratorBasicConfig;		//基本配置信息
 extern ConcentratorAlarmConfig_S ConcentratorAlarmConfig;		//告警配置参数
 extern ConcentratorLocationConfig_S ConcentratorLocationConfig;	//经纬度年表配置
@@ -143,10 +160,13 @@ extern FrameWareState_S FrameWareState;							//固件升级状态
 
 
 
-
+void ReadConcentratorGateWayID(void);
+void WriteConcentratorGateWayID(u8 reset,u8 write_enable);
 void ReadRunMode(void);
 void WriteRunMode(u8 reset,u8 write_enable);
 void ReadConcentratorBasicConfig(void);
+void ReadConcentratorLocalNetConfig(void);
+void WriteConcentratorLocalNetConfig(u8 reset,u8 write_enable);
 void WriteConcentratorBasicConfig(u8 reset,u8 write_enable);
 void ReadConcentratorAlarmConfig(void);
 void WriteConcentratorAlarmConfig(u8 reset,u8 write_enable);

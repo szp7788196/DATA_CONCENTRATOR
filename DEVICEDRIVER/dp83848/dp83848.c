@@ -51,9 +51,9 @@
 ETH_InitTypeDef ETH_InitStructure;
 __IO uint32_t  EthStatus = 0;
 extern struct netif xnetif;
-#ifdef USE_DHCP
+//#ifdef USE_DHCP
 extern __IO uint8_t DHCP_state;
-#endif /* LWIP_DHCP */
+//#endif /* LWIP_DHCP */
 xSemaphoreHandle ETH_link_xSemaphore = NULL;
 
 /* Private function prototypes -----------------------------------------------*/
@@ -371,10 +371,13 @@ void ETH_link_callback(struct netif *netif)
   struct ip_addr ipaddr;
   struct ip_addr netmask;
   struct ip_addr gw;
-#ifndef USE_DHCP
-  uint8_t iptab[4] = {0};
-  uint8_t iptxt[20];
-#endif /* USE_DHCP */
+//#ifndef USE_DHCP
+	if(lwipdev.dhcpenable == 0)
+	{
+//		uint8_t iptab[4] = {0};
+//		uint8_t iptxt[20];
+	}
+//#endif /* USE_DHCP */
 
 
   if(netif_is_link_up(netif))
@@ -442,17 +445,23 @@ void ETH_link_callback(struct netif *netif)
     /* Restart MAC interface */
     ETH_Start();
 
-#ifdef USE_DHCP
-    ipaddr.addr = 0;
-    netmask.addr = 0;
-    gw.addr = 0;
+//#ifdef USE_DHCP
+	if(lwipdev.dhcpenable == 1)
+	{
+		ipaddr.addr = 0;
+		netmask.addr = 0;
+		gw.addr = 0;
 
-    DHCP_state = DHCP_START;
-#else
-    IP4_ADDR(&ipaddr, lwipdev.ip[0], lwipdev.ip[1], lwipdev.ip[2], lwipdev.ip[3]);
-    IP4_ADDR(&netmask, lwipdev.netmask[0], lwipdev.netmask[1] , lwipdev.netmask[2], lwipdev.netmask[3]);
-    IP4_ADDR(&gw, lwipdev.gateway[0], lwipdev.gateway[1], lwipdev.gateway[2], lwipdev.gateway[3]);
-#endif /* USE_DHCP */
+		DHCP_state = DHCP_START;
+	}
+    else
+	{
+//#else
+		IP4_ADDR(&ipaddr, lwipdev.ip[0], lwipdev.ip[1], lwipdev.ip[2], lwipdev.ip[3]);
+		IP4_ADDR(&netmask, lwipdev.netmask[0], lwipdev.netmask[1] , lwipdev.netmask[2], lwipdev.netmask[3]);
+		IP4_ADDR(&gw, lwipdev.gateway[0], lwipdev.gateway[1], lwipdev.gateway[2], lwipdev.gateway[3]);
+//#endif /* USE_DHCP */
+	}
 
     netif_set_addr(&xnetif, &ipaddr , &netmask, &gw);
 
@@ -462,11 +471,14 @@ void ETH_link_callback(struct netif *netif)
   else
   {
     ETH_Stop();
-#ifdef USE_DHCP
-    DHCP_state = DHCP_LINK_DOWN;
-    dhcp_stop(netif);
+//#ifdef USE_DHCP
+	if(lwipdev.dhcpenable == 1)
+	{
+		DHCP_state = DHCP_LINK_DOWN;
+		dhcp_stop(netif);
+	}
 
-#endif /* USE_DHCP */
+//#endif /* USE_DHCP */
 
     /*  When the netif link is down this function must be called.*/
     netif_set_down(&xnetif);
