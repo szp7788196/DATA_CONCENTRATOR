@@ -27,7 +27,7 @@ void SendLoginFrameToServer(void)
 	char buf[25];
 	ServerFrameStruct_S *server_frame_struct = NULL;		//用于响应服务器
 
-	server_frame_struct = (ServerFrameStruct_S *)pvPortMalloc(sizeof(ServerFrameStruct_S));
+	server_frame_struct = (ServerFrameStruct_S *)mymalloc(sizeof(ServerFrameStruct_S));
 
 	if(server_frame_struct != NULL)
 	{
@@ -39,7 +39,7 @@ void SendLoginFrameToServer(void)
 		server_frame_struct->msg_id		= 0x00E0;
 		server_frame_struct->para_num	= 8;
 
-		server_frame_struct->para = (Parameter_S *)pvPortMalloc(server_frame_struct->para_num * sizeof(Parameter_S));
+		server_frame_struct->para = (Parameter_S *)mymalloc(server_frame_struct->para_num * sizeof(Parameter_S));
 
 		if(server_frame_struct->para != NULL)
 		{
@@ -47,7 +47,7 @@ void SendLoginFrameToServer(void)
 			memset(buf,0,25);
 			sprintf(buf, "%d",ConcentratorBasicConfig.connection_mode);
 			server_frame_struct->para[i].len = strlen(buf);
-			server_frame_struct->para[i].value = (u8 *)pvPortMalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
+			server_frame_struct->para[i].value = (u8 *)mymalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
 			if(server_frame_struct->para[i].value != NULL)
 			{
 				memcpy(server_frame_struct->para[i].value,buf,server_frame_struct->para[i].len + 1);
@@ -58,7 +58,7 @@ void SendLoginFrameToServer(void)
 			memset(buf,0,25);
 			sprintf(buf, "1");
 			server_frame_struct->para[i].len = strlen(buf);
-			server_frame_struct->para[i].value = (u8 *)pvPortMalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
+			server_frame_struct->para[i].value = (u8 *)mymalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
 			if(server_frame_struct->para[i].value != NULL)
 			{
 				memcpy(server_frame_struct->para[i].value,buf,server_frame_struct->para[i].len + 1);
@@ -69,7 +69,7 @@ void SendLoginFrameToServer(void)
 			memset(buf,0,25);
 			sprintf(buf, "%d",EC20Info.csq);
 			server_frame_struct->para[i].len = strlen(buf);
-			server_frame_struct->para[i].value = (u8 *)pvPortMalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
+			server_frame_struct->para[i].value = (u8 *)mymalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
 			if(server_frame_struct->para[i].value != NULL)
 			{
 				memcpy(server_frame_struct->para[i].value,buf,server_frame_struct->para[i].len + 1);
@@ -80,7 +80,7 @@ void SendLoginFrameToServer(void)
 			memset(buf,0,25);
 			sprintf(buf, "LNK-RTU");
 			server_frame_struct->para[i].len = strlen(buf);
-			server_frame_struct->para[i].value = (u8 *)pvPortMalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
+			server_frame_struct->para[i].value = (u8 *)mymalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
 			if(server_frame_struct->para[i].value != NULL)
 			{
 				memcpy(server_frame_struct->para[i].value,buf,server_frame_struct->para[i].len + 1);
@@ -91,7 +91,7 @@ void SendLoginFrameToServer(void)
 			memset(buf,0,25);
 			sprintf(buf, "%d",HARD_WARE_VRESION);
 			server_frame_struct->para[i].len = strlen(buf);
-			server_frame_struct->para[i].value = (u8 *)pvPortMalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
+			server_frame_struct->para[i].value = (u8 *)mymalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
 			if(server_frame_struct->para[i].value != NULL)
 			{
 				memcpy(server_frame_struct->para[i].value,buf,server_frame_struct->para[i].len + 1);
@@ -102,7 +102,7 @@ void SendLoginFrameToServer(void)
 			memset(buf,0,25);
 			sprintf(buf, "%d",SOFT_WARE_VRESION);
 			server_frame_struct->para[i].len = strlen(buf);
-			server_frame_struct->para[i].value = (u8 *)pvPortMalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
+			server_frame_struct->para[i].value = (u8 *)mymalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
 			if(server_frame_struct->para[i].value != NULL)
 			{
 				memcpy(server_frame_struct->para[i].value,buf,server_frame_struct->para[i].len + 1);
@@ -113,7 +113,7 @@ void SendLoginFrameToServer(void)
 			memset(buf,0,25);
 			TimeToString((u8 *)buf,calendar.w_year,calendar.w_month,calendar.w_date,calendar.hour,calendar.min,calendar.sec);
 			server_frame_struct->para[i].len = strlen(buf);
-			server_frame_struct->para[i].value = (u8 *)pvPortMalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
+			server_frame_struct->para[i].value = (u8 *)mymalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
 			if(server_frame_struct->para[i].value != NULL)
 			{
 				memcpy(server_frame_struct->para[i].value,buf,server_frame_struct->para[i].len + 1);
@@ -124,7 +124,7 @@ void SendLoginFrameToServer(void)
 			memset(buf,0,25);
 			sprintf(buf, "0");
 			server_frame_struct->para[i].len = strlen(buf);
-			server_frame_struct->para[i].value = (u8 *)pvPortMalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
+			server_frame_struct->para[i].value = (u8 *)mymalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
 			if(server_frame_struct->para[i].value != NULL)
 			{
 				memcpy(server_frame_struct->para[i].value,buf,server_frame_struct->para[i].len + 1);
@@ -143,7 +143,7 @@ void SendHeartBeatFrameToServer(void)
 	char buf[25];
 	ServerFrameStruct_S *server_frame_struct = NULL;		//用于响应服务器
 
-	server_frame_struct = (ServerFrameStruct_S *)pvPortMalloc(sizeof(ServerFrameStruct_S));
+	server_frame_struct = (ServerFrameStruct_S *)mymalloc(sizeof(ServerFrameStruct_S));
 
 	if(server_frame_struct != NULL)
 	{
@@ -155,7 +155,7 @@ void SendHeartBeatFrameToServer(void)
 		server_frame_struct->msg_id		= 0x00E3;
 		server_frame_struct->para_num	= 2;
 
-		server_frame_struct->para = (Parameter_S *)pvPortMalloc(server_frame_struct->para_num * sizeof(Parameter_S));
+		server_frame_struct->para = (Parameter_S *)mymalloc(server_frame_struct->para_num * sizeof(Parameter_S));
 
 		if(server_frame_struct->para != NULL)
 		{
@@ -163,7 +163,7 @@ void SendHeartBeatFrameToServer(void)
 			memset(buf,0,25);
 			sprintf(buf, "%d",EC20Info.csq);
 			server_frame_struct->para[i].len = strlen(buf);
-			server_frame_struct->para[i].value = (u8 *)pvPortMalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
+			server_frame_struct->para[i].value = (u8 *)mymalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
 			if(server_frame_struct->para[i].value != NULL)
 			{
 				memcpy(server_frame_struct->para[i].value,buf,server_frame_struct->para[i].len + 1);
@@ -174,7 +174,7 @@ void SendHeartBeatFrameToServer(void)
 			memset(buf,0,25);
 			TimeToString((u8 *)buf,calendar.w_year,calendar.w_month,calendar.w_date,calendar.hour,calendar.min,calendar.sec);
 			server_frame_struct->para[i].len = strlen(buf);
-			server_frame_struct->para[i].value = (u8 *)pvPortMalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
+			server_frame_struct->para[i].value = (u8 *)mymalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
 			if(server_frame_struct->para[i].value != NULL)
 			{
 				memcpy(server_frame_struct->para[i].value,buf,server_frame_struct->para[i].len + 1);
@@ -193,7 +193,7 @@ void SendOtaRequestFrameToServer(FrameWareState_S frame_ware_state)
 	char buf[25];
 	ServerFrameStruct_S *server_frame_struct = NULL;		//用于响应服务器
 
-	server_frame_struct = (ServerFrameStruct_S *)pvPortMalloc(sizeof(ServerFrameStruct_S));
+	server_frame_struct = (ServerFrameStruct_S *)mymalloc(sizeof(ServerFrameStruct_S));
 
 	if(server_frame_struct != NULL)
 	{
@@ -205,13 +205,13 @@ void SendOtaRequestFrameToServer(FrameWareState_S frame_ware_state)
 		server_frame_struct->msg_id		= 0x00F1;
 		server_frame_struct->para_num	= 3;
 
-		server_frame_struct->para = (Parameter_S *)pvPortMalloc(server_frame_struct->para_num * sizeof(Parameter_S));
+		server_frame_struct->para = (Parameter_S *)mymalloc(server_frame_struct->para_num * sizeof(Parameter_S));
 
 		if(server_frame_struct->para != NULL)
 		{
 			server_frame_struct->para[i].type = 0x4001;
 			server_frame_struct->para[i].len = strlen((char *)FrameWareState.md5);
-			server_frame_struct->para[i].value = (u8 *)pvPortMalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
+			server_frame_struct->para[i].value = (u8 *)mymalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
 			if(server_frame_struct->para[i].value != NULL)
 			{
 				memcpy(server_frame_struct->para[i].value,FrameWareState.md5,server_frame_struct->para[i].len + 1);
@@ -222,7 +222,7 @@ void SendOtaRequestFrameToServer(FrameWareState_S frame_ware_state)
 			memset(buf,0,25);
 			sprintf(buf, "%d",FIRMWARE_BAG_SIZE);
 			server_frame_struct->para[i].len = strlen(buf);
-			server_frame_struct->para[i].value = (u8 *)pvPortMalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
+			server_frame_struct->para[i].value = (u8 *)mymalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
 			if(server_frame_struct->para[i].value != NULL)
 			{
 				memcpy(server_frame_struct->para[i].value,buf,server_frame_struct->para[i].len + 1);
@@ -233,7 +233,7 @@ void SendOtaRequestFrameToServer(FrameWareState_S frame_ware_state)
 			memset(buf,0,25);
 			sprintf(buf, "%d",frame_ware_state.current_bag_cnt);
 			server_frame_struct->para[i].len = strlen(buf);
-			server_frame_struct->para[i].value = (u8 *)pvPortMalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
+			server_frame_struct->para[i].value = (u8 *)mymalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
 			if(server_frame_struct->para[i].value != NULL)
 			{
 				memcpy(server_frame_struct->para[i].value,buf,server_frame_struct->para[i].len + 1);
@@ -253,7 +253,7 @@ void SendOtaCompleteFrameToServer(void)
 	char buf[25];
 	ServerFrameStruct_S *server_frame_struct = NULL;		//用于响应服务器
 
-	server_frame_struct = (ServerFrameStruct_S *)pvPortMalloc(sizeof(ServerFrameStruct_S));
+	server_frame_struct = (ServerFrameStruct_S *)mymalloc(sizeof(ServerFrameStruct_S));
 
 	if(server_frame_struct != NULL)
 	{
@@ -265,13 +265,13 @@ void SendOtaCompleteFrameToServer(void)
 		server_frame_struct->msg_id		= 0x00F2;
 		server_frame_struct->para_num	= 3;
 
-		server_frame_struct->para = (Parameter_S *)pvPortMalloc(server_frame_struct->para_num * sizeof(Parameter_S));
+		server_frame_struct->para = (Parameter_S *)mymalloc(server_frame_struct->para_num * sizeof(Parameter_S));
 
 		if(server_frame_struct->para != NULL)
 		{
 			server_frame_struct->para[i].type = 0x4001;
 			server_frame_struct->para[i].len = strlen((char *)FrameWareState.md5);
-			server_frame_struct->para[i].value = (u8 *)pvPortMalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
+			server_frame_struct->para[i].value = (u8 *)mymalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
 			if(server_frame_struct->para[i].value != NULL)
 			{
 				memcpy(server_frame_struct->para[i].value,FrameWareState.md5,server_frame_struct->para[i].len + 1);
@@ -290,7 +290,7 @@ void SendOtaCompleteFrameToServer(void)
 			memset(buf,0,25);
 			sprintf(buf, "%d",tmp);
 			server_frame_struct->para[i].len = strlen(buf);
-			server_frame_struct->para[i].value = (u8 *)pvPortMalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
+			server_frame_struct->para[i].value = (u8 *)mymalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
 			if(server_frame_struct->para[i].value != NULL)
 			{
 				memcpy(server_frame_struct->para[i].value,buf,server_frame_struct->para[i].len + 1);
@@ -301,7 +301,7 @@ void SendOtaCompleteFrameToServer(void)
 			memset(buf,0,25);
 			sprintf(buf, "%d",SOFT_WARE_VRESION);
 			server_frame_struct->para[i].len = strlen(buf);
-			server_frame_struct->para[i].value = (u8 *)pvPortMalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
+			server_frame_struct->para[i].value = (u8 *)mymalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
 			if(server_frame_struct->para[i].value != NULL)
 			{
 				memcpy(server_frame_struct->para[i].value,buf,server_frame_struct->para[i].len + 1);
@@ -322,7 +322,7 @@ void SendAlarmReportFrameToServer(AlarmReport_S *alarm_report)
 
 	if(alarm_report != NULL)
 	{
-		server_frame_struct = (ServerFrameStruct_S *)pvPortMalloc(sizeof(ServerFrameStruct_S));
+		server_frame_struct = (ServerFrameStruct_S *)mymalloc(sizeof(ServerFrameStruct_S));
 		
 		if(server_frame_struct != NULL)
 		{
@@ -345,7 +345,7 @@ void SendAlarmReportFrameToServer(AlarmReport_S *alarm_report)
 
 			server_frame_struct->msg_id += ((((u16)alarm_report->device_type) << 8) & 0xFF00);
 
-			server_frame_struct->para = (Parameter_S *)pvPortMalloc(server_frame_struct->para_num * sizeof(Parameter_S));
+			server_frame_struct->para = (Parameter_S *)mymalloc(server_frame_struct->para_num * sizeof(Parameter_S));
 
 			if(server_frame_struct->para != NULL)
 			{
@@ -353,7 +353,7 @@ void SendAlarmReportFrameToServer(AlarmReport_S *alarm_report)
 				memset(buf,0,25);
 				sprintf(buf, "%d",alarm_report->device_type);
 				server_frame_struct->para[i].len = strlen(buf);
-				server_frame_struct->para[i].value = (u8 *)pvPortMalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
+				server_frame_struct->para[i].value = (u8 *)mymalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
 				if(server_frame_struct->para[i].value != NULL)
 				{
 					memcpy(server_frame_struct->para[i].value,buf,server_frame_struct->para[i].len + 1);
@@ -364,7 +364,7 @@ void SendAlarmReportFrameToServer(AlarmReport_S *alarm_report)
 				memset(buf,0,25);
 				sprintf(buf, "%d",alarm_report->record_type);
 				server_frame_struct->para[i].len = strlen(buf);
-				server_frame_struct->para[i].value = (u8 *)pvPortMalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
+				server_frame_struct->para[i].value = (u8 *)mymalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
 				if(server_frame_struct->para[i].value != NULL)
 				{
 					memcpy(server_frame_struct->para[i].value,buf,server_frame_struct->para[i].len + 1);
@@ -373,7 +373,7 @@ void SendAlarmReportFrameToServer(AlarmReport_S *alarm_report)
 
 				server_frame_struct->para[i].type = 0x4003;
 				server_frame_struct->para[i].len = strlen((char *)alarm_report->device_address);
-				server_frame_struct->para[i].value = (u8 *)pvPortMalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
+				server_frame_struct->para[i].value = (u8 *)mymalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
 				if(server_frame_struct->para[i].value != NULL)
 				{
 					memcpy(server_frame_struct->para[i].value,alarm_report->device_address,server_frame_struct->para[i].len + 1);
@@ -382,7 +382,7 @@ void SendAlarmReportFrameToServer(AlarmReport_S *alarm_report)
 
 				server_frame_struct->para[i].type = 0x4004;
 				server_frame_struct->para[i].len = strlen((char *)alarm_report->device_channel);
-				server_frame_struct->para[i].value = (u8 *)pvPortMalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
+				server_frame_struct->para[i].value = (u8 *)mymalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
 				if(server_frame_struct->para[i].value != NULL)
 				{
 					memcpy(server_frame_struct->para[i].value,alarm_report->device_channel,server_frame_struct->para[i].len + 1);
@@ -391,7 +391,7 @@ void SendAlarmReportFrameToServer(AlarmReport_S *alarm_report)
 
 				server_frame_struct->para[i].type = 0x4005;
 				server_frame_struct->para[i].len = strlen((char *)alarm_report->current_value);
-				server_frame_struct->para[i].value = (u8 *)pvPortMalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
+				server_frame_struct->para[i].value = (u8 *)mymalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
 				if(server_frame_struct->para[i].value != NULL)
 				{
 					memcpy(server_frame_struct->para[i].value,alarm_report->current_value,server_frame_struct->para[i].len + 1);
@@ -400,7 +400,7 @@ void SendAlarmReportFrameToServer(AlarmReport_S *alarm_report)
 
 				server_frame_struct->para[i].type = 0x4006;
 				server_frame_struct->para[i].len = strlen((char *)alarm_report->set_value);
-				server_frame_struct->para[i].value = (u8 *)pvPortMalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
+				server_frame_struct->para[i].value = (u8 *)mymalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
 				if(server_frame_struct->para[i].value != NULL)
 				{
 					memcpy(server_frame_struct->para[i].value,alarm_report->set_value,server_frame_struct->para[i].len + 1);
@@ -409,7 +409,7 @@ void SendAlarmReportFrameToServer(AlarmReport_S *alarm_report)
 
 				server_frame_struct->para[i].type = 0x4007;
 				server_frame_struct->para[i].len = strlen((char *)alarm_report->reference_value);
-				server_frame_struct->para[i].value = (u8 *)pvPortMalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
+				server_frame_struct->para[i].value = (u8 *)mymalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
 				if(server_frame_struct->para[i].value != NULL)
 				{
 					memcpy(server_frame_struct->para[i].value,alarm_report->reference_value,server_frame_struct->para[i].len + 1);
@@ -418,7 +418,7 @@ void SendAlarmReportFrameToServer(AlarmReport_S *alarm_report)
 
 				server_frame_struct->para[i].type = 0xA008;
 				server_frame_struct->para[i].len = strlen((char *)alarm_report->occur_time);
-				server_frame_struct->para[i].value = (u8 *)pvPortMalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
+				server_frame_struct->para[i].value = (u8 *)mymalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
 				if(server_frame_struct->para[i].value != NULL)
 				{
 					memcpy(server_frame_struct->para[i].value,alarm_report->occur_time,server_frame_struct->para[i].len + 1);
@@ -774,8 +774,8 @@ u8 TransparentTransmission(ServerFrameStruct_S *server_frame_struct)
 	ServerFrameStruct_S *resp_server_frame_struct = NULL;		//用于响应服务器
 	ServerFrameStruct_S *tran_server_frame_struct = NULL;		//用于透传到其他设备
 
-	resp_server_frame_struct = (ServerFrameStruct_S *)pvPortMalloc(sizeof(ServerFrameStruct_S));
-	tran_server_frame_struct = (ServerFrameStruct_S *)pvPortMalloc(sizeof(ServerFrameStruct_S));
+	resp_server_frame_struct = (ServerFrameStruct_S *)mymalloc(sizeof(ServerFrameStruct_S));
+	tran_server_frame_struct = (ServerFrameStruct_S *)mymalloc(sizeof(ServerFrameStruct_S));
 
 	if(resp_server_frame_struct != NULL)
 	{
@@ -868,7 +868,7 @@ u8 SynchronizeTime(ServerFrameStruct_S *server_frame_struct)
 
 	RX8010S_Set_Time(cal.w_year - 2000,cal.w_month,cal.w_date,cal.hour,cal.min,cal.sec);
 
-	resp_server_frame_struct = (ServerFrameStruct_S *)pvPortMalloc(sizeof(ServerFrameStruct_S));
+	resp_server_frame_struct = (ServerFrameStruct_S *)mymalloc(sizeof(ServerFrameStruct_S));
 
 	if(resp_server_frame_struct != NULL)
 	{
@@ -921,7 +921,7 @@ u8 ResetConfigParameters(ServerFrameStruct_S *server_frame_struct)
 
 	FlagSystemReBoot = reboot_type;
 
-	resp_server_frame_struct = (ServerFrameStruct_S *)pvPortMalloc(sizeof(ServerFrameStruct_S));
+	resp_server_frame_struct = (ServerFrameStruct_S *)mymalloc(sizeof(ServerFrameStruct_S));
 
 	if(resp_server_frame_struct != NULL)
 	{
@@ -946,7 +946,7 @@ u8 RebootTheSystem(ServerFrameStruct_S *server_frame_struct)
 
 	FlagSystemReBoot = 1;
 
-	resp_server_frame_struct = (ServerFrameStruct_S *)pvPortMalloc(sizeof(ServerFrameStruct_S));
+	resp_server_frame_struct = (ServerFrameStruct_S *)mymalloc(sizeof(ServerFrameStruct_S));
 
 	if(resp_server_frame_struct != NULL)
 	{
@@ -971,7 +971,7 @@ u8 ReConnectToServer(ServerFrameStruct_S *server_frame_struct)
 
 	FlagReConnectToServer = 1;
 
-	resp_server_frame_struct = (ServerFrameStruct_S *)pvPortMalloc(sizeof(ServerFrameStruct_S));
+	resp_server_frame_struct = (ServerFrameStruct_S *)mymalloc(sizeof(ServerFrameStruct_S));
 
 	if(resp_server_frame_struct != NULL)
 	{
@@ -1002,7 +1002,7 @@ u8 SetRunMode(ServerFrameStruct_S *server_frame_struct)
 		RunMode = (RUN_MODE_E)run_mode;
 	}
 
-	resp_server_frame_struct = (ServerFrameStruct_S *)pvPortMalloc(sizeof(ServerFrameStruct_S));
+	resp_server_frame_struct = (ServerFrameStruct_S *)mymalloc(sizeof(ServerFrameStruct_S));
 
 	if(resp_server_frame_struct != NULL)
 	{
@@ -1032,7 +1032,7 @@ u8 QueryState(ServerFrameStruct_S *server_frame_struct)
 
 	ServerFrameStruct_S *resp_server_frame_struct = NULL;		//用于响应服务器
 
-	resp_server_frame_struct = (ServerFrameStruct_S *)pvPortMalloc(sizeof(ServerFrameStruct_S));
+	resp_server_frame_struct = (ServerFrameStruct_S *)mymalloc(sizeof(ServerFrameStruct_S));
 
 	if(resp_server_frame_struct != NULL)
 	{
@@ -1043,7 +1043,7 @@ u8 QueryState(ServerFrameStruct_S *server_frame_struct)
 		resp_server_frame_struct->err_code 	= (u8)NO_ERR;
 		resp_server_frame_struct->para_num = 9;
 
-		resp_server_frame_struct->para = (Parameter_S *)pvPortMalloc(resp_server_frame_struct->para_num * sizeof(Parameter_S));
+		resp_server_frame_struct->para = (Parameter_S *)mymalloc(resp_server_frame_struct->para_num * sizeof(Parameter_S));
 
 		if(resp_server_frame_struct->para != NULL)
 		{
@@ -1051,7 +1051,7 @@ u8 QueryState(ServerFrameStruct_S *server_frame_struct)
 			memset(buf,0,25);
 			sprintf(buf, "%d",ConcentratorBasicConfig.connection_mode);
 			resp_server_frame_struct->para[i].len = strlen(buf);
-			resp_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
+			resp_server_frame_struct->para[i].value = (u8 *)mymalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
 			if(resp_server_frame_struct->para[i].value != NULL)
 			{
 				memcpy(resp_server_frame_struct->para[i].value,buf,resp_server_frame_struct->para[i].len + 1);
@@ -1062,7 +1062,7 @@ u8 QueryState(ServerFrameStruct_S *server_frame_struct)
 			memset(buf,0,25);
 			sprintf(buf, "1");
 			resp_server_frame_struct->para[i].len = strlen(buf);
-			resp_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
+			resp_server_frame_struct->para[i].value = (u8 *)mymalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
 			if(resp_server_frame_struct->para[i].value != NULL)
 			{
 				memcpy(resp_server_frame_struct->para[i].value,buf,resp_server_frame_struct->para[i].len + 1);
@@ -1073,7 +1073,7 @@ u8 QueryState(ServerFrameStruct_S *server_frame_struct)
 			memset(buf,0,25);
 			sprintf(buf, "%d",EC20Info.csq);
 			resp_server_frame_struct->para[i].len = strlen(buf);
-			resp_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
+			resp_server_frame_struct->para[i].value = (u8 *)mymalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
 			if(resp_server_frame_struct->para[i].value != NULL)
 			{
 				memcpy(resp_server_frame_struct->para[i].value,buf,resp_server_frame_struct->para[i].len + 1);
@@ -1090,7 +1090,7 @@ u8 QueryState(ServerFrameStruct_S *server_frame_struct)
 		             calendar.min,
 					 calendar.sec);
 			resp_server_frame_struct->para[i].len = strlen(buf);
-			resp_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
+			resp_server_frame_struct->para[i].value = (u8 *)mymalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
 			if(resp_server_frame_struct->para[i].value != NULL)
 			{
 				memcpy(resp_server_frame_struct->para[i].value,buf,resp_server_frame_struct->para[i].len + 1);
@@ -1099,7 +1099,7 @@ u8 QueryState(ServerFrameStruct_S *server_frame_struct)
 
 			resp_server_frame_struct->para[i].type = 0x4105;
 			resp_server_frame_struct->para[i].len = strlen((char *)EC20Info.apn);
-			resp_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
+			resp_server_frame_struct->para[i].value = (u8 *)mymalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
 			if(resp_server_frame_struct->para[i].value != NULL)
 			{
 				memcpy(resp_server_frame_struct->para[i].value,(char *)EC20Info.apn,resp_server_frame_struct->para[i].len + 1);
@@ -1108,7 +1108,7 @@ u8 QueryState(ServerFrameStruct_S *server_frame_struct)
 
 			resp_server_frame_struct->para[i].type = 0x4106;
 			resp_server_frame_struct->para[i].len = strlen((char *)EC20Info.imei);
-			resp_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
+			resp_server_frame_struct->para[i].value = (u8 *)mymalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
 			if(resp_server_frame_struct->para[i].value != NULL)
 			{
 				memcpy(resp_server_frame_struct->para[i].value,(char *)EC20Info.imei,resp_server_frame_struct->para[i].len + 1);
@@ -1117,7 +1117,7 @@ u8 QueryState(ServerFrameStruct_S *server_frame_struct)
 
 			resp_server_frame_struct->para[i].type = 0x4107;
 			resp_server_frame_struct->para[i].len = strlen((char *)EC20Info.iccid);
-			resp_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
+			resp_server_frame_struct->para[i].value = (u8 *)mymalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
 			if(resp_server_frame_struct->para[i].value != NULL)
 			{
 				memcpy(resp_server_frame_struct->para[i].value,(char *)EC20Info.iccid,resp_server_frame_struct->para[i].len + 1);
@@ -1126,7 +1126,7 @@ u8 QueryState(ServerFrameStruct_S *server_frame_struct)
 
 			resp_server_frame_struct->para[i].type = 0x4107;
 			resp_server_frame_struct->para[i].len = strlen((char *)EC20Info.imsi);
-			resp_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
+			resp_server_frame_struct->para[i].value = (u8 *)mymalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
 			if(resp_server_frame_struct->para[i].value != NULL)
 			{
 				memcpy(resp_server_frame_struct->para[i].value,(char *)EC20Info.imsi,resp_server_frame_struct->para[i].len + 1);
@@ -1135,7 +1135,7 @@ u8 QueryState(ServerFrameStruct_S *server_frame_struct)
 
 			resp_server_frame_struct->para[i].type = 0x4117;
 			resp_server_frame_struct->para[i].len = 0;
-			resp_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
+			resp_server_frame_struct->para[i].value = (u8 *)mymalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
 			if(resp_server_frame_struct->para[i].value != NULL)
 			{
 				resp_server_frame_struct->para[i].value[0] = 0;
@@ -1273,7 +1273,7 @@ u8 SetAlarmConfiguration(ServerFrameStruct_S *server_frame_struct)
 		}
 	}
 
-	resp_server_frame_struct = (ServerFrameStruct_S *)pvPortMalloc(sizeof(ServerFrameStruct_S));
+	resp_server_frame_struct = (ServerFrameStruct_S *)mymalloc(sizeof(ServerFrameStruct_S));
 
 	if(resp_server_frame_struct != NULL)
 	{
@@ -1301,7 +1301,7 @@ u8 GetAlarmConfiguration(ServerFrameStruct_S *server_frame_struct)
 
 	ServerFrameStruct_S *resp_server_frame_struct = NULL;		//用于响应服务器
 
-	resp_server_frame_struct = (ServerFrameStruct_S *)pvPortMalloc(sizeof(ServerFrameStruct_S));
+	resp_server_frame_struct = (ServerFrameStruct_S *)mymalloc(sizeof(ServerFrameStruct_S));
 
 	if(resp_server_frame_struct != NULL)
 	{
@@ -1312,7 +1312,7 @@ u8 GetAlarmConfiguration(ServerFrameStruct_S *server_frame_struct)
 		resp_server_frame_struct->err_code 	= (u8)NO_ERR;
 		resp_server_frame_struct->para_num = 8;
 
-		resp_server_frame_struct->para = (Parameter_S *)pvPortMalloc(resp_server_frame_struct->para_num * sizeof(Parameter_S));
+		resp_server_frame_struct->para = (Parameter_S *)mymalloc(resp_server_frame_struct->para_num * sizeof(Parameter_S));
 
 		if(resp_server_frame_struct->para != NULL)
 		{
@@ -1320,7 +1320,7 @@ u8 GetAlarmConfiguration(ServerFrameStruct_S *server_frame_struct)
 			memset(buf,0,25);
 			sprintf(buf, "%d",ConcentratorAlarmConfig.power_off_alarm_enable);
 			resp_server_frame_struct->para[i].len = strlen(buf);
-			resp_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
+			resp_server_frame_struct->para[i].value = (u8 *)mymalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
 			if(resp_server_frame_struct->para[i].value != NULL)
 			{
 				memcpy(resp_server_frame_struct->para[i].value,buf,resp_server_frame_struct->para[i].len + 1);
@@ -1335,7 +1335,7 @@ u8 GetAlarmConfiguration(ServerFrameStruct_S *server_frame_struct)
 			sprintf(tmp, "%d",ConcentratorAlarmConfig.power_off_alarm_rm_percent);
 			strcat(buf,tmp);
 			resp_server_frame_struct->para[i].len = strlen(buf);
-			resp_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
+			resp_server_frame_struct->para[i].value = (u8 *)mymalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
 			if(resp_server_frame_struct->para[i].value != NULL)
 			{
 				memcpy(resp_server_frame_struct->para[i].value,buf,resp_server_frame_struct->para[i].len + 1);
@@ -1346,7 +1346,7 @@ u8 GetAlarmConfiguration(ServerFrameStruct_S *server_frame_struct)
 			memset(buf,0,25);
 			myitoa(ConcentratorAlarmConfig.electric_leakage_alarm_enable,(char *)buf,10);
 			resp_server_frame_struct->para[i].len = strlen(buf);
-			resp_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
+			resp_server_frame_struct->para[i].value = (u8 *)mymalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
 			if(resp_server_frame_struct->para[i].value != NULL)
 			{
 				memcpy(resp_server_frame_struct->para[i].value,buf,resp_server_frame_struct->para[i].len + 1);
@@ -1367,7 +1367,7 @@ u8 GetAlarmConfiguration(ServerFrameStruct_S *server_frame_struct)
 			sprintf(tmp, "%d",ConcentratorAlarmConfig.electric_leakage_alarm_c_rm_percent);
 			strcat(buf,tmp);
 			resp_server_frame_struct->para[i].len = strlen(buf);
-			resp_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
+			resp_server_frame_struct->para[i].value = (u8 *)mymalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
 			if(resp_server_frame_struct->para[i].value != NULL)
 			{
 				memcpy(resp_server_frame_struct->para[i].value,buf,resp_server_frame_struct->para[i].len + 1);
@@ -1378,7 +1378,7 @@ u8 GetAlarmConfiguration(ServerFrameStruct_S *server_frame_struct)
 			memset(buf,0,25);
 			sprintf(buf, "%d",ConcentratorAlarmConfig.low_battery_alarm_enable);
 			resp_server_frame_struct->para[i].len = strlen(buf);
-			resp_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
+			resp_server_frame_struct->para[i].value = (u8 *)mymalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
 			if(resp_server_frame_struct->para[i].value != NULL)
 			{
 				memcpy(resp_server_frame_struct->para[i].value,buf,resp_server_frame_struct->para[i].len + 1);
@@ -1393,7 +1393,7 @@ u8 GetAlarmConfiguration(ServerFrameStruct_S *server_frame_struct)
 			sprintf(tmp, "%d",ConcentratorAlarmConfig.low_battery_alarm_rm_percent);
 			strcat(buf,tmp);
 			resp_server_frame_struct->para[i].len = strlen(buf);
-			resp_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
+			resp_server_frame_struct->para[i].value = (u8 *)mymalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
 			if(resp_server_frame_struct->para[i].value != NULL)
 			{
 				memcpy(resp_server_frame_struct->para[i].value,buf,resp_server_frame_struct->para[i].len + 1);
@@ -1404,7 +1404,7 @@ u8 GetAlarmConfiguration(ServerFrameStruct_S *server_frame_struct)
 			memset(buf,0,25);
 			sprintf(buf, "%d",ConcentratorAlarmConfig.abnormal_charge_alarm_enable);
 			resp_server_frame_struct->para[i].len = strlen(buf);
-			resp_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
+			resp_server_frame_struct->para[i].value = (u8 *)mymalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
 			if(resp_server_frame_struct->para[i].value != NULL)
 			{
 				memcpy(resp_server_frame_struct->para[i].value,buf,resp_server_frame_struct->para[i].len + 1);
@@ -1425,7 +1425,7 @@ u8 GetAlarmConfiguration(ServerFrameStruct_S *server_frame_struct)
 			sprintf(tmp, "%d",ConcentratorAlarmConfig.abnormal_charge_alarm_c_rm_percent);
 			strcat(buf,tmp);
 			resp_server_frame_struct->para[i].len = strlen(buf);
-			resp_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
+			resp_server_frame_struct->para[i].value = (u8 *)mymalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
 			if(resp_server_frame_struct->para[i].value != NULL)
 			{
 				memcpy(resp_server_frame_struct->para[i].value,buf,resp_server_frame_struct->para[i].len + 1);
@@ -1560,7 +1560,7 @@ u8 SetBasicConfiguration(ServerFrameStruct_S *server_frame_struct)
 		}
 	}
 	
-	resp_server_frame_struct = (ServerFrameStruct_S *)pvPortMalloc(sizeof(ServerFrameStruct_S));
+	resp_server_frame_struct = (ServerFrameStruct_S *)mymalloc(sizeof(ServerFrameStruct_S));
 
 	if(resp_server_frame_struct != NULL)
 	{
@@ -1626,7 +1626,7 @@ u8 GetBasicConfiguration(ServerFrameStruct_S *server_frame_struct)
 
 	ServerFrameStruct_S *resp_server_frame_struct = NULL;		//用于响应服务器
 
-	resp_server_frame_struct = (ServerFrameStruct_S *)pvPortMalloc(sizeof(ServerFrameStruct_S));
+	resp_server_frame_struct = (ServerFrameStruct_S *)mymalloc(sizeof(ServerFrameStruct_S));
 
 	if(resp_server_frame_struct != NULL)
 	{
@@ -1637,7 +1637,7 @@ u8 GetBasicConfiguration(ServerFrameStruct_S *server_frame_struct)
 		resp_server_frame_struct->err_code 	= (u8)NO_ERR;
 		resp_server_frame_struct->para_num = 24;
 
-		resp_server_frame_struct->para = (Parameter_S *)pvPortMalloc(resp_server_frame_struct->para_num * sizeof(Parameter_S));
+		resp_server_frame_struct->para = (Parameter_S *)mymalloc(resp_server_frame_struct->para_num * sizeof(Parameter_S));
 
 		if(resp_server_frame_struct->para != NULL)
 		{
@@ -1645,7 +1645,7 @@ u8 GetBasicConfiguration(ServerFrameStruct_S *server_frame_struct)
 			memset(buf,0,25);
 			sprintf(buf, "%d",ConcentratorBasicConfig.connection_mode);
 			resp_server_frame_struct->para[i].len = strlen(buf);
-			resp_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
+			resp_server_frame_struct->para[i].value = (u8 *)mymalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
 			if(resp_server_frame_struct->para[i].value != NULL)
 			{
 				memcpy(resp_server_frame_struct->para[i].value,buf,resp_server_frame_struct->para[i].len + 1);
@@ -1654,7 +1654,7 @@ u8 GetBasicConfiguration(ServerFrameStruct_S *server_frame_struct)
 
 			resp_server_frame_struct->para[i].type = 0x4102;
 			resp_server_frame_struct->para[i].len = strlen((char *)ConcentratorBasicConfig.server_ip);
-			resp_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
+			resp_server_frame_struct->para[i].value = (u8 *)mymalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
 			if(resp_server_frame_struct->para[i].value != NULL)
 			{
 				memcpy(resp_server_frame_struct->para[i].value,ConcentratorBasicConfig.server_ip,resp_server_frame_struct->para[i].len + 1);
@@ -1663,7 +1663,7 @@ u8 GetBasicConfiguration(ServerFrameStruct_S *server_frame_struct)
 
 			resp_server_frame_struct->para[i].type = 0x7103;
 			resp_server_frame_struct->para[i].len = strlen((char *)ConcentratorBasicConfig.server_port);
-			resp_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
+			resp_server_frame_struct->para[i].value = (u8 *)mymalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
 			if(resp_server_frame_struct->para[i].value != NULL)
 			{
 				memcpy(resp_server_frame_struct->para[i].value,ConcentratorBasicConfig.server_port,resp_server_frame_struct->para[i].len + 1);
@@ -1674,7 +1674,7 @@ u8 GetBasicConfiguration(ServerFrameStruct_S *server_frame_struct)
 			memset(buf,0,25);
 			sprintf(buf, "%d",ConcentratorBasicConfig.heartbeat_cycle);
 			resp_server_frame_struct->para[i].len = strlen(buf);
-			resp_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
+			resp_server_frame_struct->para[i].value = (u8 *)mymalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
 			if(resp_server_frame_struct->para[i].value != NULL)
 			{
 				memcpy(resp_server_frame_struct->para[i].value,buf,resp_server_frame_struct->para[i].len + 1);
@@ -1685,7 +1685,7 @@ u8 GetBasicConfiguration(ServerFrameStruct_S *server_frame_struct)
 			memset(buf,0,25);
 			sprintf(buf, "%d",ConcentratorBasicConfig.electric_energy_collection_cycle);
 			resp_server_frame_struct->para[i].len = strlen(buf);
-			resp_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
+			resp_server_frame_struct->para[i].value = (u8 *)mymalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
 			if(resp_server_frame_struct->para[i].value != NULL)
 			{
 				memcpy(resp_server_frame_struct->para[i].value,buf,resp_server_frame_struct->para[i].len + 1);
@@ -1696,7 +1696,7 @@ u8 GetBasicConfiguration(ServerFrameStruct_S *server_frame_struct)
 			memset(buf,0,25);
 			sprintf(buf, "%d",ConcentratorBasicConfig.electric_energy_recording_time);
 			resp_server_frame_struct->para[i].len = strlen(buf);
-			resp_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
+			resp_server_frame_struct->para[i].value = (u8 *)mymalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
 			if(resp_server_frame_struct->para[i].value != NULL)
 			{
 				memcpy(resp_server_frame_struct->para[i].value,buf,resp_server_frame_struct->para[i].len + 1);
@@ -1707,7 +1707,7 @@ u8 GetBasicConfiguration(ServerFrameStruct_S *server_frame_struct)
 			memset(buf,0,25);
 			sprintf(buf, "%d",ConcentratorBasicConfig.loop_state_monitoring_cycle);
 			resp_server_frame_struct->para[i].len = strlen(buf);
-			resp_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
+			resp_server_frame_struct->para[i].value = (u8 *)mymalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
 			if(resp_server_frame_struct->para[i].value != NULL)
 			{
 				memcpy(resp_server_frame_struct->para[i].value,buf,resp_server_frame_struct->para[i].len + 1);
@@ -1718,7 +1718,7 @@ u8 GetBasicConfiguration(ServerFrameStruct_S *server_frame_struct)
 			memset(buf,0,25);
 			sprintf(buf, "%d",ConcentratorBasicConfig.loop_state_recording_time);
 			resp_server_frame_struct->para[i].len = strlen(buf);
-			resp_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
+			resp_server_frame_struct->para[i].value = (u8 *)mymalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
 			if(resp_server_frame_struct->para[i].value != NULL)
 			{
 				memcpy(resp_server_frame_struct->para[i].value,buf,resp_server_frame_struct->para[i].len + 1);
@@ -1729,7 +1729,7 @@ u8 GetBasicConfiguration(ServerFrameStruct_S *server_frame_struct)
 			memset(buf,0,25);
 			sprintf(buf, "%d",ConcentratorBasicConfig.cupboard_alarm_collection_cycle);
 			resp_server_frame_struct->para[i].len = strlen(buf);
-			resp_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
+			resp_server_frame_struct->para[i].value = (u8 *)mymalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
 			if(resp_server_frame_struct->para[i].value != NULL)
 			{
 				memcpy(resp_server_frame_struct->para[i].value,buf,resp_server_frame_struct->para[i].len + 1);
@@ -1740,7 +1740,7 @@ u8 GetBasicConfiguration(ServerFrameStruct_S *server_frame_struct)
 			memset(buf,0,25);
 			sprintf(buf, "%d",ConcentratorBasicConfig.cupboard_alarm_recording_time);
 			resp_server_frame_struct->para[i].len = strlen(buf);
-			resp_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
+			resp_server_frame_struct->para[i].value = (u8 *)mymalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
 			if(resp_server_frame_struct->para[i].value != NULL)
 			{
 				memcpy(resp_server_frame_struct->para[i].value,buf,resp_server_frame_struct->para[i].len + 1);
@@ -1751,7 +1751,7 @@ u8 GetBasicConfiguration(ServerFrameStruct_S *server_frame_struct)
 			memset(buf,0,25);
 			sprintf(buf, "%d",ConcentratorBasicConfig.lamp_state_collection_cycle);
 			resp_server_frame_struct->para[i].len = strlen(buf);
-			resp_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
+			resp_server_frame_struct->para[i].value = (u8 *)mymalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
 			if(resp_server_frame_struct->para[i].value != NULL)
 			{
 				memcpy(resp_server_frame_struct->para[i].value,buf,resp_server_frame_struct->para[i].len + 1);
@@ -1762,7 +1762,7 @@ u8 GetBasicConfiguration(ServerFrameStruct_S *server_frame_struct)
 			memset(buf,0,25);
 			sprintf(buf, "%d",ConcentratorBasicConfig.lamp_state_collection_offset);
 			resp_server_frame_struct->para[i].len = strlen(buf);
-			resp_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
+			resp_server_frame_struct->para[i].value = (u8 *)mymalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
 			if(resp_server_frame_struct->para[i].value != NULL)
 			{
 				memcpy(resp_server_frame_struct->para[i].value,buf,resp_server_frame_struct->para[i].len + 1);
@@ -1773,7 +1773,7 @@ u8 GetBasicConfiguration(ServerFrameStruct_S *server_frame_struct)
 			memset(buf,0,25);
 			sprintf(buf, "%d",ConcentratorBasicConfig.lamp_state_recording_time);
 			resp_server_frame_struct->para[i].len = strlen(buf);
-			resp_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
+			resp_server_frame_struct->para[i].value = (u8 *)mymalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
 			if(resp_server_frame_struct->para[i].value != NULL)
 			{
 				memcpy(resp_server_frame_struct->para[i].value,buf,resp_server_frame_struct->para[i].len + 1);
@@ -1784,7 +1784,7 @@ u8 GetBasicConfiguration(ServerFrameStruct_S *server_frame_struct)
 			memset(buf,0,25);
 			sprintf(buf, "%d",ConcentratorBasicConfig.command_response_timeout);
 			resp_server_frame_struct->para[i].len = strlen(buf);
-			resp_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
+			resp_server_frame_struct->para[i].value = (u8 *)mymalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
 			if(resp_server_frame_struct->para[i].value != NULL)
 			{
 				memcpy(resp_server_frame_struct->para[i].value,buf,resp_server_frame_struct->para[i].len + 1);
@@ -1795,7 +1795,7 @@ u8 GetBasicConfiguration(ServerFrameStruct_S *server_frame_struct)
 			memset(buf,0,25);
 			sprintf(buf, "%d",ConcentratorBasicConfig.command_retransmission_times);
 			resp_server_frame_struct->para[i].len = strlen(buf);
-			resp_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
+			resp_server_frame_struct->para[i].value = (u8 *)mymalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
 			if(resp_server_frame_struct->para[i].value != NULL)
 			{
 				memcpy(resp_server_frame_struct->para[i].value,buf,resp_server_frame_struct->para[i].len + 1);
@@ -1806,7 +1806,7 @@ u8 GetBasicConfiguration(ServerFrameStruct_S *server_frame_struct)
 			memset(buf,0,25);
 			sprintf(buf, "%d",ConcentratorBasicConfig.heartbeat_response_timeout);
 			resp_server_frame_struct->para[i].len = strlen(buf);
-			resp_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
+			resp_server_frame_struct->para[i].value = (u8 *)mymalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
 			if(resp_server_frame_struct->para[i].value != NULL)
 			{
 				memcpy(resp_server_frame_struct->para[i].value,buf,resp_server_frame_struct->para[i].len + 1);
@@ -1817,7 +1817,7 @@ u8 GetBasicConfiguration(ServerFrameStruct_S *server_frame_struct)
 			memset(buf,0,25);
 			sprintf(buf, "%d",ConcentratorBasicConfig.heartbeat_retransmission_times);
 			resp_server_frame_struct->para[i].len = strlen(buf);
-			resp_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
+			resp_server_frame_struct->para[i].value = (u8 *)mymalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
 			if(resp_server_frame_struct->para[i].value != NULL)
 			{
 				memcpy(resp_server_frame_struct->para[i].value,buf,resp_server_frame_struct->para[i].len + 1);
@@ -1828,7 +1828,7 @@ u8 GetBasicConfiguration(ServerFrameStruct_S *server_frame_struct)
 			memset(buf,0,25);
 			sprintf(buf, "%d",ConcentratorBasicConfig.lamp_response_timeout);
 			resp_server_frame_struct->para[i].len = strlen(buf);
-			resp_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
+			resp_server_frame_struct->para[i].value = (u8 *)mymalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
 			if(resp_server_frame_struct->para[i].value != NULL)
 			{
 				memcpy(resp_server_frame_struct->para[i].value,buf,resp_server_frame_struct->para[i].len + 1);
@@ -1839,7 +1839,7 @@ u8 GetBasicConfiguration(ServerFrameStruct_S *server_frame_struct)
 			memset(buf,0,25);
 			sprintf(buf, "%d",ConcentratorBasicConfig.lamp_retransmission_times);
 			resp_server_frame_struct->para[i].len = strlen(buf);
-			resp_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
+			resp_server_frame_struct->para[i].value = (u8 *)mymalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
 			if(resp_server_frame_struct->para[i].value != NULL)
 			{
 				memcpy(resp_server_frame_struct->para[i].value,buf,resp_server_frame_struct->para[i].len + 1);
@@ -1850,7 +1850,7 @@ u8 GetBasicConfiguration(ServerFrameStruct_S *server_frame_struct)
 			memset(buf,0,25);
 			sprintf(buf, "%d",ConcentratorBasicConfig.lamp_broadcast_times);
 			resp_server_frame_struct->para[i].len = strlen(buf);
-			resp_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
+			resp_server_frame_struct->para[i].value = (u8 *)mymalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
 			if(resp_server_frame_struct->para[i].value != NULL)
 			{
 				memcpy(resp_server_frame_struct->para[i].value,buf,resp_server_frame_struct->para[i].len + 1);
@@ -1861,7 +1861,7 @@ u8 GetBasicConfiguration(ServerFrameStruct_S *server_frame_struct)
 			memset(buf,0,25);
 			sprintf(buf, "%d",ConcentratorBasicConfig.lamp_broadcast_interval_time);
 			resp_server_frame_struct->para[i].len = strlen(buf);
-			resp_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
+			resp_server_frame_struct->para[i].value = (u8 *)mymalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
 			if(resp_server_frame_struct->para[i].value != NULL)
 			{
 				memcpy(resp_server_frame_struct->para[i].value,buf,resp_server_frame_struct->para[i].len + 1);
@@ -1870,7 +1870,7 @@ u8 GetBasicConfiguration(ServerFrameStruct_S *server_frame_struct)
 
 			resp_server_frame_struct->para[i].type = 0x4116;
 			resp_server_frame_struct->para[i].len = strlen((char *)ConcentratorBasicConfig.operation_password);
-			resp_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
+			resp_server_frame_struct->para[i].value = (u8 *)mymalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
 			if(resp_server_frame_struct->para[i].value != NULL)
 			{
 				memcpy(resp_server_frame_struct->para[i].value,ConcentratorBasicConfig.operation_password,resp_server_frame_struct->para[i].len + 1);
@@ -1879,7 +1879,7 @@ u8 GetBasicConfiguration(ServerFrameStruct_S *server_frame_struct)
 
 			resp_server_frame_struct->para[i].type = 0x4117;
 			resp_server_frame_struct->para[i].len = strlen((char *)ConcentratorBasicConfig.manufacturer_name);
-			resp_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
+			resp_server_frame_struct->para[i].value = (u8 *)mymalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
 			if(resp_server_frame_struct->para[i].value != NULL)
 			{
 				memcpy(resp_server_frame_struct->para[i].value,ConcentratorBasicConfig.manufacturer_name,resp_server_frame_struct->para[i].len + 1);
@@ -1888,7 +1888,7 @@ u8 GetBasicConfiguration(ServerFrameStruct_S *server_frame_struct)
 
 			resp_server_frame_struct->para[i].type = 0x4118;
 			resp_server_frame_struct->para[i].len = strlen((char *)ConcentratorBasicConfig.manufacturer_website);
-			resp_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
+			resp_server_frame_struct->para[i].value = (u8 *)mymalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
 			if(resp_server_frame_struct->para[i].value != NULL)
 			{
 				memcpy(resp_server_frame_struct->para[i].value,ConcentratorBasicConfig.manufacturer_website,resp_server_frame_struct->para[i].len + 1);
@@ -1955,7 +1955,7 @@ u8 SetLocationConfiguration(ServerFrameStruct_S *server_frame_struct)
 		}
 	}
 
-	resp_server_frame_struct = (ServerFrameStruct_S *)pvPortMalloc(sizeof(ServerFrameStruct_S));
+	resp_server_frame_struct = (ServerFrameStruct_S *)mymalloc(sizeof(ServerFrameStruct_S));
 
 	if(resp_server_frame_struct != NULL)
 	{
@@ -1986,7 +1986,7 @@ u8 GetLocationConfiguration(ServerFrameStruct_S *server_frame_struct)
 
 	ServerFrameStruct_S *resp_server_frame_struct = NULL;		//用于响应服务器
 
-	resp_server_frame_struct = (ServerFrameStruct_S *)pvPortMalloc(sizeof(ServerFrameStruct_S));
+	resp_server_frame_struct = (ServerFrameStruct_S *)mymalloc(sizeof(ServerFrameStruct_S));
 
 	if(resp_server_frame_struct != NULL)
 	{
@@ -1997,7 +1997,7 @@ u8 GetLocationConfiguration(ServerFrameStruct_S *server_frame_struct)
 		resp_server_frame_struct->err_code 	= (u8)NO_ERR;
 		resp_server_frame_struct->para_num = 14;
 
-		resp_server_frame_struct->para = (Parameter_S *)pvPortMalloc(resp_server_frame_struct->para_num * sizeof(Parameter_S));
+		resp_server_frame_struct->para = (Parameter_S *)mymalloc(resp_server_frame_struct->para_num * sizeof(Parameter_S));
 
 		if(resp_server_frame_struct->para != NULL)
 		{
@@ -2005,7 +2005,7 @@ u8 GetLocationConfiguration(ServerFrameStruct_S *server_frame_struct)
 			memset(buf,0,25);
 			sprintf(buf, "%f",ConcentratorLocationConfig.longitude);
 			resp_server_frame_struct->para[i].len = strlen(buf);
-			resp_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
+			resp_server_frame_struct->para[i].value = (u8 *)mymalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
 			if(resp_server_frame_struct->para[i].value != NULL)
 			{
 				memcpy(resp_server_frame_struct->para[i].value,buf,resp_server_frame_struct->para[i].len + 1);
@@ -2016,7 +2016,7 @@ u8 GetLocationConfiguration(ServerFrameStruct_S *server_frame_struct)
 			memset(buf,0,25);
 			sprintf(buf, "%f",ConcentratorLocationConfig.latitude);
 			resp_server_frame_struct->para[i].len = strlen(buf);
-			resp_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
+			resp_server_frame_struct->para[i].value = (u8 *)mymalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
 			if(resp_server_frame_struct->para[i].value != NULL)
 			{
 				memcpy(resp_server_frame_struct->para[i].value,buf,resp_server_frame_struct->para[i].len + 1);
@@ -2053,7 +2053,7 @@ u8 GetLocationConfiguration(ServerFrameStruct_S *server_frame_struct)
 				}
 
 				resp_server_frame_struct->para[i].len = strlen(buf);
-				resp_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
+				resp_server_frame_struct->para[i].value = (u8 *)mymalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
 
 				if(resp_server_frame_struct->para[i].value != NULL)
 				{
@@ -2104,7 +2104,7 @@ u8 RequestFrameWareUpDate(ServerFrameStruct_S *server_frame_struct)
 		}
 	}
 
-	resp_server_frame_struct = (ServerFrameStruct_S *)pvPortMalloc(sizeof(ServerFrameStruct_S));
+	resp_server_frame_struct = (ServerFrameStruct_S *)mymalloc(sizeof(ServerFrameStruct_S));
 
 	if(resp_server_frame_struct != NULL)
 	{
@@ -2309,7 +2309,7 @@ u8 FrameWareUpDateStop(ServerFrameStruct_S *server_frame_struct)
 		}
 	}
 
-	resp_server_frame_struct = (ServerFrameStruct_S *)pvPortMalloc(sizeof(ServerFrameStruct_S));
+	resp_server_frame_struct = (ServerFrameStruct_S *)mymalloc(sizeof(ServerFrameStruct_S));
 
 	if(resp_server_frame_struct != NULL)
 	{
@@ -2337,7 +2337,7 @@ u8 GetAlarmReportHistory(ServerFrameStruct_S *server_frame_struct)
 	EventHistory_S *event_history = NULL;
 	ServerFrameStruct_S *resp_server_frame_struct = NULL;		//用于响应服务器
 
-	event_history = (EventHistory_S *)pvPortMalloc(sizeof(EventHistory_S));
+	event_history = (EventHistory_S *)mymalloc(sizeof(EventHistory_S));
 
 	if(event_history != NULL)
 	{
@@ -2349,7 +2349,7 @@ u8 GetAlarmReportHistory(ServerFrameStruct_S *server_frame_struct)
 			switch(server_frame_struct->para[j].type)
 			{
 				case 0xA001:
-					event_history->start_date = (u8 *)pvPortMalloc((server_frame_struct->para[j].len + 1) * sizeof(u8));
+					event_history->start_date = (u8 *)mymalloc((server_frame_struct->para[j].len + 1) * sizeof(u8));
 
 					if(event_history->start_date != NULL)
 					{
@@ -2358,7 +2358,7 @@ u8 GetAlarmReportHistory(ServerFrameStruct_S *server_frame_struct)
 				break;
 
 				case 0xA002:
-					event_history->end_date = (u8 *)pvPortMalloc((server_frame_struct->para[j].len + 1) * sizeof(u8));
+					event_history->end_date = (u8 *)mymalloc((server_frame_struct->para[j].len + 1) * sizeof(u8));
 
 					if(event_history->end_date != NULL)
 					{
@@ -2398,7 +2398,7 @@ u8 GetAlarmReportHistory(ServerFrameStruct_S *server_frame_struct)
 		}
 	}
 
-	resp_server_frame_struct = (ServerFrameStruct_S *)pvPortMalloc(sizeof(ServerFrameStruct_S));
+	resp_server_frame_struct = (ServerFrameStruct_S *)mymalloc(sizeof(ServerFrameStruct_S));
 
 	if(resp_server_frame_struct != NULL)
 	{
@@ -2409,7 +2409,7 @@ u8 GetAlarmReportHistory(ServerFrameStruct_S *server_frame_struct)
 		resp_server_frame_struct->err_code 	= (u8)NO_ERR;
 		resp_server_frame_struct->para_num  = 2;
 
-		resp_server_frame_struct->para = (Parameter_S *)pvPortMalloc(resp_server_frame_struct->para_num * sizeof(Parameter_S));
+		resp_server_frame_struct->para = (Parameter_S *)mymalloc(resp_server_frame_struct->para_num * sizeof(Parameter_S));
 
 		if(resp_server_frame_struct->para != NULL)
 		{
@@ -2417,7 +2417,7 @@ u8 GetAlarmReportHistory(ServerFrameStruct_S *server_frame_struct)
 			memset(buf,0,10);
 			sprintf(buf, "%d",record_num);
 			resp_server_frame_struct->para[i].len = strlen(buf);
-			resp_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
+			resp_server_frame_struct->para[i].value = (u8 *)mymalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
 			if(resp_server_frame_struct->para[i].value != NULL)
 			{
 				memcpy(resp_server_frame_struct->para[i].value,buf,resp_server_frame_struct->para[i].len + 1);
@@ -2435,7 +2435,7 @@ u8 GetAlarmReportHistory(ServerFrameStruct_S *server_frame_struct)
 				sprintf(buf, "%d",record_num);
 			}
 			resp_server_frame_struct->para[i].len = strlen(buf);
-			resp_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
+			resp_server_frame_struct->para[i].value = (u8 *)mymalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
 			if(resp_server_frame_struct->para[i].value != NULL)
 			{
 				memcpy(resp_server_frame_struct->para[i].value,buf,resp_server_frame_struct->para[i].len + 1);

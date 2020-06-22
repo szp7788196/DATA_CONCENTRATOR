@@ -69,6 +69,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include "malloc.h"
 
 /* Defining MPU_WRAPPERS_INCLUDED_FROM_API_FILE prevents task.h from redefining
 all the API functions to use the MPU wrappers.  That should only be done when
@@ -403,7 +404,7 @@ Queue_t * const pxQueue = ( Queue_t * ) xQueue;
 			xQueueSizeInBytes = ( size_t ) ( uxQueueLength * uxItemSize ); /*lint !e961 MISRA exception as the casts are only redundant for some ports. */
 		}
 
-		pxNewQueue = ( Queue_t * ) pvPortMalloc( sizeof( Queue_t ) + xQueueSizeInBytes );
+		pxNewQueue = ( Queue_t * ) mymalloc( sizeof( Queue_t ) + xQueueSizeInBytes );
 
 		if( pxNewQueue != NULL )
 		{
@@ -1639,7 +1640,7 @@ Queue_t * const pxQueue = ( Queue_t * ) xQueue;
 	{
 		/* The queue can only have been allocated dynamically - free it
 		again. */
-		vPortFree( pxQueue );
+		myfree( pxQueue );
 	}
 	#elif( ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) && ( configSUPPORT_STATIC_ALLOCATION == 1 ) )
 	{
@@ -1647,7 +1648,7 @@ Queue_t * const pxQueue = ( Queue_t * ) xQueue;
 		check before attempting to free the memory. */
 		if( pxQueue->ucStaticallyAllocated == ( uint8_t ) pdFALSE )
 		{
-			vPortFree( pxQueue );
+			myfree( pxQueue );
 		}
 		else
 		{

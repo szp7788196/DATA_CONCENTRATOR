@@ -611,7 +611,7 @@ u8 GetMemoryForSpecifyPointer(u8 **str,u16 size, u8 *memory)
 	{
 		len = size;
 
-		*str = (u8 *)pvPortMalloc(sizeof(u8) * len + 1);
+		*str = (u8 *)mymalloc(sizeof(u8) * len + 1);
 	}
 
 	if(*str != NULL)
@@ -630,8 +630,8 @@ u8 GetMemoryForSpecifyPointer(u8 **str,u16 size, u8 *memory)
 		}
 		else
 		{
-			vPortFree(*str);
-			*str = (u8 *)pvPortMalloc(sizeof(u8) * new_len + 1);
+			myfree(*str);
+			*str = (u8 *)mymalloc(sizeof(u8) * new_len + 1);
 
 			if(*str != NULL)
 			{

@@ -11,14 +11,15 @@
 #include "concentrator_conf.h"
 
 
+u8 ETH_ConnectState = ETH_UNKNOW;
 struct netconn *tcp_clientconn;					//TCP CLIENT网络连接结构体
-
+unsigned portBASE_TYPE SatckTCP_CLIENT;
 
 TaskHandle_t xHandleTaskTCP_CLIENT = NULL;
-u32 cnttt = 0;
+
 void vTaskTCP_CLIENT(void *pvParameters)
 {
-	u16 i = 0;
+//	u16 i = 0;
 	u8 *msg = NULL;
 	struct pbuf *q;
 	err_t err,recv_err;
@@ -30,6 +31,8 @@ void vTaskTCP_CLIENT(void *pvParameters)
 	
 	while (1)
 	{
+		ETH_ConnectState = ETH_UNKNOW;
+		
 //#ifdef USE_DHCP
 		if(lwipdev.dhcpenable == 1)
 		{
@@ -63,16 +66,15 @@ void vTaskTCP_CLIENT(void *pvParameters)
 			
 			while(1)
 			{
+				ETH_ConnectState = ETH_CONNECTED;
+				
 				if((recv_err = netconn_recv(tcp_clientconn,&recvbuf)) == ERR_OK)  //接收到数据
 				{
 					for(q = recvbuf->p; q != NULL; q = q->next)  //遍历完整个pbuf链表
 					{
 						msg = (u8 *)q->payload;
 						
-						for(i = 0; i < q->len; i ++)
-						{
-							ringbuf_put(&ring_fifo,*(msg + i));
-						}
+						fifo_put(dl_buf_id,q->len,msg);
 					}
 
 					netbuf_delete(recvbuf);
@@ -91,6 +93,8 @@ void vTaskTCP_CLIENT(void *pvParameters)
 				}
 				
 				delay_ms(100);
+				
+				SatckTCP_CLIENT = uxTaskGetStackHighWaterMark(NULL);
 			}
 		}
 	}
@@ -107,10 +111,10 @@ void PullEthTxQueueAndSendFrame(void)
 	{
 		netconn_write(tcp_clientconn ,tx_frame->buf,tx_frame->len,NETCONN_COPY); //发送tcp_server_sentbuf中的数据
 		
-		vPortFree(tx_frame->buf);
+		myfree(tx_frame->buf);
 		tx_frame->buf = NULL;
 
-		vPortFree(tx_frame);
+		myfree(tx_frame);
 		tx_frame = NULL;
 	}
 }

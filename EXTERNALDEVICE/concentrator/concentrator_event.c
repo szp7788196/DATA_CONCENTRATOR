@@ -87,7 +87,7 @@ void ConcentratorAlarmPowerFailure(void)
 		{
 			record = 0;
 
-			alarm_report = (AlarmReport_S *)pvPortMalloc(sizeof(AlarmReport_S));
+			alarm_report = (AlarmReport_S *)mymalloc(sizeof(AlarmReport_S));
 
 			if(alarm_report != NULL)
 			{
@@ -106,7 +106,7 @@ void ConcentratorAlarmPowerFailure(void)
 				memset(buf,0,25);
 				sprintf(buf, "%d",0);
 				para_len = strlen(buf);
-				alarm_report->device_address = (u8 *)pvPortMalloc((para_len + 1) * sizeof(u8));
+				alarm_report->device_address = (u8 *)mymalloc((para_len + 1) * sizeof(u8));
 				if(alarm_report->device_address != NULL)
 				{
 					memcpy(alarm_report->device_address,buf,para_len + 1);
@@ -115,7 +115,7 @@ void ConcentratorAlarmPowerFailure(void)
 				memset(buf,0,25);
 				sprintf(buf, "%d",0);
 				para_len = strlen(buf);
-				alarm_report->device_channel = (u8 *)pvPortMalloc((para_len + 1) * sizeof(u8));
+				alarm_report->device_channel = (u8 *)mymalloc((para_len + 1) * sizeof(u8));
 				if(alarm_report->device_channel != NULL)
 				{
 					memcpy(alarm_report->device_channel,buf,para_len + 1);
@@ -124,7 +124,7 @@ void ConcentratorAlarmPowerFailure(void)
 				memset(buf,0,25);
 				sprintf(buf, "%f",voltage);
 				para_len = strlen(buf);
-				alarm_report->current_value = (u8 *)pvPortMalloc((para_len + 1) * sizeof(u8));
+				alarm_report->current_value = (u8 *)mymalloc((para_len + 1) * sizeof(u8));
 				if(alarm_report->current_value != NULL)
 				{
 					memcpy(alarm_report->current_value,buf,para_len + 1);
@@ -137,7 +137,7 @@ void ConcentratorAlarmPowerFailure(void)
 				sprintf(tmp, "%d",ConcentratorAlarmConfig.power_off_alarm_rm_percent);
 				strcat(buf,tmp);
 				para_len = strlen(buf);
-				alarm_report->set_value = (u8 *)pvPortMalloc((para_len + 1) * sizeof(u8));
+				alarm_report->set_value = (u8 *)mymalloc((para_len + 1) * sizeof(u8));
 				if(alarm_report->set_value != NULL)
 				{
 					memcpy(alarm_report->set_value,buf,para_len + 1);
@@ -150,7 +150,7 @@ void ConcentratorAlarmPowerFailure(void)
 				sprintf(tmp, "%f",BatteryManagement.discharge_current);
 				strcat(buf,tmp);
 				para_len = strlen(buf);
-				alarm_report->reference_value = (u8 *)pvPortMalloc((para_len + 1) * sizeof(u8));
+				alarm_report->reference_value = (u8 *)mymalloc((para_len + 1) * sizeof(u8));
 				if(alarm_report->reference_value != NULL)
 				{
 					memcpy(alarm_report->reference_value,buf,para_len + 1);

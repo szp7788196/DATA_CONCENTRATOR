@@ -4,7 +4,11 @@
 
 #include "common.h"
 
+#define ETH_UNKNOW		0
+#define ETH_CONNECTED	1
 
+
+extern u8 ETH_ConnectState;
 
 extern TaskHandle_t xHandleTaskTCP_CLIENT;
 

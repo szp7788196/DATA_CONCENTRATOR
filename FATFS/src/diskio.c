@@ -234,12 +234,12 @@ DWORD get_fattime (void)
 //动态分配内存
 void *ff_memalloc (UINT size)
 {
-	return (void*)pvPortMalloc(size);
+	return (void*)mymalloc(size);
 }
 //释放内存
 void ff_memfree (void* mf)
 {
-	vPortFree(mf);
+	myfree(mf);
 }
 
 

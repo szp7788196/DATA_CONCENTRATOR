@@ -9,7 +9,7 @@
 
 
 TaskHandle_t xHandleTaskHANDLE_SERVER_FRAME = NULL;
-
+unsigned portBASE_TYPE SatckFRAME;
 
 
 void vTaskHANDLE_SERVER_FRAME(void *pvParameters)
@@ -29,6 +29,8 @@ void vTaskHANDLE_SERVER_FRAME(void *pvParameters)
 		}
 
 		delay_ms(100);
+		
+		SatckFRAME = uxTaskGetStackHighWaterMark(NULL);
 	}
 }
 
@@ -115,14 +117,14 @@ void RecvNetFrameAndPushToRxQueue(CONNECTION_MODE_E connection_mode)
 				{
 					frame_len = tail_pos + 1 - head_pos;
 
-					rx_frame = (ServerFrame_S *)pvPortMalloc(sizeof(ServerFrame_S));
+					rx_frame = (ServerFrame_S *)mymalloc(sizeof(ServerFrame_S));
 
 					if(rx_frame != NULL)
 					{
 						rx_frame->connection_mode = connection_mode;
 						rx_frame->len = frame_len;
 
-						rx_frame->buf = (u8 *)pvPortMalloc(frame_len * sizeof(u8));
+						rx_frame->buf = (u8 *)mymalloc(frame_len * sizeof(u8));
 
 						if(rx_frame->buf != NULL)
 						{

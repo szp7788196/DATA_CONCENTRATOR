@@ -129,7 +129,7 @@ void ElectricityMeterDetectParasStateChanges(void)
 
 					occur[i] = 0;
 
-					module_state = (ElectricityMeterState_S *)pvPortMalloc(sizeof(ElectricityMeterState_S));
+					module_state = (ElectricityMeterState_S *)mymalloc(sizeof(ElectricityMeterState_S));
 
 					if(module_state != NULL)
 					{
@@ -140,7 +140,7 @@ void ElectricityMeterDetectParasStateChanges(void)
 #ifdef DEBUG_LOG
 							printf("send xQueue_ElectricityMeterState fail.\r\n");
 #endif
-							vPortFree(module_state);
+							myfree(module_state);
 						}
 					}
 				}
@@ -157,11 +157,11 @@ void ElectricityMeterCombineParasThreOverAlarm(u8 i,u8 j,u8 m,double reference_v
 	char *buf = NULL;
 	AlarmReport_S *alarm_report = NULL;
 
-	alarm_report = (AlarmReport_S *)pvPortMalloc(sizeof(AlarmReport_S));
+	alarm_report = (AlarmReport_S *)mymalloc(sizeof(AlarmReport_S));
 
 	if(alarm_report != NULL)
 	{
-		buf = (char *)pvPortMalloc(100 * sizeof(char));
+		buf = (char *)mymalloc(100 * sizeof(char));
 
 		if(buf != NULL)
 		{
@@ -180,7 +180,7 @@ void ElectricityMeterCombineParasThreOverAlarm(u8 i,u8 j,u8 m,double reference_v
 			memset(buf,0,25);
 			sprintf(buf, "%d",ElectricityMeterState[i].address);
 			para_len = strlen(buf);
-			alarm_report->device_address = (u8 *)pvPortMalloc((para_len + 1) * sizeof(u8));
+			alarm_report->device_address = (u8 *)mymalloc((para_len + 1) * sizeof(u8));
 			if(alarm_report->device_address != NULL)
 			{
 				memcpy(alarm_report->device_address,buf,para_len + 1);
@@ -189,7 +189,7 @@ void ElectricityMeterCombineParasThreOverAlarm(u8 i,u8 j,u8 m,double reference_v
 			memset(buf,0,25);
 			sprintf(buf, "%d",ElectricityMeterState[i].channel);
 			para_len = strlen(buf);
-			alarm_report->device_channel = (u8 *)pvPortMalloc((para_len + 1) * sizeof(u8));
+			alarm_report->device_channel = (u8 *)mymalloc((para_len + 1) * sizeof(u8));
 			if(alarm_report->device_channel != NULL)
 			{
 				memcpy(alarm_report->device_channel,buf,para_len + 1);
@@ -198,7 +198,7 @@ void ElectricityMeterCombineParasThreOverAlarm(u8 i,u8 j,u8 m,double reference_v
 			memset(buf,0,25);
 			sprintf(buf, "%04x",ElectricityMeterState[i].abnormal_ch);
 			para_len = strlen(buf);
-			alarm_report->current_value = (u8 *)pvPortMalloc((para_len + 1) * sizeof(u8));
+			alarm_report->current_value = (u8 *)mymalloc((para_len + 1) * sizeof(u8));
 			if(alarm_report->current_value != NULL)
 			{
 				memcpy(alarm_report->current_value,buf,para_len + 1);
@@ -271,7 +271,7 @@ void ElectricityMeterCombineParasThreOverAlarm(u8 i,u8 j,u8 m,double reference_v
 			strcat(buf,tmp);
 			
 			para_len = strlen(buf);
-			alarm_report->set_value = (u8 *)pvPortMalloc((para_len + 1) * sizeof(u8));
+			alarm_report->set_value = (u8 *)mymalloc((para_len + 1) * sizeof(u8));
 			if(alarm_report->set_value != NULL)
 			{
 				memcpy(alarm_report->set_value,buf,para_len + 1);
@@ -280,7 +280,7 @@ void ElectricityMeterCombineParasThreOverAlarm(u8 i,u8 j,u8 m,double reference_v
 			memset(buf,0,25);
 			sprintf(tmp, "%0.3f",reference_value);
 			para_len = strlen(buf);
-			alarm_report->reference_value = (u8 *)pvPortMalloc((para_len + 1) * sizeof(u8));
+			alarm_report->reference_value = (u8 *)mymalloc((para_len + 1) * sizeof(u8));
 			if(alarm_report->reference_value != NULL)
 			{
 				memcpy(alarm_report->reference_value,buf,para_len + 1);
@@ -296,7 +296,7 @@ void ElectricityMeterCombineParasThreOverAlarm(u8 i,u8 j,u8 m,double reference_v
 
 			PushAlarmReportToAlarmQueue(alarm_report);
 			
-			vPortFree(buf);
+			myfree(buf);
 		}
 		else
 		{

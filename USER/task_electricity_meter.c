@@ -9,6 +9,7 @@
 
 
 TaskHandle_t xHandleTaskELECTRICITY_METER = NULL;
+unsigned portBASE_TYPE SatckMETER;
 
 void vTaskELECTRICITY_METER(void *pvParameters)
 {
@@ -34,6 +35,8 @@ void vTaskELECTRICITY_METER(void *pvParameters)
 		cnt += 1;
 		
 		delay_ms(100);
+		
+		SatckMETER = uxTaskGetStackHighWaterMark(NULL);
 	}
 }
 

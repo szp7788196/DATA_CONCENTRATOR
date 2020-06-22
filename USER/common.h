@@ -16,6 +16,7 @@
 #include "semphr.h"
 #include "event_groups.h"
 #include <time.h>
+#include "malloc.h"
 
 /*---------------------------------------------------------------------------*/
 /* Type Definition Macros                                                    */

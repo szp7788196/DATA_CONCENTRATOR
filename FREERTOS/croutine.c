@@ -147,7 +147,7 @@ BaseType_t xReturn;
 CRCB_t *pxCoRoutine;
 
 	/* Allocate the memory that will store the co-routine control block. */
-	pxCoRoutine = ( CRCB_t * ) pvPortMalloc( sizeof( CRCB_t ) );
+	pxCoRoutine = ( CRCB_t * ) mymalloc( sizeof( CRCB_t ) );
 	if( pxCoRoutine )
 	{
 		/* If pxCurrentCoRoutine is NULL then this is the first co-routine to

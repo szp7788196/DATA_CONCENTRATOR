@@ -9,7 +9,7 @@
 
 
 EC20Info_S EC20Info;
-CONNECT_STATE_E ConnectState = UNKNOW_STATE;
+CONNECT_STATE_E EC20ConnectState = UNKNOW_STATE;
 
 
 void EC20_Init(void)

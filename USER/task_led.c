@@ -16,13 +16,16 @@
 #include "kr.h"
 #include "kc.h"
 #include "concentrator_comm.h"
+#include "task_tcp_client.h"
 
 
 
 TaskHandle_t xHandleTaskLED = NULL;
+unsigned portBASE_TYPE SatckLED;
 
 u32 FreeHeapSize = 0;
 
+u32 jjjjjj = 0;
 void vTaskLED(void *pvParameters)
 {
 	u32 cnt = 0;
@@ -35,6 +38,8 @@ void vTaskLED(void *pvParameters)
 
 	while(1)											//循环一次延时约100ms
 	{
+		jjjjjj ++;
+		
 		if(Usart4RecvEnd == 0xAA)						//处理屏幕发过来的数据
 		{
 			Usart4RecvEnd = 0;
@@ -78,7 +83,7 @@ void vTaskLED(void *pvParameters)
 			                            ConcentratorLocationConfig.latitude);
 		}
 
-		FreeHeapSize = xPortGetFreeHeapSize();
+		FreeHeapSize = mymem_perused();
 
 		if(cnt % 50 == 0)
 		{
@@ -108,7 +113,9 @@ void vTaskLED(void *pvParameters)
 
 		cnt = (cnt + 1) & 0xFFFFFFFF;
 
-		delay_ms(100);									//循环一次延时约20ms
+		delay_ms(50);									//循环一次延时约20ms
+		
+		SatckLED = uxTaskGetStackHighWaterMark(NULL);
 	}
 }
 
@@ -297,14 +304,26 @@ u8 GetLinkTypeLinkState(u8 cmd_code,u8 *outbuf)
 	u8 buf[3] = {0};
 
 	buf[0] = ConcentratorBasicConfig.connection_mode;
-
-	if(ConnectState == (u8)CONNECTED)
+	
+	if(ConcentratorBasicConfig.connection_mode == (u8)MODE_4G)
 	{
-		buf[1] = 1;
+		if(EC20ConnectState == (u8)CONNECTED)
+		{
+			buf[1] = 1;
+		}
+
+		buf[2] = 0 - EC20Info.csq;
 	}
+	else if(ConcentratorBasicConfig.connection_mode == (u8)MODE_ETH)
+	{
+		if(ETH_ConnectState == (u8)ETH_CONNECTED)
+		{
+			buf[1] = 1;
+		}
 
-	buf[2] = 0 - EC20Info.csq;
-
+		buf[2] = 0;
+	}
+	
 	ret = CombineMMI_Frame(cmd_code,buf,3,outbuf);
 
 	return ret;

@@ -1,41 +1,46 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no" ?>
-<Project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="project_proj.xsd">
+<Project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="project_projx.xsd">
 
-  <SchemaVersion>1.1</SchemaVersion>
+  <SchemaVersion>2.1</SchemaVersion>
 
   <Header>### uVision Project, (C) Keil Software</Header>
 
   <Targets>
     <Target>
-      <TargetName>DataConcentrator</TargetName>
+      <TargetName>Concentrator</TargetName>
       <ToolsetNumber>0x4</ToolsetNumber>
       <ToolsetName>ARM-ADS</ToolsetName>
+      <pCCUsed>5060750::V5.06 update 6 (build 750)::ARMCC</pCCUsed>
+      <uAC6>0</uAC6>
       <TargetOption>
         <TargetCommonOption>
-          <Device>STM32F407ZG</Device>
+          <Device>STM32F407ZGTx</Device>
           <Vendor>STMicroelectronics</Vendor>
-          <Cpu>IRAM(0x20000000-0x2001FFFF) IRAM2(0x10000000-0x1000FFFF) IROM(0x8000000-0x80FFFFF) CLOCK(25000000) CPUTYPE("Cortex-M4") FPU2</Cpu>
+          <PackID>Keil.STM32F4xx_DFP.2.13.0</PackID>
+          <PackURL>http://www.keil.com/pack</PackURL>
+          <Cpu>IRAM(0x20000000,0x00020000) IRAM2(0x10000000,0x00010000) IROM(0x08000000,0x00100000) CPUTYPE("Cortex-M4") FPU2 CLOCK(12000000) ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
-          <StartupFile>"Startup\ST\STM32F4xx\startup_stm32f40xx.s" ("STM32F40xx Startup Code")</StartupFile>
-          <FlashDriverDll>UL2CM3(-O207 -S0 -C0 -FO7 -FD20000000 -FC800 -FN1 -FF0STM32F4xx_1024 -FS08000000 -FL0100000)</FlashDriverDll>
-          <DeviceId>6105</DeviceId>
-          <RegisterFile>stm32f4xx.h</RegisterFile>
+          <StartupFile></StartupFile>
+          <FlashDriverDll>UL2CM3(-S0 -C0 -P0 -FD20000000 -FC1000 -FN1 -FF0STM32F4xx_1024 -FS08000000 -FL0100000 -FP0($$Device:STM32F407ZGTx$CMSIS\Flash\STM32F4xx_1024.FLM))</FlashDriverDll>
+          <DeviceId>0</DeviceId>
+          <RegisterFile>$$Device:STM32F407ZGTx$Drivers\CMSIS\Device\ST\STM32F4xx\Include\stm32f4xx.h</RegisterFile>
           <MemoryEnv></MemoryEnv>
           <Cmp></Cmp>
           <Asm></Asm>
           <Linker></Linker>
           <OHString></OHString>
           <InfinionOptionDll></InfinionOptionDll>
-          <SLE66CMisc>-DSTM32F40XX</SLE66CMisc>
+          <SLE66CMisc></SLE66CMisc>
           <SLE66AMisc></SLE66AMisc>
           <SLE66LinkerMisc></SLE66LinkerMisc>
-          <SFDFile>SFD\ST\STM32F4xx\STM32F40x.sfr</SFDFile>
+          <SFDFile>$$Device:STM32F407ZGTx$CMSIS\SVD\STM32F40x.svd</SFDFile>
+          <bCustSvd>0</bCustSvd>
           <UseEnv>0</UseEnv>
           <BinPath></BinPath>
           <IncludePath></IncludePath>
           <LibPath></LibPath>
-          <RegisterFilePath>ST\STM32F4xx\</RegisterFilePath>
-          <DBRegisterFilePath>ST\STM32F4xx\</DBRegisterFilePath>
+          <RegisterFilePath></RegisterFilePath>
+          <DBRegisterFilePath></DBRegisterFilePath>
           <TargetStatus>
             <Error>0</Error>
             <ExitCodeStop>0</ExitCodeStop>
@@ -44,7 +49,7 @@
             <InvalidFlash>1</InvalidFlash>
           </TargetStatus>
           <OutputDirectory>..\OUTPUT\Obj\</OutputDirectory>
-          <OutputName>DataConcentrator</OutputName>
+          <OutputName>Concentrator</OutputName>
           <CreateExecutable>1</CreateExecutable>
           <CreateLib>0</CreateLib>
           <CreateHexFile>1</CreateHexFile>
@@ -71,14 +76,18 @@
             <UserProg2Name></UserProg2Name>
             <UserProg1Dos16Mode>0</UserProg1Dos16Mode>
             <UserProg2Dos16Mode>0</UserProg2Dos16Mode>
+            <nStopB1X>0</nStopB1X>
+            <nStopB2X>0</nStopB2X>
           </BeforeMake>
           <AfterMake>
             <RunUserProg1>1</RunUserProg1>
             <RunUserProg2>0</RunUserProg2>
-            <UserProg1Name>C:\Keil\ARM\ARMCC\bin\fromelf.exe  --bin -o   ..\OUTPUT\Obj\DataConcentrator.bin ..\OUTPUT\Obj\DataConcentrator.axf</UserProg1Name>
+            <UserProg1Name>C:\Keil_v5\ARM\ARMCC\bin\fromelf.exe  --bin -o   ..\OUTPUT\Obj\Concentrator.bin ..\OUTPUT\Obj\Concentrator.axf</UserProg1Name>
             <UserProg2Name></UserProg2Name>
             <UserProg1Dos16Mode>0</UserProg1Dos16Mode>
             <UserProg2Dos16Mode>0</UserProg2Dos16Mode>
+            <nStopA1X>0</nStopA1X>
+            <nStopA2X>0</nStopA2X>
           </AfterMake>
           <SelectedForBatchBuild>0</SelectedForBatchBuild>
           <SVCSIdString></SVCSIdString>
@@ -97,14 +106,15 @@
           <StopOnExitCode>3</StopOnExitCode>
           <CustomArgument></CustomArgument>
           <IncludeLibraryModules></IncludeLibraryModules>
+          <ComprImg>1</ComprImg>
         </CommonProperty>
         <DllOption>
           <SimDllName>SARMCM3.DLL</SimDllName>
-          <SimDllArguments>-MPU -REMAP</SimDllArguments>
+          <SimDllArguments> -REMAP -MPU</SimDllArguments>
           <SimDlgDll>DCM.DLL</SimDlgDll>
           <SimDlgDllArguments>-pCM4</SimDlgDllArguments>
           <TargetDllName>SARMCM3.DLL</TargetDllName>
-          <TargetDllArguments>-MPU</TargetDllArguments>
+          <TargetDllArguments> -MPU</TargetDllArguments>
           <TargetDlgDll>TCM.DLL</TargetDlgDll>
           <TargetDlgDllArguments>-pCM4</TargetDlgDllArguments>
         </DllOption>
@@ -116,45 +126,6 @@
             <HexOffset>0</HexOffset>
             <Oh166RecLen>16</Oh166RecLen>
           </OPTHX>
-          <Simulator>
-            <UseSimulator>0</UseSimulator>
-            <LoadApplicationAtStartup>1</LoadApplicationAtStartup>
-            <RunToMain>1</RunToMain>
-            <RestoreBreakpoints>1</RestoreBreakpoints>
-            <RestoreWatchpoints>1</RestoreWatchpoints>
-            <RestoreMemoryDisplay>1</RestoreMemoryDisplay>
-            <RestoreFunctions>1</RestoreFunctions>
-            <RestoreToolbox>1</RestoreToolbox>
-            <LimitSpeedToRealTime>0</LimitSpeedToRealTime>
-          </Simulator>
-          <Target>
-            <UseTarget>1</UseTarget>
-            <LoadApplicationAtStartup>1</LoadApplicationAtStartup>
-            <RunToMain>0</RunToMain>
-            <RestoreBreakpoints>1</RestoreBreakpoints>
-            <RestoreWatchpoints>1</RestoreWatchpoints>
-            <RestoreMemoryDisplay>1</RestoreMemoryDisplay>
-            <RestoreFunctions>0</RestoreFunctions>
-            <RestoreToolbox>1</RestoreToolbox>
-            <RestoreTracepoints>1</RestoreTracepoints>
-          </Target>
-          <RunDebugAfterBuild>0</RunDebugAfterBuild>
-          <TargetSelection>7</TargetSelection>
-          <SimDlls>
-            <CpuDll></CpuDll>
-            <CpuDllArguments></CpuDllArguments>
-            <PeripheralDll></PeripheralDll>
-            <PeripheralDllArguments></PeripheralDllArguments>
-            <InitializationFile></InitializationFile>
-          </SimDlls>
-          <TargetDlls>
-            <CpuDll></CpuDll>
-            <CpuDllArguments></CpuDllArguments>
-            <PeripheralDll></PeripheralDll>
-            <PeripheralDllArguments></PeripheralDllArguments>
-            <InitializationFile></InitializationFile>
-            <Driver>Segger\JL2CM3.dll</Driver>
-          </TargetDlls>
         </DebugOption>
         <Utilities>
           <Flash1>
@@ -169,6 +140,10 @@
           <Flash2>BIN\UL2CM3.DLL</Flash2>
           <Flash3>"" ()</Flash3>
           <Flash4></Flash4>
+          <pFcarmOut></pFcarmOut>
+          <pFcarmGrp></pFcarmGrp>
+          <pFcArmRoot></pFcArmRoot>
+          <FcArmLst>0</FcArmLst>
         </Utilities>
         <TargetArmAds>
           <ArmAdsMisc>
@@ -212,11 +187,12 @@
             <hadIRAM2>1</hadIRAM2>
             <hadIROM2>0</hadIROM2>
             <StupSel>8</StupSel>
-            <useUlib>0</useUlib>
+            <useUlib>1</useUlib>
             <EndSel>0</EndSel>
             <uLtcg>0</uLtcg>
+            <nSecure>0</nSecure>
             <RoSelD>3</RoSelD>
-            <RwSelD>3</RwSelD>
+            <RwSelD>4</RwSelD>
             <CodeSel>0</CodeSel>
             <OptFeed>0</OptFeed>
             <NoZi1>0</NoZi1>
@@ -298,7 +274,7 @@
               <OCR_RVCT4>
                 <Type>1</Type>
                 <StartAddress>0x8000000</StartAddress>
-                <Size>0x60000</Size>
+                <Size>0x100000</Size>
               </OCR_RVCT4>
               <OCR_RVCT5>
                 <Type>1</Type>
@@ -344,14 +320,24 @@
             <PlainCh>0</PlainCh>
             <Ropi>0</Ropi>
             <Rwpi>0</Rwpi>
-            <wLevel>0</wLevel>
+            <wLevel>2</wLevel>
             <uThumb>0</uThumb>
             <uSurpInc>0</uSurpInc>
+            <uC99>1</uC99>
+            <uGnu>1</uGnu>
+            <useXO>0</useXO>
+            <v6Lang>1</v6Lang>
+            <v6LangP>1</v6LangP>
+            <vShortEn>1</vShortEn>
+            <vShortWch>1</vShortWch>
+            <v6Lto>0</v6Lto>
+            <v6WtE>0</v6WtE>
+            <v6Rtti>0</v6Rtti>
             <VariousControls>
               <MiscControls></MiscControls>
               <Define>STM32F40XX,USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>..\CORE;..\DEVICEDRIVER\led;..\FREERTOS\include;..\FREERTOS\portable\RVDS\ARM_CM4F;..\FWLIB\inc;..\PERIPHERAL\usart;..\PERIPHERAL\watch_dog;..\PROTOCOL;..\SYSTEM\delay;..\SYSTEM\sys;..\USER;..\DEVICEDRIVER\dp83848;..\ETHERNET;..\LWIP\lwip-1.4.1\src\include;..\LWIP\lwip-1.4.1\src\include\lwip;..\LWIP\lwip-1.4.1\src\include\ipv4;..\LWIP\lwip-1.4.1\src\include\netif;..\LWIP\lwip-1.4.1\port\STM32F4x7;..\LWIP\lwip-1.4.1\port\STM32F4x7\FreeRTOS;..\DEVICEDRIVER\key;..\PERIPHERAL\spi;..\PERIPHERAL\iic;..\PERIPHERAL\stmflash;..\DEVICEDRIVER\kc;..\DEVICEDRIVER\kr;..\DEVICEDRIVER\rx8010s;..\DEVICEDRIVER\cat25x;..\DEVICEDRIVER\w25qxx;..\FATFS;..\FATFS\src;..\FATFS\exfuns;..\DEVICEDRIVER\ht7038;..\MEMORY;..\MIDDLEWARE;..\DEVICEDRIVER\ec20;..\DEVICEDRIVER\battery;..\EXTERNALDEVICE\concentrator;..\EXTERNALDEVICE\relay;..\EXTERNALDEVICE\input_collector;..\EXTERNALDEVICE\electricity_meter;..\DEVICEDRIVER\e_meter</IncludePath>
+              <IncludePath>..\CORE;..\USER;..\DEVICEDRIVER\dp83848;..\ETHERNET;..\FREERTOS\include;..\FREERTOS\portable\RVDS\ARM_CM4F;..\FWLIB\inc;..\SYSTEM\delay;..\SYSTEM\sys;..\LWIP\lwip-1.4.1\src\include;..\LWIP\lwip-1.4.1\src\include\lwip;..\LWIP\lwip-1.4.1\src\include\ipv4;..\LWIP\lwip-1.4.1\src\include\netif;..\LWIP\lwip-1.4.1\port\STM32F4x7;..\LWIP\lwip-1.4.1\port\STM32F4x7\FreeRTOS;..\PERIPHERAL\usart;..\DEVICEDRIVER\battery;..\DEVICEDRIVER\cat25x;..\DEVICEDRIVER\dp83848;..\DEVICEDRIVER\e_meter;..\DEVICEDRIVER\ec20;..\DEVICEDRIVER\ht7038;..\DEVICEDRIVER\ht7038;..\DEVICEDRIVER\kc;..\DEVICEDRIVER\kr;..\DEVICEDRIVER\led;..\DEVICEDRIVER\rx8010s;..\DEVICEDRIVER\w25qxx;..\FATFS;..\FATFS\src;..\FATFS\exfuns;..\MEMORY;..\MIDDLEWARE;..\PROTOCOL;..\PERIPHERAL\iic;..\PERIPHERAL\spi;..\PERIPHERAL\stmflash;..\PERIPHERAL\usart;..\PERIPHERAL\watch_dog;..\EXTERNALDEVICE\concentrator;..\EXTERNALDEVICE\electricity_meter;..\EXTERNALDEVICE\input_collector;..\EXTERNALDEVICE\relay</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -363,6 +349,8 @@
             <SwStkChk>0</SwStkChk>
             <NoWarn>0</NoWarn>
             <uSurpInc>0</uSurpInc>
+            <useXO>0</useXO>
+            <uClangAs>0</uClangAs>
             <VariousControls>
               <MiscControls></MiscControls>
               <Define></Define>
@@ -379,6 +367,7 @@
             <useFile>0</useFile>
             <TextAddressRange>0x08000000</TextAddressRange>
             <DataAddressRange>0x20000000</DataAddressRange>
+            <pXoBase></pXoBase>
             <ScatterFile></ScatterFile>
             <IncludeLibs></IncludeLibs>
             <IncludeLibsPath></IncludeLibsPath>
@@ -413,19 +402,9 @@
               <FilePath>..\USER\stm32f4xx_it.c</FilePath>
             </File>
             <File>
-              <FileName>task_led.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\USER\task_led.c</FilePath>
-            </File>
-            <File>
               <FileName>task_4g.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\USER\task_4g.c</FilePath>
-            </File>
-            <File>
-              <FileName>task_handle_server_frame.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\USER\task_handle_server_frame.c</FilePath>
             </File>
             <File>
               <FileName>task_concentrator.c</FileName>
@@ -433,14 +412,24 @@
               <FilePath>..\USER\task_concentrator.c</FilePath>
             </File>
             <File>
-              <FileName>task_store.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\USER\task_store.c</FilePath>
-            </File>
-            <File>
               <FileName>task_electricity_meter.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\USER\task_electricity_meter.c</FilePath>
+            </File>
+            <File>
+              <FileName>task_handle_server_frame.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\USER\task_handle_server_frame.c</FilePath>
+            </File>
+            <File>
+              <FileName>task_input_collector.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\USER\task_input_collector.c</FilePath>
+            </File>
+            <File>
+              <FileName>task_led.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\USER\task_led.c</FilePath>
             </File>
             <File>
               <FileName>task_relay.c</FileName>
@@ -453,9 +442,9 @@
               <FilePath>..\USER\task_rs485.c</FilePath>
             </File>
             <File>
-              <FileName>task_input_collector.c</FileName>
+              <FileName>task_store.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\USER\task_input_collector.c</FilePath>
+              <FilePath>..\USER\task_store.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -496,6 +485,11 @@
               <FileName>misc.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\FWLIB\src\misc.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f4x7_eth.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\FWLIB\src\stm32f4x7_eth.c</FilePath>
             </File>
             <File>
               <FileName>stm32f4xx_adc.c</FileName>
@@ -612,11 +606,6 @@
               <FileType>1</FileType>
               <FilePath>..\FWLIB\src\stm32f4xx_wwdg.c</FilePath>
             </File>
-            <File>
-              <FileName>stm32f4x7_eth.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\FWLIB\src\stm32f4x7_eth.c</FilePath>
-            </File>
           </Files>
         </Group>
         <Group>
@@ -626,6 +615,11 @@
               <FileName>usart.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\PERIPHERAL\usart\usart.c</FilePath>
+            </File>
+            <File>
+              <FileName>usart6.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\PERIPHERAL\usart\usart6.c</FilePath>
             </File>
             <File>
               <FileName>watch_dog.c</FileName>
@@ -647,15 +641,10 @@
               <FileType>1</FileType>
               <FilePath>..\PERIPHERAL\stmflash\stmflash.c</FilePath>
             </File>
-            <File>
-              <FileName>usart6.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\PERIPHERAL\usart\usart6.c</FilePath>
-            </File>
           </Files>
         </Group>
         <Group>
-          <GroupName>DEVIC_EDRIVER</GroupName>
+          <GroupName>DEVICE_DRIVER</GroupName>
           <Files>
             <File>
               <FileName>led.c</FileName>
@@ -773,26 +762,6 @@
           <GroupName>ETHERNET</GroupName>
           <Files>
             <File>
-              <FileName>netconf.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\ETHERNET\netconf.c</FilePath>
-            </File>
-            <File>
-              <FileName>task_lwip_init.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\ETHERNET\task_lwip_init.c</FilePath>
-            </File>
-            <File>
-              <FileName>task_tcp_client.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\ETHERNET\task_tcp_client.c</FilePath>
-            </File>
-            <File>
-              <FileName>lwip_comm.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\ETHERNET\lwip_comm.c</FilePath>
-            </File>
-            <File>
               <FileName>fs.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\ETHERNET\fs.c</FilePath>
@@ -806,6 +775,26 @@
               <FileName>httpd_cgi_ssi.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\ETHERNET\httpd_cgi_ssi.c</FilePath>
+            </File>
+            <File>
+              <FileName>lwip_comm.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\ETHERNET\lwip_comm.c</FilePath>
+            </File>
+            <File>
+              <FileName>netconf.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\ETHERNET\netconf.c</FilePath>
+            </File>
+            <File>
+              <FileName>task_lwip_init.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\ETHERNET\task_lwip_init.c</FilePath>
+            </File>
+            <File>
+              <FileName>task_tcp_client.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\ETHERNET\task_tcp_client.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -873,6 +862,11 @@
               <FilePath>..\LWIP\lwip-1.4.1\src\core\init.c</FilePath>
             </File>
             <File>
+              <FileName>lwip_timers.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\LWIP\lwip-1.4.1\src\core\lwip_timers.c</FilePath>
+            </File>
+            <File>
               <FileName>mem.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\LWIP\lwip-1.4.1\src\core\mem.c</FilePath>
@@ -916,11 +910,6 @@
               <FileName>tcp_out.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\LWIP\lwip-1.4.1\src\core\tcp_out.c</FilePath>
-            </File>
-            <File>
-              <FileName>lwip_timers.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\LWIP\lwip-1.4.1\src\core\lwip_timers.c</FilePath>
             </File>
             <File>
               <FileName>udp.c</FileName>
@@ -968,11 +957,6 @@
               <FilePath>..\LWIP\lwip-1.4.1\src\core\ipv4\ip_frag.c</FilePath>
             </File>
             <File>
-              <FileName>etharp.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\LWIP\lwip-1.4.1\src\netif\etharp.c</FilePath>
-            </File>
-            <File>
               <FileName>ethernetif.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\LWIP\lwip-1.4.1\port\STM32F4x7\FreeRTOS\ethernetif.c</FilePath>
@@ -982,10 +966,15 @@
               <FileType>1</FileType>
               <FilePath>..\LWIP\lwip-1.4.1\port\STM32F4x7\FreeRTOS\sys_arch.c</FilePath>
             </File>
+            <File>
+              <FileName>etharp.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\LWIP\lwip-1.4.1\src\netif\etharp.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
-          <GroupName>FATFS</GroupName>
+          <GroupName>FATS</GroupName>
           <Files>
             <File>
               <FileName>diskio.c</FileName>
@@ -1027,6 +1016,11 @@
               <FileType>1</FileType>
               <FilePath>..\MEMORY\ringbuf.c</FilePath>
             </File>
+            <File>
+              <FileName>malloc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\MEMORY\malloc.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -1053,14 +1047,14 @@
           <GroupName>EXTERNAL_DEVICE</GroupName>
           <Files>
             <File>
-              <FileName>concentrator_conf.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\EXTERNALDEVICE\concentrator\concentrator_conf.c</FilePath>
-            </File>
-            <File>
               <FileName>concentrator_comm.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\EXTERNALDEVICE\concentrator\concentrator_comm.c</FilePath>
+            </File>
+            <File>
+              <FileName>concentrator_conf.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\EXTERNALDEVICE\concentrator\concentrator_conf.c</FilePath>
             </File>
             <File>
               <FileName>concentrator_event.c</FileName>
@@ -1068,14 +1062,14 @@
               <FilePath>..\EXTERNALDEVICE\concentrator\concentrator_event.c</FilePath>
             </File>
             <File>
-              <FileName>relay_conf.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\EXTERNALDEVICE\relay\relay_conf.c</FilePath>
-            </File>
-            <File>
               <FileName>relay_comm.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\EXTERNALDEVICE\relay\relay_comm.c</FilePath>
+            </File>
+            <File>
+              <FileName>relay_conf.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\EXTERNALDEVICE\relay\relay_conf.c</FilePath>
             </File>
             <File>
               <FileName>relay_event.c</FileName>
@@ -1083,14 +1077,14 @@
               <FilePath>..\EXTERNALDEVICE\relay\relay_event.c</FilePath>
             </File>
             <File>
-              <FileName>input_collector_conf.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\EXTERNALDEVICE\input_collector\input_collector_conf.c</FilePath>
-            </File>
-            <File>
               <FileName>input_collector_comm.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\EXTERNALDEVICE\input_collector\input_collector_comm.c</FilePath>
+            </File>
+            <File>
+              <FileName>input_collector_conf.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\EXTERNALDEVICE\input_collector\input_collector_conf.c</FilePath>
             </File>
             <File>
               <FileName>input_collector_event.c</FileName>
@@ -1098,14 +1092,14 @@
               <FilePath>..\EXTERNALDEVICE\input_collector\input_collector_event.c</FilePath>
             </File>
             <File>
-              <FileName>electricity_meter_conf.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\EXTERNALDEVICE\electricity_meter\electricity_meter_conf.c</FilePath>
-            </File>
-            <File>
               <FileName>electricity_meter_comm.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\EXTERNALDEVICE\electricity_meter\electricity_meter_comm.c</FilePath>
+            </File>
+            <File>
+              <FileName>electricity_meter_conf.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\EXTERNALDEVICE\electricity_meter\electricity_meter_conf.c</FilePath>
             </File>
             <File>
               <FileName>electricity_meter_event.c</FileName>
@@ -1117,5 +1111,11 @@
       </Groups>
     </Target>
   </Targets>
+
+  <RTE>
+    <apis/>
+    <components/>
+    <files/>
+  </RTE>
 
 </Project>

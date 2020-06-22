@@ -333,6 +333,8 @@ void Eth_Link_EXTIConfig(void)
 * @param  None
 * @retval None
 */
+
+unsigned portBASE_TYPE SatckEth_Link_IT;
 void Eth_Link_IT_task( void * pvParameters )
 {
   uint32_t pcPHYAddress;
@@ -356,6 +358,8 @@ void Eth_Link_IT_task( void * pvParameters )
         }
       }
     }
+	
+	SatckEth_Link_IT = uxTaskGetStackHighWaterMark(NULL);
   }
 }
 /**

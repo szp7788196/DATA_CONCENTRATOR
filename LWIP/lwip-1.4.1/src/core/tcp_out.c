@@ -301,7 +301,7 @@ tcp_write_checks(struct tcp_pcb *pcb, u16_t len)
     LWIP_DEBUGF(TCP_OUTPUT_DEBUG | LWIP_DBG_STATE | LWIP_DBG_LEVEL_SEVERE, ("tcp_write() called in invalid state\n"));
     return ERR_CONN;
   } else if (len == 0) {
-    return ERR_OK;;
+    return ERR_OK;
   }
 
   /* fail on too much data */
@@ -858,6 +858,7 @@ tcp_send_empty_ack(struct tcp_pcb *pcb)
   }
   tcphdr = (struct tcp_hdr *)p->payload;
   tcphdr = tcphdr;
+  
   LWIP_DEBUGF(TCP_OUTPUT_DEBUG, 
               ("tcp_output: sending ACK for %"U32_F"\n", pcb->rcv_nxt));
   /* remove ACK flags from the PCB, as we send an empty ACK now */

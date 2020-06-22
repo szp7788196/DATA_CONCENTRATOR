@@ -13,7 +13,7 @@
 
 
 TaskHandle_t xHandleTaskRELAY = NULL;
-
+unsigned portBASE_TYPE SatckRELAY;
 
 void vTaskRELAY(void *pvParameters)
 {
@@ -36,6 +36,8 @@ void vTaskRELAY(void *pvParameters)
 		RelayRecvAndHandleDeviceFrame();				//接收并处理外置继电器模块返回的数据
 
 		delay_ms(100);
+		
+		SatckRELAY = uxTaskGetStackHighWaterMark(NULL);
 	}
 }
 

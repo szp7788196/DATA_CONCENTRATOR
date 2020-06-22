@@ -17,7 +17,7 @@ void vTaskLWIP_INIT(void *pvParameters)
 	
 	tcp_client_init();
 	
-	httpd_init();
+//	httpd_init();
 	
 //#ifdef USE_DHCP
 	if(lwipdev.dhcpenable == 1)

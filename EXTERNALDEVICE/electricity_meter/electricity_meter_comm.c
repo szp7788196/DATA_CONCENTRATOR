@@ -14,11 +14,11 @@ void ElectricityMeterSendStateChangesReportFrameToServer(ElectricityMeterState_S
 	char *buf = NULL;
 	ServerFrameStruct_S *server_frame_struct = NULL;		//用于响应服务器
 
-	buf = (char *)pvPortMalloc(500 * sizeof(char));
+	buf = (char *)mymalloc(500 * sizeof(char));
 
 	if(buf != NULL)
 	{
-		server_frame_struct = (ServerFrameStruct_S *)pvPortMalloc(sizeof(ServerFrameStruct_S));
+		server_frame_struct = (ServerFrameStruct_S *)mymalloc(sizeof(ServerFrameStruct_S));
 
 		if(server_frame_struct != NULL && module_state != NULL)
 		{
@@ -30,7 +30,7 @@ void ElectricityMeterSendStateChangesReportFrameToServer(ElectricityMeterState_S
 			server_frame_struct->msg_id		= 0x0471;
 			server_frame_struct->para_num	= module_state->ch_num + 1 + 3;
 
-			server_frame_struct->para = (Parameter_S *)pvPortMalloc(server_frame_struct->para_num * sizeof(Parameter_S));
+			server_frame_struct->para = (Parameter_S *)mymalloc(server_frame_struct->para_num * sizeof(Parameter_S));
 
 			if(server_frame_struct->para != NULL)
 			{
@@ -40,7 +40,7 @@ void ElectricityMeterSendStateChangesReportFrameToServer(ElectricityMeterState_S
 				memset(buf,0,25);
 				sprintf(buf, "%x",module_state->address);
 				server_frame_struct->para[i].len = strlen(buf);
-				server_frame_struct->para[i].value = (u8 *)pvPortMalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
+				server_frame_struct->para[i].value = (u8 *)mymalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
 				if(server_frame_struct->para[i].value != NULL)
 				{
 					memcpy(server_frame_struct->para[i].value,buf,server_frame_struct->para[i].len + 1);
@@ -51,7 +51,7 @@ void ElectricityMeterSendStateChangesReportFrameToServer(ElectricityMeterState_S
 				memset(buf,0,25);
 				sprintf(buf, "%d",module_state->channel);
 				server_frame_struct->para[i].len = strlen(buf);
-				server_frame_struct->para[i].value = (u8 *)pvPortMalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
+				server_frame_struct->para[i].value = (u8 *)mymalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
 				if(server_frame_struct->para[i].value != NULL)
 				{
 					memcpy(server_frame_struct->para[i].value,buf,server_frame_struct->para[i].len + 1);
@@ -62,7 +62,7 @@ void ElectricityMeterSendStateChangesReportFrameToServer(ElectricityMeterState_S
 				memset(buf,0,25);
 				sprintf(buf, "%d",module_state->ch_num);
 				server_frame_struct->para[i].len = strlen(buf);
-				server_frame_struct->para[i].value = (u8 *)pvPortMalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
+				server_frame_struct->para[i].value = (u8 *)mymalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
 				if(server_frame_struct->para[i].value != NULL)
 				{
 					memcpy(server_frame_struct->para[i].value,buf,server_frame_struct->para[i].len + 1);
@@ -114,7 +114,7 @@ void ElectricityMeterSendStateChangesReportFrameToServer(ElectricityMeterState_S
 					strcat(buf,tmp);
 
 					server_frame_struct->para[i].len = strlen(buf);
-					server_frame_struct->para[i].value = (u8 *)pvPortMalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
+					server_frame_struct->para[i].value = (u8 *)mymalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
 					if(server_frame_struct->para[i].value != NULL)
 					{
 						memcpy(server_frame_struct->para[i].value,buf,server_frame_struct->para[i].len + 1);
@@ -126,7 +126,7 @@ void ElectricityMeterSendStateChangesReportFrameToServer(ElectricityMeterState_S
 			ConvertFrameStructToFrame(server_frame_struct);
 		}
 
-		vPortFree(buf);
+		myfree(buf);
 	}
 }
 
@@ -142,7 +142,7 @@ void ElectricityMeterSendStateChangesReportToServer(void)
 	{
 		if(module_state != NULL)
 		{
-			vPortFree(module_state);
+			myfree(module_state);
 			module_state = NULL;
 		}
 
@@ -179,7 +179,7 @@ void ElectricityMeterSendStateChangesReportToServer(void)
 
 				ElectricityMeterStateChangesReportResponse = 0;
 
-				vPortFree(module_state);
+				myfree(module_state);
 				module_state = NULL;
 			}
 		}
@@ -275,7 +275,7 @@ u8 ElectricityMeterGetCurrentState(ServerFrameStruct_S *server_frame_struct)
 
 	ServerFrameStruct_S *resp_server_frame_struct = NULL;		//用于响应服务器
 
-	resp_server_frame_struct = (ServerFrameStruct_S *)pvPortMalloc(sizeof(ServerFrameStruct_S));
+	resp_server_frame_struct = (ServerFrameStruct_S *)mymalloc(sizeof(ServerFrameStruct_S));
 
 	if(server_frame_struct->para_num % 2 == 0)
 	{
@@ -289,7 +289,7 @@ u8 ElectricityMeterGetCurrentState(ServerFrameStruct_S *server_frame_struct)
 
 			ret = ConvertFrameStructToFrame(resp_server_frame_struct);
 
-			buf = (char *)pvPortMalloc(500 * sizeof(char));
+			buf = (char *)mymalloc(500 * sizeof(char));
 
 			if(buf != NULL)
 			{
@@ -320,7 +320,7 @@ u8 ElectricityMeterGetCurrentState(ServerFrameStruct_S *server_frame_struct)
 						{
 							ServerFrameStruct_S *state_server_frame_struct = NULL;		//用于响应服务器
 
-							state_server_frame_struct = (ServerFrameStruct_S *)pvPortMalloc(sizeof(ServerFrameStruct_S));
+							state_server_frame_struct = (ServerFrameStruct_S *)mymalloc(sizeof(ServerFrameStruct_S));
 
 							if(state_server_frame_struct != NULL)
 							{
@@ -332,7 +332,7 @@ u8 ElectricityMeterGetCurrentState(ServerFrameStruct_S *server_frame_struct)
 
 								state_server_frame_struct->para_num = ElectricityMeterState[j].ch_num + 1 + 3;
 
-								state_server_frame_struct->para = (Parameter_S *)pvPortMalloc(state_server_frame_struct->para_num * sizeof(Parameter_S));
+								state_server_frame_struct->para = (Parameter_S *)mymalloc(state_server_frame_struct->para_num * sizeof(Parameter_S));
 
 								if(state_server_frame_struct->para != NULL)
 								{
@@ -342,7 +342,7 @@ u8 ElectricityMeterGetCurrentState(ServerFrameStruct_S *server_frame_struct)
 									memset(buf,0,25);
 									sprintf(buf, "%x",ElectricityMeterState[j].address);
 									state_server_frame_struct->para[i].len = strlen(buf);
-									state_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((state_server_frame_struct->para[i].len + 1) * sizeof(u8));
+									state_server_frame_struct->para[i].value = (u8 *)mymalloc((state_server_frame_struct->para[i].len + 1) * sizeof(u8));
 									if(state_server_frame_struct->para[i].value != NULL)
 									{
 										memcpy(state_server_frame_struct->para[i].value,buf,state_server_frame_struct->para[i].len + 1);
@@ -353,7 +353,7 @@ u8 ElectricityMeterGetCurrentState(ServerFrameStruct_S *server_frame_struct)
 									memset(buf,0,25);
 									sprintf(buf, "%d",ElectricityMeterState[j].channel);
 									state_server_frame_struct->para[i].len = strlen(buf);
-									state_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((state_server_frame_struct->para[i].len + 1) * sizeof(u8));
+									state_server_frame_struct->para[i].value = (u8 *)mymalloc((state_server_frame_struct->para[i].len + 1) * sizeof(u8));
 									if(state_server_frame_struct->para[i].value != NULL)
 									{
 										memcpy(state_server_frame_struct->para[i].value,buf,state_server_frame_struct->para[i].len + 1);
@@ -364,7 +364,7 @@ u8 ElectricityMeterGetCurrentState(ServerFrameStruct_S *server_frame_struct)
 									memset(buf,0,25);
 									sprintf(buf, "%d",ElectricityMeterState[j].ch_num);
 									state_server_frame_struct->para[i].len = strlen(buf);
-									state_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((state_server_frame_struct->para[i].len + 1) * sizeof(u8));
+									state_server_frame_struct->para[i].value = (u8 *)mymalloc((state_server_frame_struct->para[i].len + 1) * sizeof(u8));
 									if(state_server_frame_struct->para[i].value != NULL)
 									{
 										memcpy(state_server_frame_struct->para[i].value,buf,state_server_frame_struct->para[i].len + 1);
@@ -416,7 +416,7 @@ u8 ElectricityMeterGetCurrentState(ServerFrameStruct_S *server_frame_struct)
 										strcat(buf,tmp);
 
 										state_server_frame_struct->para[i].len = strlen(buf);
-										state_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((state_server_frame_struct->para[i].len + 1) * sizeof(u8));
+										state_server_frame_struct->para[i].value = (u8 *)mymalloc((state_server_frame_struct->para[i].len + 1) * sizeof(u8));
 										if(state_server_frame_struct->para[i].value != NULL)
 										{
 											memcpy(state_server_frame_struct->para[i].value,buf,state_server_frame_struct->para[i].len + 1);
@@ -431,7 +431,7 @@ u8 ElectricityMeterGetCurrentState(ServerFrameStruct_S *server_frame_struct)
 					}
 				}
 
-				vPortFree(buf);
+				myfree(buf);
 			}
 		}
 	}
@@ -616,7 +616,7 @@ u8 ElectricityMeterSetAlarmConfiguration(ServerFrameStruct_S *server_frame_struc
 		}
 	}
 
-	resp_server_frame_struct = (ServerFrameStruct_S *)pvPortMalloc(sizeof(ServerFrameStruct_S));
+	resp_server_frame_struct = (ServerFrameStruct_S *)mymalloc(sizeof(ServerFrameStruct_S));
 
 	if(resp_server_frame_struct != NULL)
 	{
@@ -648,11 +648,11 @@ u8 ElectricityMeterGetAlarmConfiguration(ServerFrameStruct_S *server_frame_struc
 
 	ServerFrameStruct_S *resp_server_frame_struct = NULL;		//用于响应服务器
 
-	resp_server_frame_struct = (ServerFrameStruct_S *)pvPortMalloc(sizeof(ServerFrameStruct_S));
+	resp_server_frame_struct = (ServerFrameStruct_S *)mymalloc(sizeof(ServerFrameStruct_S));
 
 	if(resp_server_frame_struct != NULL)
 	{
-		buf = (char *)pvPortMalloc(4096 * sizeof(char));
+		buf = (char *)mymalloc(4096 * sizeof(char));
 
 		if(buf != NULL)
 		{
@@ -663,7 +663,7 @@ u8 ElectricityMeterGetAlarmConfiguration(ServerFrameStruct_S *server_frame_struc
 			resp_server_frame_struct->err_code 	= (u8)NO_ERR;
 			resp_server_frame_struct->para_num 	= 2;
 
-			resp_server_frame_struct->para = (Parameter_S *)pvPortMalloc(resp_server_frame_struct->para_num * sizeof(Parameter_S));
+			resp_server_frame_struct->para = (Parameter_S *)mymalloc(resp_server_frame_struct->para_num * sizeof(Parameter_S));
 
 			if(resp_server_frame_struct->para != NULL)
 			{
@@ -671,7 +671,7 @@ u8 ElectricityMeterGetAlarmConfiguration(ServerFrameStruct_S *server_frame_struc
 				memset(buf,0,2);
 				sprintf(buf, "%d",ElectricityMeterAlarmConfig.electrical_parameters_thre_over_alarm_enable);
 				resp_server_frame_struct->para[i].len = strlen(buf);
-				resp_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
+				resp_server_frame_struct->para[i].value = (u8 *)mymalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
 				if(resp_server_frame_struct->para[i].value != NULL)
 				{
 					memcpy(resp_server_frame_struct->para[i].value,buf,resp_server_frame_struct->para[i].len + 1);
@@ -763,7 +763,7 @@ u8 ElectricityMeterGetAlarmConfiguration(ServerFrameStruct_S *server_frame_struc
 
 				buf[strlen(buf) - 1] = 0;	//去掉最后一个'|'
 				resp_server_frame_struct->para[i].len = strlen(buf);
-				resp_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
+				resp_server_frame_struct->para[i].value = (u8 *)mymalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
 				if(resp_server_frame_struct->para[i].value != NULL)
 				{
 					memcpy(resp_server_frame_struct->para[i].value,buf,resp_server_frame_struct->para[i].len + 1);
@@ -773,7 +773,7 @@ u8 ElectricityMeterGetAlarmConfiguration(ServerFrameStruct_S *server_frame_struc
 
 			ret = ConvertFrameStructToFrame(resp_server_frame_struct);
 
-			vPortFree(buf);
+			myfree(buf);
 		}
 		else
 		{
@@ -796,7 +796,7 @@ u8 ElectricityMeterGetAlarmReportHistory(ServerFrameStruct_S *server_frame_struc
 	EventHistory_S *event_history = NULL;
 	ServerFrameStruct_S *resp_server_frame_struct = NULL;		//用于响应服务器
 
-	event_history = (EventHistory_S *)pvPortMalloc(sizeof(EventHistory_S));
+	event_history = (EventHistory_S *)mymalloc(sizeof(EventHistory_S));
 
 	if(event_history != NULL)
 	{
@@ -808,7 +808,7 @@ u8 ElectricityMeterGetAlarmReportHistory(ServerFrameStruct_S *server_frame_struc
 			switch(server_frame_struct->para[j].type)
 			{
 				case 0xA001:
-					event_history->start_date = (u8 *)pvPortMalloc((server_frame_struct->para[j].len + 1) * sizeof(u8));
+					event_history->start_date = (u8 *)mymalloc((server_frame_struct->para[j].len + 1) * sizeof(u8));
 
 					if(event_history->start_date != NULL)
 					{
@@ -817,7 +817,7 @@ u8 ElectricityMeterGetAlarmReportHistory(ServerFrameStruct_S *server_frame_struc
 				break;
 
 				case 0xA002:
-					event_history->end_date = (u8 *)pvPortMalloc((server_frame_struct->para[j].len + 1) * sizeof(u8));
+					event_history->end_date = (u8 *)mymalloc((server_frame_struct->para[j].len + 1) * sizeof(u8));
 
 					if(event_history->end_date != NULL)
 					{
@@ -857,7 +857,7 @@ u8 ElectricityMeterGetAlarmReportHistory(ServerFrameStruct_S *server_frame_struc
 		}
 	}
 
-	resp_server_frame_struct = (ServerFrameStruct_S *)pvPortMalloc(sizeof(ServerFrameStruct_S));
+	resp_server_frame_struct = (ServerFrameStruct_S *)mymalloc(sizeof(ServerFrameStruct_S));
 
 	if(resp_server_frame_struct != NULL)
 	{
@@ -868,7 +868,7 @@ u8 ElectricityMeterGetAlarmReportHistory(ServerFrameStruct_S *server_frame_struc
 		resp_server_frame_struct->err_code 	= (u8)NO_ERR;
 		resp_server_frame_struct->para_num  = 2;
 
-		resp_server_frame_struct->para = (Parameter_S *)pvPortMalloc(resp_server_frame_struct->para_num * sizeof(Parameter_S));
+		resp_server_frame_struct->para = (Parameter_S *)mymalloc(resp_server_frame_struct->para_num * sizeof(Parameter_S));
 
 		if(resp_server_frame_struct->para != NULL)
 		{
@@ -876,7 +876,7 @@ u8 ElectricityMeterGetAlarmReportHistory(ServerFrameStruct_S *server_frame_struc
 			memset(buf,0,10);
 			sprintf(buf, "%d",record_num);
 			resp_server_frame_struct->para[i].len = strlen(buf);
-			resp_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
+			resp_server_frame_struct->para[i].value = (u8 *)mymalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
 			if(resp_server_frame_struct->para[i].value != NULL)
 			{
 				memcpy(resp_server_frame_struct->para[i].value,buf,resp_server_frame_struct->para[i].len + 1);
@@ -894,7 +894,7 @@ u8 ElectricityMeterGetAlarmReportHistory(ServerFrameStruct_S *server_frame_struc
 				sprintf(buf, "%d",record_num);
 			}
 			resp_server_frame_struct->para[i].len = strlen(buf);
-			resp_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
+			resp_server_frame_struct->para[i].value = (u8 *)mymalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
 			if(resp_server_frame_struct->para[i].value != NULL)
 			{
 				memcpy(resp_server_frame_struct->para[i].value,buf,resp_server_frame_struct->para[i].len + 1);
@@ -1066,7 +1066,7 @@ u8 ElectricityMeterSetBasicConfiguration(ServerFrameStruct_S *server_frame_struc
 		}
 	}
 
-	resp_server_frame_struct = (ServerFrameStruct_S *)pvPortMalloc(sizeof(ServerFrameStruct_S));
+	resp_server_frame_struct = (ServerFrameStruct_S *)mymalloc(sizeof(ServerFrameStruct_S));
 
 	if(resp_server_frame_struct != NULL)
 	{
@@ -1093,11 +1093,11 @@ u8 ElectricityMeterGetBasicConfiguration(ServerFrameStruct_S *server_frame_struc
 
 	ServerFrameStruct_S *resp_server_frame_struct = NULL;		//用于响应服务器
 
-	resp_server_frame_struct = (ServerFrameStruct_S *)pvPortMalloc(sizeof(ServerFrameStruct_S));
+	resp_server_frame_struct = (ServerFrameStruct_S *)mymalloc(sizeof(ServerFrameStruct_S));
 
 	if(resp_server_frame_struct != NULL)
 	{
-		buf = (char *)pvPortMalloc(500 * sizeof(char));
+		buf = (char *)mymalloc(500 * sizeof(char));
 
 		if(buf != NULL)
 		{
@@ -1108,7 +1108,7 @@ u8 ElectricityMeterGetBasicConfiguration(ServerFrameStruct_S *server_frame_struc
 			resp_server_frame_struct->err_code 	= (u8)NO_ERR;
 			resp_server_frame_struct->para_num 	= 3;
 
-			resp_server_frame_struct->para = (Parameter_S *)pvPortMalloc(resp_server_frame_struct->para_num * sizeof(Parameter_S));
+			resp_server_frame_struct->para = (Parameter_S *)mymalloc(resp_server_frame_struct->para_num * sizeof(Parameter_S));
 
 			if(resp_server_frame_struct->para != NULL)
 			{
@@ -1116,7 +1116,7 @@ u8 ElectricityMeterGetBasicConfiguration(ServerFrameStruct_S *server_frame_struc
 				memset(buf,0,10);
 				sprintf(buf, "%d",ElectricityMeterBasicConfig.detect_interval);
 				resp_server_frame_struct->para[i].len = strlen(buf);
-				resp_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
+				resp_server_frame_struct->para[i].value = (u8 *)mymalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
 				if(resp_server_frame_struct->para[i].value != NULL)
 				{
 					memcpy(resp_server_frame_struct->para[i].value,buf,resp_server_frame_struct->para[i].len + 1);
@@ -1127,7 +1127,7 @@ u8 ElectricityMeterGetBasicConfiguration(ServerFrameStruct_S *server_frame_struc
 				memset(buf,0,10);
 				sprintf(buf, "%d",ElectricityMeterBasicConfig.auto_report);
 				resp_server_frame_struct->para[i].len = strlen(buf);
-				resp_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
+				resp_server_frame_struct->para[i].value = (u8 *)mymalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
 				if(resp_server_frame_struct->para[i].value != NULL)
 				{
 					memcpy(resp_server_frame_struct->para[i].value,buf,resp_server_frame_struct->para[i].len + 1);
@@ -1194,7 +1194,7 @@ u8 ElectricityMeterGetBasicConfiguration(ServerFrameStruct_S *server_frame_struc
 				}
 
 				resp_server_frame_struct->para[i].len = strlen(buf);
-				resp_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
+				resp_server_frame_struct->para[i].value = (u8 *)mymalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
 				if(resp_server_frame_struct->para[i].value != NULL)
 				{
 					memcpy(resp_server_frame_struct->para[i].value,buf,resp_server_frame_struct->para[i].len + 1);
@@ -1204,7 +1204,7 @@ u8 ElectricityMeterGetBasicConfiguration(ServerFrameStruct_S *server_frame_struc
 
 			ret = ConvertFrameStructToFrame(resp_server_frame_struct);
 
-			vPortFree(buf);
+			myfree(buf);
 		}
 		else
 		{

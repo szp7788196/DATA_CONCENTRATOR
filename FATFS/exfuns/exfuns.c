@@ -84,16 +84,16 @@ FRESULT init_mount_flash(void)
 //1,失败
 u8 exfuns_init(void)
 {
-	fs = (FATFS*)pvPortMalloc(sizeof(FATFS));	//为磁盘i工作区申请内存
+	fs = (FATFS*)mymalloc(sizeof(FATFS));	//为磁盘i工作区申请内存
 
 	if(!fs)
 	{
 		return 1;
 	}
 
-	file = (FIL*)pvPortMalloc(sizeof(FIL));		//为file申请内存
+	file = (FIL*)mymalloc(sizeof(FIL));		//为file申请内存
 
-	fatbuf = (u8*)pvPortMalloc(512);				//为fatbuf申请内存
+	fatbuf = (u8*)mymalloc(512);				//为fatbuf申请内存
 
 	if(file && fatbuf)
 	{

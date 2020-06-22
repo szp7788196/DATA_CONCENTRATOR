@@ -622,7 +622,7 @@ void GetAlarmEventContentFromDateSegmentAndSendToServer(EventHistory_S event_his
 							ANALYSIS_LOOP:
 							if(i == 0 && server_frame_struct == NULL)
 							{
-								server_frame_struct = (ServerFrameStruct_S *)pvPortMalloc(sizeof(ServerFrameStruct_S));
+								server_frame_struct = (ServerFrameStruct_S *)mymalloc(sizeof(ServerFrameStruct_S));
 
 								if(server_frame_struct == NULL)
 								{
@@ -643,7 +643,7 @@ void GetAlarmEventContentFromDateSegmentAndSendToServer(EventHistory_S event_his
 
 									server_frame_struct->msg_id += ((((u16)event_history.device_type) << 8) & 0xFF00);
 
-									server_frame_struct->para = (Parameter_S *)pvPortMalloc(server_frame_struct->para_num * sizeof(Parameter_S));
+									server_frame_struct->para = (Parameter_S *)mymalloc(server_frame_struct->para_num * sizeof(Parameter_S));
 
 									if(server_frame_struct->para == NULL)
 									{
@@ -660,7 +660,7 @@ void GetAlarmEventContentFromDateSegmentAndSendToServer(EventHistory_S event_his
 										memset(tmp,0,10);
 										sprintf(tmp, "%d",patch_num ++);
 										server_frame_struct->para[i].len = strlen(tmp);
-										server_frame_struct->para[i].value = (u8 *)pvPortMalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
+										server_frame_struct->para[i].value = (u8 *)mymalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
 										if(server_frame_struct->para[i].value != NULL)
 										{
 											memcpy(server_frame_struct->para[i].value,tmp,server_frame_struct->para[i].len + 1);
@@ -677,7 +677,7 @@ void GetAlarmEventContentFromDateSegmentAndSendToServer(EventHistory_S event_his
 								server_frame_struct->para[i].type = 0x4001 + i;
 								msg_len = end_pos;
 								server_frame_struct->para[i].len = end_pos;
-								server_frame_struct->para[i].value = (u8 *)pvPortMalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
+								server_frame_struct->para[i].value = (u8 *)mymalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
 								if(server_frame_struct->para[i].value != NULL)
 								{
 									server_frame_struct->para[i].value[server_frame_struct->para[i].len] = 0;
@@ -733,35 +733,35 @@ void DeleteAlarmReport(AlarmReport_S *alarm_report)
 	{
 		if(alarm_report->device_address != NULL)
 		{
-			vPortFree(alarm_report->device_address);
+			myfree(alarm_report->device_address);
 			alarm_report->device_address = NULL;
 		}
 
 		if(alarm_report->device_channel != NULL)
 		{
-			vPortFree(alarm_report->device_channel);
+			myfree(alarm_report->device_channel);
 			alarm_report->device_channel = NULL;
 		}
 
 		if(alarm_report->current_value != NULL)
 		{
-			vPortFree(alarm_report->current_value);
+			myfree(alarm_report->current_value);
 			alarm_report->current_value = NULL;
 		}
 
 		if(alarm_report->set_value != NULL)
 		{
-			vPortFree(alarm_report->set_value);
+			myfree(alarm_report->set_value);
 			alarm_report->set_value = NULL;
 		}
 
 		if(alarm_report->reference_value != NULL)
 		{
-			vPortFree(alarm_report->reference_value);
+			myfree(alarm_report->reference_value);
 			alarm_report->reference_value = NULL;
 		}
 
-		vPortFree(alarm_report);
+		myfree(alarm_report);
 		alarm_report = NULL;
 	}
 }
@@ -780,35 +780,35 @@ void CopyAlarmReport(AlarmReport_S *s_alarm_report,AlarmReport_S *d_alarm_report
 		if(s_alarm_report->device_address != NULL)
 		{
 			len = strlen((char *)s_alarm_report->device_address);
-			d_alarm_report->device_address = (u8 *)pvPortMalloc((len + 1) * sizeof(u8));
+			d_alarm_report->device_address = (u8 *)mymalloc((len + 1) * sizeof(u8));
 			memcpy(d_alarm_report->device_address,s_alarm_report->device_address,len + 1);
 		}
 
 		if(s_alarm_report->device_channel != NULL)
 		{
 			len = strlen((char *)s_alarm_report->device_channel);
-			d_alarm_report->device_channel = (u8 *)pvPortMalloc((len + 1) * sizeof(u8));
+			d_alarm_report->device_channel = (u8 *)mymalloc((len + 1) * sizeof(u8));
 			memcpy(d_alarm_report->device_channel,s_alarm_report->device_channel,len + 1);
 		}
 
 		if(s_alarm_report->current_value != NULL)
 		{
 			len = strlen((char *)s_alarm_report->current_value);
-			d_alarm_report->current_value = (u8 *)pvPortMalloc((len + 1) * sizeof(u8));
+			d_alarm_report->current_value = (u8 *)mymalloc((len + 1) * sizeof(u8));
 			memcpy(d_alarm_report->current_value,s_alarm_report->current_value,len + 1);
 		}
 
 		if(s_alarm_report->set_value != NULL)
 		{
 			len = strlen((char *)s_alarm_report->set_value);
-			d_alarm_report->set_value = (u8 *)pvPortMalloc((len + 1) * sizeof(u8));
+			d_alarm_report->set_value = (u8 *)mymalloc((len + 1) * sizeof(u8));
 			memcpy(d_alarm_report->set_value,s_alarm_report->set_value,len + 1);
 		}
 
 		if(s_alarm_report->reference_value != NULL)
 		{
 			len = strlen((char *)s_alarm_report->reference_value);
-			d_alarm_report->reference_value = (u8 *)pvPortMalloc((len + 1) * sizeof(u8));
+			d_alarm_report->reference_value = (u8 *)mymalloc((len + 1) * sizeof(u8));
 			memcpy(d_alarm_report->reference_value,s_alarm_report->reference_value,len + 1);
 		}
 
@@ -822,17 +822,17 @@ void DeleteEventHistory(EventHistory_S *event_history)
 	{
 		if(event_history->start_date != NULL)
 		{
-			vPortFree(event_history->start_date );
+			myfree(event_history->start_date );
 			event_history->start_date  = NULL;
 		}
 
 		if(event_history->end_date != NULL)
 		{
-			vPortFree(event_history->end_date );
+			myfree(event_history->end_date );
 			event_history->end_date  = NULL;
 		}
 
-		vPortFree(event_history);
+		myfree(event_history);
 		event_history = NULL;
 	}
 }
@@ -844,7 +844,7 @@ void PushAlarmReportToAlarmQueue(AlarmReport_S *alarm_report)
 	
 	if(alarm_report != NULL)
 	{
-		alarm_report_cpy = (AlarmReport_S *)pvPortMalloc(sizeof(AlarmReport_S));
+		alarm_report_cpy = (AlarmReport_S *)mymalloc(sizeof(AlarmReport_S));
 		
 		if(alarm_report_cpy != NULL)
 		{

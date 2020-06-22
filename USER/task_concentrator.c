@@ -15,7 +15,7 @@
 
 
 TaskHandle_t xHandleTaskCONCENTRATOR = NULL;
-
+unsigned portBASE_TYPE SatckCONCENTRATOR;
 
 void vTaskCONCENTRATOR(void *pvParameters)
 {
@@ -53,6 +53,8 @@ void vTaskCONCENTRATOR(void *pvParameters)
 		}
 
 		delay_ms(100);
+		
+		SatckCONCENTRATOR = uxTaskGetStackHighWaterMark(NULL);
 	}
 }
 

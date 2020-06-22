@@ -130,7 +130,7 @@ void ControlAllBuiltOutRelay(RelayModuleState_S state)
 	inbuf[2] = (u8)((state.loop_current_state >> 8) & 0x00FF);
 	inbuf[3] = (u8)((state.loop_current_state >> 0) & 0x00FF);
 	
-	frame = (Rs485Frame_S *)pvPortMalloc(sizeof(Rs485Frame_S));
+	frame = (Rs485Frame_S *)mymalloc(sizeof(Rs485Frame_S));
 
 	if(frame != NULL)
 	{
@@ -138,7 +138,7 @@ void ControlAllBuiltOutRelay(RelayModuleState_S state)
 		
 		frame->len = PackBuiltOutRelayFrame(state.address,0xD1,inbuf,4,outbuf);
 		
-		frame->buf = (u8 *)pvPortMalloc(frame->len * sizeof(u8));
+		frame->buf = (u8 *)mymalloc(frame->len * sizeof(u8));
 		
 		if(frame->buf != NULL)
 		{
@@ -169,7 +169,7 @@ void GetBuiltOutRelayState(RelayModuleState_S state)
 	u8 outbuf[48] = {0};
 	Rs485Frame_S *frame = NULL;
 	
-	frame = (Rs485Frame_S *)pvPortMalloc(sizeof(Rs485Frame_S));
+	frame = (Rs485Frame_S *)mymalloc(sizeof(Rs485Frame_S));
 
 	if(frame != NULL)
 	{
@@ -177,7 +177,7 @@ void GetBuiltOutRelayState(RelayModuleState_S state)
 		
 		frame->len = PackBuiltOutRelayFrame(state.address,0xD0,NULL,0,outbuf);
 		
-		frame->buf = (u8 *)pvPortMalloc(frame->len * sizeof(u8));
+		frame->buf = (u8 *)mymalloc(frame->len * sizeof(u8));
 		
 		if(frame->buf != NULL)
 		{

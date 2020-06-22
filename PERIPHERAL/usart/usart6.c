@@ -121,7 +121,7 @@ void USART6_IRQHandler(void)                	//串口1中断服务程序
 			}
 			else if(strstr((const char *)ring_fifo.data, "\"closed\"") != NULL)
 			{
-				ConnectState = CLOSING;
+				EC20ConnectState = CLOSING;
 			}
 		}
 		

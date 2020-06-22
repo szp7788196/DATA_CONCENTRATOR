@@ -5,7 +5,7 @@
 
 
 TaskHandle_t xHandleTaskINPUT_COLLECTOR = NULL;
-
+unsigned portBASE_TYPE SatckCOLLECTOR;
 
 void vTaskINPUT_COLLECTOR(void *pvParameters)
 {
@@ -29,6 +29,8 @@ void vTaskINPUT_COLLECTOR(void *pvParameters)
 		cnt ++;
 		
 		delay_ms(100);
+		
+		SatckCOLLECTOR = uxTaskGetStackHighWaterMark(NULL);
 	}
 }
 

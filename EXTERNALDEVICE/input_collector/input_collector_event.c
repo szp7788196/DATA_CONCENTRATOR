@@ -31,7 +31,7 @@ void InputCollectorDetectD_QuantityStateChanges(void)
 
 				InputCollectorState[i].d_mirror_state = InputCollectorState[i].d_current_state;
 
-				module_state = (InputCollectorState_S *)pvPortMalloc(sizeof(InputCollectorState_S));
+				module_state = (InputCollectorState_S *)mymalloc(sizeof(InputCollectorState_S));
 
 				if(module_state != NULL)
 				{
@@ -42,7 +42,7 @@ void InputCollectorDetectD_QuantityStateChanges(void)
 #ifdef DEBUG_LOG
 						printf("send xQueue_InputCollectorState fail.\r\n");
 #endif
-						vPortFree(module_state);
+						myfree(module_state);
 					}
 				}
 			}
@@ -104,7 +104,7 @@ void InputCollectorDetectA_QuantityStateChanges(void)
 
 					occur[i] = 0;
 
-					module_state = (InputCollectorState_S *)pvPortMalloc(sizeof(InputCollectorState_S));
+					module_state = (InputCollectorState_S *)mymalloc(sizeof(InputCollectorState_S));
 
 					if(module_state != NULL)
 					{
@@ -115,7 +115,7 @@ void InputCollectorDetectA_QuantityStateChanges(void)
 #ifdef DEBUG_LOG
 							printf("send xQueue_InputCollectorState fail.\r\n");
 #endif
-							vPortFree(module_state);
+							myfree(module_state);
 						}
 					}
 				}
@@ -230,11 +230,11 @@ void InputCollectorD_QuantityAbnormal(void)
 
 					record[i] = 0;
 
-					alarm_report = (AlarmReport_S *)pvPortMalloc(sizeof(AlarmReport_S));
+					alarm_report = (AlarmReport_S *)mymalloc(sizeof(AlarmReport_S));
 
 					if(alarm_report != NULL)
 					{
-						buf = (char *)pvPortMalloc(400 * sizeof(char));
+						buf = (char *)mymalloc(400 * sizeof(char));
 
 						if(buf != NULL)
 						{
@@ -253,7 +253,7 @@ void InputCollectorD_QuantityAbnormal(void)
 							memset(buf,0,25);
 							sprintf(buf, "%d",InputCollectorState[i].address);
 							para_len = strlen(buf);
-							alarm_report->device_address = (u8 *)pvPortMalloc((para_len + 1) * sizeof(u8));
+							alarm_report->device_address = (u8 *)mymalloc((para_len + 1) * sizeof(u8));
 							if(alarm_report->device_address != NULL)
 							{
 								memcpy(alarm_report->device_address,buf,para_len + 1);
@@ -262,7 +262,7 @@ void InputCollectorD_QuantityAbnormal(void)
 							memset(buf,0,25);
 							sprintf(buf, "%d",InputCollectorState[i].channel);
 							para_len = strlen(buf);
-							alarm_report->device_channel = (u8 *)pvPortMalloc((para_len + 1) * sizeof(u8));
+							alarm_report->device_channel = (u8 *)mymalloc((para_len + 1) * sizeof(u8));
 							if(alarm_report->device_channel != NULL)
 							{
 								memcpy(alarm_report->device_channel,buf,para_len + 1);
@@ -271,7 +271,7 @@ void InputCollectorD_QuantityAbnormal(void)
 							memset(buf,0,25);
 							sprintf(buf, "%04x",InputCollectorState[i].d_abnormal_loop);
 							para_len = strlen(buf);
-							alarm_report->current_value = (u8 *)pvPortMalloc((para_len + 1) * sizeof(u8));
+							alarm_report->current_value = (u8 *)mymalloc((para_len + 1) * sizeof(u8));
 							if(alarm_report->current_value != NULL)
 							{
 								memcpy(alarm_report->current_value,buf,para_len + 1);
@@ -326,7 +326,7 @@ void InputCollectorD_QuantityAbnormal(void)
 							}
 							buf[strlen(buf) - 1] = 0;
 							para_len = strlen(buf);
-							alarm_report->set_value = (u8 *)pvPortMalloc((para_len + 1) * sizeof(u8));
+							alarm_report->set_value = (u8 *)mymalloc((para_len + 1) * sizeof(u8));
 							if(alarm_report->set_value != NULL)
 							{
 								memcpy(alarm_report->set_value,buf,para_len + 1);
@@ -335,7 +335,7 @@ void InputCollectorD_QuantityAbnormal(void)
 							memset(buf,0,25);
 							sprintf(buf, "%04x",InputCollectorState[i].d_current_state);
 							para_len = strlen(buf);
-							alarm_report->reference_value = (u8 *)pvPortMalloc((para_len + 1) * sizeof(u8));
+							alarm_report->reference_value = (u8 *)mymalloc((para_len + 1) * sizeof(u8));
 							if(alarm_report->reference_value != NULL)
 							{
 								memcpy(alarm_report->reference_value,buf,para_len + 1);
@@ -351,7 +351,7 @@ void InputCollectorD_QuantityAbnormal(void)
 
 							PushAlarmReportToAlarmQueue(alarm_report);
 							
-							vPortFree(buf);
+							myfree(buf);
 						}
 						else
 						{
@@ -466,11 +466,11 @@ void InputCollectorA_OverQuantityAbnormal(void)
 
 					record[i] = 0;
 
-					alarm_report = (AlarmReport_S *)pvPortMalloc(sizeof(AlarmReport_S));
+					alarm_report = (AlarmReport_S *)mymalloc(sizeof(AlarmReport_S));
 
 					if(alarm_report != NULL)
 					{
-						buf = (char *)pvPortMalloc(400 * sizeof(char));
+						buf = (char *)mymalloc(400 * sizeof(char));
 
 						if(buf != NULL)
 						{
@@ -489,7 +489,7 @@ void InputCollectorA_OverQuantityAbnormal(void)
 							memset(buf,0,25);
 							sprintf(buf, "%d",InputCollectorState[i].address);
 							para_len = strlen(buf);
-							alarm_report->device_address = (u8 *)pvPortMalloc((para_len + 1) * sizeof(u8));
+							alarm_report->device_address = (u8 *)mymalloc((para_len + 1) * sizeof(u8));
 							if(alarm_report->device_address != NULL)
 							{
 								memcpy(alarm_report->device_address,buf,para_len + 1);
@@ -498,7 +498,7 @@ void InputCollectorA_OverQuantityAbnormal(void)
 							memset(buf,0,25);
 							sprintf(buf, "%d",InputCollectorState[i].channel);
 							para_len = strlen(buf);
-							alarm_report->device_channel = (u8 *)pvPortMalloc((para_len + 1) * sizeof(u8));
+							alarm_report->device_channel = (u8 *)mymalloc((para_len + 1) * sizeof(u8));
 							if(alarm_report->device_channel != NULL)
 							{
 								memcpy(alarm_report->device_channel,buf,para_len + 1);
@@ -507,7 +507,7 @@ void InputCollectorA_OverQuantityAbnormal(void)
 							memset(buf,0,25);
 							sprintf(buf, "%04x",InputCollectorState[i].a_abnormal_loop);
 							para_len = strlen(buf);
-							alarm_report->current_value = (u8 *)pvPortMalloc((para_len + 1) * sizeof(u8));
+							alarm_report->current_value = (u8 *)mymalloc((para_len + 1) * sizeof(u8));
 							if(alarm_report->current_value != NULL)
 							{
 								memcpy(alarm_report->current_value,buf,para_len + 1);
@@ -585,7 +585,7 @@ void InputCollectorA_OverQuantityAbnormal(void)
 								}
 							}
 							para_len = strlen(buf);
-							alarm_report->set_value = (u8 *)pvPortMalloc((para_len + 1) * sizeof(u8));
+							alarm_report->set_value = (u8 *)mymalloc((para_len + 1) * sizeof(u8));
 							if(alarm_report->set_value != NULL)
 							{
 								memcpy(alarm_report->set_value,buf,para_len + 1);
@@ -603,7 +603,7 @@ void InputCollectorA_OverQuantityAbnormal(void)
 								}
 							}
 							para_len = strlen(buf);
-							alarm_report->reference_value = (u8 *)pvPortMalloc((para_len + 1) * sizeof(u8));
+							alarm_report->reference_value = (u8 *)mymalloc((para_len + 1) * sizeof(u8));
 							if(alarm_report->reference_value != NULL)
 							{
 								memcpy(alarm_report->reference_value,buf,para_len + 1);
@@ -619,7 +619,7 @@ void InputCollectorA_OverQuantityAbnormal(void)
 
 							PushAlarmReportToAlarmQueue(alarm_report);
 							
-							vPortFree(buf);
+							myfree(buf);
 						}
 						else
 						{
@@ -734,11 +734,11 @@ void InputCollectorA_UnderQuantityAbnormal(void)
 
 					record[i] = 0;
 
-					alarm_report = (AlarmReport_S *)pvPortMalloc(sizeof(AlarmReport_S));
+					alarm_report = (AlarmReport_S *)mymalloc(sizeof(AlarmReport_S));
 
 					if(alarm_report != NULL)
 					{
-						buf = (char *)pvPortMalloc(400 * sizeof(char));
+						buf = (char *)mymalloc(400 * sizeof(char));
 
 						if(buf != NULL)
 						{
@@ -757,7 +757,7 @@ void InputCollectorA_UnderQuantityAbnormal(void)
 							memset(buf,0,25);
 							sprintf(buf, "%d",InputCollectorState[i].address);
 							para_len = strlen(buf);
-							alarm_report->device_address = (u8 *)pvPortMalloc((para_len + 1) * sizeof(u8));
+							alarm_report->device_address = (u8 *)mymalloc((para_len + 1) * sizeof(u8));
 							if(alarm_report->device_address != NULL)
 							{
 								memcpy(alarm_report->device_address,buf,para_len + 1);
@@ -766,7 +766,7 @@ void InputCollectorA_UnderQuantityAbnormal(void)
 							memset(buf,0,25);
 							sprintf(buf, "%d",InputCollectorState[i].channel);
 							para_len = strlen(buf);
-							alarm_report->device_channel = (u8 *)pvPortMalloc((para_len + 1) * sizeof(u8));
+							alarm_report->device_channel = (u8 *)mymalloc((para_len + 1) * sizeof(u8));
 							if(alarm_report->device_channel != NULL)
 							{
 								memcpy(alarm_report->device_channel,buf,para_len + 1);
@@ -775,7 +775,7 @@ void InputCollectorA_UnderQuantityAbnormal(void)
 							memset(buf,0,25);
 							sprintf(buf, "%04x",InputCollectorState[i].a_abnormal_loop);
 							para_len = strlen(buf);
-							alarm_report->current_value = (u8 *)pvPortMalloc((para_len + 1) * sizeof(u8));
+							alarm_report->current_value = (u8 *)mymalloc((para_len + 1) * sizeof(u8));
 							if(alarm_report->current_value != NULL)
 							{
 								memcpy(alarm_report->current_value,buf,para_len + 1);
@@ -853,7 +853,7 @@ void InputCollectorA_UnderQuantityAbnormal(void)
 								}
 							}
 							para_len = strlen(buf);
-							alarm_report->set_value = (u8 *)pvPortMalloc((para_len + 1) * sizeof(u8));
+							alarm_report->set_value = (u8 *)mymalloc((para_len + 1) * sizeof(u8));
 							if(alarm_report->set_value != NULL)
 							{
 								memcpy(alarm_report->set_value,buf,para_len + 1);
@@ -871,7 +871,7 @@ void InputCollectorA_UnderQuantityAbnormal(void)
 								}
 							}
 							para_len = strlen(buf);
-							alarm_report->reference_value = (u8 *)pvPortMalloc((para_len + 1) * sizeof(u8));
+							alarm_report->reference_value = (u8 *)mymalloc((para_len + 1) * sizeof(u8));
 							if(alarm_report->reference_value != NULL)
 							{
 								memcpy(alarm_report->reference_value,buf,para_len + 1);
@@ -887,7 +887,7 @@ void InputCollectorA_UnderQuantityAbnormal(void)
 
 							PushAlarmReportToAlarmQueue(alarm_report);
 							
-							vPortFree(buf);
+							myfree(buf);
 						}
 						else
 						{

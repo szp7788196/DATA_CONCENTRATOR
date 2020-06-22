@@ -70,6 +70,8 @@ sys_mutex_t lock_tcpip_core;
  *
  * @param arg unused argument
  */
+ 
+unsigned portBASE_TYPE Satckt_cpip_thread;
 static void
 tcpip_thread(void *arg)
 {
@@ -82,6 +84,7 @@ tcpip_thread(void *arg)
 
   LOCK_TCPIP_CORE();
   while (1) {                          /* MAIN Loop */
+	  Satckt_cpip_thread = uxTaskGetStackHighWaterMark(NULL);
     UNLOCK_TCPIP_CORE();
     LWIP_TCPIP_THREAD_ALIVE();
     /* wait for a message, timeouts are processed while waiting */

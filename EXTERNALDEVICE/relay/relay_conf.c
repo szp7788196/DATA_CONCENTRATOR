@@ -397,7 +397,7 @@ void ReadRelayAppointmentGroup(void)
 
 	ReadRelayAppointmentNum();
 
-	RelayAppointmentGroup = (pRelayAppointment)pvPortMalloc(sizeof(RelayAppointment_S));
+	RelayAppointmentGroup = (pRelayAppointment)mymalloc(sizeof(RelayAppointment_S));
 
 	if(RelayAppointmentGroup == NULL)
 	{
@@ -425,7 +425,7 @@ void ReadRelayAppointmentGroup(void)
 		{
 			pRelayAppointment appointment = NULL;
 
-			appointment = (pRelayAppointment)pvPortMalloc(sizeof(RelayAppointment_S));
+			appointment = (pRelayAppointment)mymalloc(sizeof(RelayAppointment_S));
 
 			if(appointment != NULL)
 			{
@@ -456,7 +456,7 @@ void ReadRelayStrategyGroups(void)
 
 	for(i = 0; i < MAX_RELAY_MODULE_STRATEGY_GROUP_NUM; i ++)
 	{
-		RelayStrategyGroup[i] = (pRelayStrategy)pvPortMalloc(sizeof(RelayStrategy_S));
+		RelayStrategyGroup[i] = (pRelayStrategy)mymalloc(sizeof(RelayStrategy_S));
 
 		if(RelayStrategyGroup[i] != NULL)
 		{
@@ -485,7 +485,7 @@ void ReadRelayStrategyGroups(void)
 		{
 			pRelayStrategy strategy = NULL;
 
-			strategy = (pRelayStrategy)pvPortMalloc(sizeof(RelayStrategy_S));
+			strategy = (pRelayStrategy)mymalloc(sizeof(RelayStrategy_S));
 
 			if(strategy != NULL)
 			{
@@ -763,7 +763,7 @@ void RelayStrategyGroupDelete(u8 group_id)
 				temp_strategy->prev->next = NULL;
 			}
 
-			vPortFree(temp_strategy);
+			myfree(temp_strategy);
 		}
 	}
 
@@ -844,7 +844,7 @@ void RelayAppointmentGroupDelete(void)
 				temp_appointment->prev->next = NULL;
 			}
 
-			vPortFree(temp_appointment);
+			myfree(temp_appointment);
 		}
 	}
 

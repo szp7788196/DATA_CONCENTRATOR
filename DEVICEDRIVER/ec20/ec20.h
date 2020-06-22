@@ -86,7 +86,7 @@ typedef struct EC20Info					//EC20运行信息
 
 
 extern EC20Info_S EC20Info;
-extern CONNECT_STATE_E ConnectState;
+extern CONNECT_STATE_E EC20ConnectState;
 
 
 

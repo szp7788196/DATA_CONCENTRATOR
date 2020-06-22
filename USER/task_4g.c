@@ -12,7 +12,7 @@
 
 
 TaskHandle_t xHandleTask4G = NULL;
-
+unsigned portBASE_TYPE Satck4G;
 
 
 void vTask4G(void *pvParameters)
@@ -24,12 +24,17 @@ void vTask4G(void *pvParameters)
 
 	RE_INIT:
 	wait_cnt = 0;
-	ConnectState = UNKNOW_STATE;
+	EC20ConnectState = UNKNOW_STATE;
 
 	ec20_soft_init();
 
 	while(1)
 	{
+		while(ConcentratorBasicConfig.connection_mode != (u8)MODE_4G)
+		{
+			delay_ms(10000);
+		}
+		
 		if(FlagReConnectToServer == 2)
 		{
 			FlagReConnectToServer = 0;
@@ -37,7 +42,7 @@ void vTask4G(void *pvParameters)
 			goto RE_INIT;
 		}
 		
-		if(ConnectState != CONNECTED)
+		if(EC20ConnectState != CONNECTED)
 		{
 			refresh_state = 1;
 		}
@@ -52,7 +57,7 @@ void vTask4G(void *pvParameters)
 		{
 			refresh_state = 0;
 
-			ConnectState = ec20_get_AT_QISTATE();
+			EC20ConnectState = ec20_get_AT_QISTATE();
 
 			ec20_get_AT_CSQ((char *)&EC20Info.csq);
 
@@ -66,7 +71,7 @@ void vTask4G(void *pvParameters)
 			goto RE_INIT;
 		}
 
-		switch((u8)ConnectState)
+		switch((u8)EC20ConnectState)
 		{
 			case (u8)UNKNOW_STATE:
 				ret = ec20_set_AT_QIACT();
@@ -125,6 +130,8 @@ void vTask4G(void *pvParameters)
 		}
 
 		delay_ms(100);
+		
+		Satck4G = uxTaskGetStackHighWaterMark(NULL);
 	}
 }
 
@@ -139,10 +146,10 @@ void Pull4gTxQueueAndSendFrame(void)
 	{
 		ec20_get_AT_QISEND(tx_frame->buf,tx_frame->len);
 		
-		vPortFree(tx_frame->buf);
+		myfree(tx_frame->buf);
 		tx_frame->buf = NULL;
 
-		vPortFree(tx_frame);
+		myfree(tx_frame);
 		tx_frame = NULL;
 	}
 }

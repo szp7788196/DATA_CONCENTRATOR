@@ -298,7 +298,7 @@ void ElectricityMeterGetBuiltOutParas(ElectricityMeterState_S state)
 	Rs485Frame_S *frame1 = NULL;
 	Rs485Frame_S *frame2 = NULL;
 
-	frame1 = (Rs485Frame_S *)pvPortMalloc(sizeof(Rs485Frame_S));
+	frame1 = (Rs485Frame_S *)mymalloc(sizeof(Rs485Frame_S));
 
 	if(frame1 != NULL)
 	{
@@ -306,7 +306,7 @@ void ElectricityMeterGetBuiltOutParas(ElectricityMeterState_S state)
 
 		frame1->len = PackBuiltOutElectricityMeterFrame(state.address,0,outbuf);
 
-		frame1->buf = (u8 *)pvPortMalloc(frame1->len * sizeof(u8));
+		frame1->buf = (u8 *)mymalloc(frame1->len * sizeof(u8));
 
 		if(frame1->buf != NULL)
 		{
@@ -332,7 +332,7 @@ void ElectricityMeterGetBuiltOutParas(ElectricityMeterState_S state)
 	
 	if(state.address >= 32 && state.address <= 47)
 	{
-		frame2 = (Rs485Frame_S *)pvPortMalloc(sizeof(Rs485Frame_S));
+		frame2 = (Rs485Frame_S *)mymalloc(sizeof(Rs485Frame_S));
 		
 		if(frame2 != NULL)
 		{
@@ -340,7 +340,7 @@ void ElectricityMeterGetBuiltOutParas(ElectricityMeterState_S state)
 
 			frame2->len = PackBuiltOutElectricityMeterFrame(state.address,1,outbuf);
 
-			frame2->buf = (u8 *)pvPortMalloc(frame2->len * sizeof(u8));
+			frame2->buf = (u8 *)mymalloc(frame2->len * sizeof(u8));
 
 			if(frame2->buf != NULL)
 			{

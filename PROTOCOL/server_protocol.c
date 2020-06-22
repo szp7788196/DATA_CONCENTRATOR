@@ -13,7 +13,7 @@ void ServerFrameHandle(ServerFrame_S *rx_frame)
 	
 	ServerFrameStruct_S *server_frame_struct = NULL;
 
-	server_frame_struct = (ServerFrameStruct_S *)pvPortMalloc(sizeof(ServerFrameStruct_S));
+	server_frame_struct = (ServerFrameStruct_S *)mymalloc(sizeof(ServerFrameStruct_S));
 
 	if(server_frame_struct != NULL)
 	{
@@ -143,7 +143,7 @@ u8 GetParameters(ServerFrameStruct_S *server_frame_struct,ServerFrame_S *rx_fram
 	
 	server_frame_struct->para_num = para_num;
 	
-	server_frame_struct->para = (Parameter_S *)pvPortMalloc(para_num * sizeof(Parameter_S));
+	server_frame_struct->para = (Parameter_S *)mymalloc(para_num * sizeof(Parameter_S));
 	
 	for(i = 0; i < para_num; i ++)
 	{
@@ -158,7 +158,7 @@ u8 GetParameters(ServerFrameStruct_S *server_frame_struct,ServerFrame_S *rx_fram
 
 			server_frame_struct->para[i].len = strlen((char *)msg);
 
-			server_frame_struct->para[i].value = (u8 *)pvPortMalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
+			server_frame_struct->para[i].value = (u8 *)mymalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
 
 			if(server_frame_struct->para[i].value != NULL)
 			{
@@ -260,7 +260,7 @@ u8 ConvertFrameStructToFrame(ServerFrameStruct_S *server_frame_struct)
 		origin_frame_len += server_frame_struct->para[i].len;
 	}
 
-	origin_buf = (u8 *)pvPortMalloc(origin_frame_len * sizeof(u8));
+	origin_buf = (u8 *)mymalloc(origin_frame_len * sizeof(u8));
 
 	if(origin_buf != NULL)
 	{
@@ -323,7 +323,7 @@ u8 ConvertFrameStructToFrame(ServerFrameStruct_S *server_frame_struct)
 
 		final_frame_len = GetFinalFrameLen(origin_buf,origin_frame_len);
 
-		final_buf = (u8 *)pvPortMalloc(final_frame_len * sizeof(u8));
+		final_buf = (u8 *)mymalloc(final_frame_len * sizeof(u8));
 
 		if(final_buf != NULL)
 		{
@@ -335,7 +335,7 @@ u8 ConvertFrameStructToFrame(ServerFrameStruct_S *server_frame_struct)
 			{
 				ServerFrame_S *tx_frame = NULL;
 
-				tx_frame = (ServerFrame_S *)pvPortMalloc(sizeof(ServerFrame_S));
+				tx_frame = (ServerFrame_S *)mymalloc(sizeof(ServerFrame_S));
 
 				if(tx_frame != NULL)
 				{
@@ -350,7 +350,7 @@ u8 ConvertFrameStructToFrame(ServerFrameStruct_S *server_frame_struct)
 						tx_frame->len = EC20_MAX_RECV_SEND_BUF_LEN;
 					}
 
-					tx_frame->buf = (u8 *)pvPortMalloc(tx_frame->len * sizeof(u8));
+					tx_frame->buf = (u8 *)mymalloc(tx_frame->len * sizeof(u8));
 
 					if(tx_frame->buf != NULL)
 					{
@@ -372,11 +372,11 @@ u8 ConvertFrameStructToFrame(ServerFrameStruct_S *server_frame_struct)
 				}
 			}
 
-			vPortFree(final_buf);
+			myfree(final_buf);
 			final_buf = NULL;
 		}
 
-		vPortFree(origin_buf);
+		myfree(origin_buf);
 		origin_buf = NULL;
 	}
 
@@ -418,7 +418,7 @@ u8 CopyServerFrameStruct(ServerFrameStruct_S *s_server_frame_struct,ServerFrameS
 	{
 		d_server_frame_struct->para_num = s_server_frame_struct->para_num;
 		
-		d_server_frame_struct->para = (Parameter_S *)pvPortMalloc(d_server_frame_struct->para_num * sizeof(Parameter_S));
+		d_server_frame_struct->para = (Parameter_S *)mymalloc(d_server_frame_struct->para_num * sizeof(Parameter_S));
 
 		if(d_server_frame_struct->para != NULL)
 		{
@@ -428,7 +428,7 @@ u8 CopyServerFrameStruct(ServerFrameStruct_S *s_server_frame_struct,ServerFrameS
 
 				d_server_frame_struct->para[i].len = s_server_frame_struct->para[i].len;
 
-				d_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((d_server_frame_struct->para[i].len + 1) * sizeof(u8));
+				d_server_frame_struct->para[i].value = (u8 *)mymalloc((d_server_frame_struct->para[i].len + 1) * sizeof(u8));
 
 				if(d_server_frame_struct->para[i].value != NULL)
 				{
@@ -482,16 +482,16 @@ void DeleteServerFrameStruct(ServerFrameStruct_S *server_frame_struct)
 			{
 				for(i = 0; i < server_frame_struct->para_num; i ++)		//ÊÍ·Åserver_frame_struct»º´æ
 				{
-					vPortFree(server_frame_struct->para[i].value);
+					myfree(server_frame_struct->para[i].value);
 					server_frame_struct->para[i].value = NULL;
 				}
 			}
 
-			vPortFree(server_frame_struct->para);
+			myfree(server_frame_struct->para);
 			server_frame_struct->para = NULL;
 		}
 
-		vPortFree(server_frame_struct);
+		myfree(server_frame_struct);
 		server_frame_struct = NULL;
 	}
 }
@@ -503,11 +503,11 @@ void DeleteServerFrame(ServerFrame_S *server_frame)
 	{
 		if(server_frame->buf != NULL)
 		{
-			vPortFree(server_frame->buf);
+			myfree(server_frame->buf);
 			server_frame->buf = NULL;
 		}
 		
-		vPortFree(server_frame);
+		myfree(server_frame);
 		server_frame = NULL;
 	}
 }
