@@ -7,6 +7,7 @@
 
 ///////////////////////////////公共文件区,使用malloc的时候////////////////////////////////////////////
 FATFS *fs;//逻辑磁盘工作区.
+FATFS *fs1;//逻辑磁盘工作区.
 FIL *file;	  		//文件1
 UINT br,bw;			//读写变量
 FILINFO fileinfo;	//文件信息
@@ -84,16 +85,16 @@ FRESULT init_mount_flash(void)
 //1,失败
 u8 exfuns_init(void)
 {
-	fs = (FATFS*)mymalloc(sizeof(FATFS));	//为磁盘i工作区申请内存
+	fs = (FATFS*)pvPortMalloc(sizeof(FATFS));	//为磁盘i工作区申请内存
 
 	if(!fs)
 	{
 		return 1;
 	}
 
-	file = (FIL*)mymalloc(sizeof(FIL));		//为file申请内存
+	file = (FIL*)pvPortMalloc(sizeof(FIL));		//为file申请内存
 
-	fatbuf = (u8*)mymalloc(512);				//为fatbuf申请内存
+	fatbuf = (u8*)pvPortMalloc(512);				//为fatbuf申请内存
 
 	if(file && fatbuf)
 	{

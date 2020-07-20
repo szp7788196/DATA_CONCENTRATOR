@@ -16,7 +16,6 @@
 #include "semphr.h"
 #include "event_groups.h"
 #include <time.h>
-#include "malloc.h"
 
 /*---------------------------------------------------------------------------*/
 /* Type Definition Macros                                                    */
@@ -63,23 +62,23 @@
 #define CONCENTRATOR_LOCATION_CONF_ADD			201			//集控器经纬度年表参数配置EEPROM存储地址
 #define CONCENTRATOR_LOCATION_CONF_LEN			1506
 
-#define CONCENTRATOR_LOCAL_NET_CONF_ADD			22901		//集控器本地网络参数配置存储地址
+#define CONCENTRATOR_LOCAL_NET_CONF_ADD			1800		//集控器本地网络参数配置存储地址
 #define CONCENTRATOR_LOCAL_NET_CONF_LEN			26
 
 #define FW_STATE_ADD							1721		//固件更新状态EEPROM存储地址
 #define FW_STATE_LEN							79
 
-#define DEFAULT_SWITCH_TIME_ADD					1895		//默认开关灯时间
-#define DEFAULT_SWITCH_TIME_LEN					6
-
-#define RELAY_MODULE_APPOINTMENT_NUM_ADD		1877		//继电器模块策略配置数量地址
+#define RELAY_MODULE_APPOINTMENT_NUM_ADD		1874		//继电器模块策略配置数量地址
 #define RELAY_MODULE_APPOINTMENT_NUM_LEN		6
 
-#define RELAY_MODULE_STRATEGY_NUM_ADD			1883		//继电器模块预约配置数量地址
+#define RELAY_MODULE_STRATEGY_NUM_ADD			1880		//继电器模块预约配置数量地址
 #define RELAY_MODULE_STRATEGY_NUM_LEN			6
 
-#define RELAY_MODULE_CONF_NUM_ADD				1889		//继电器模块配置数量地址
+#define RELAY_MODULE_CONF_NUM_ADD				1886		//继电器模块配置数量地址
 #define RELAY_MODULE_CONF_NUM_LEN				6
+
+#define RELAY_MODULE_BASIC_CONF_ADD				1892		//继电器模块基础配置
+#define RELAY_MODULE_BASIC_CONF_LEN				9
 
 #define RELAY_MODULE_CONF_ADD					1901		//继电器模块配置地址
 #define RELAY_MODULE_CONF_LEN					277
@@ -118,12 +117,37 @@
 #define ELECTRICITY_METER_CONF_NUM_LEN			6
 
 #define ELECTRICITY_METER_CONF_ADD				17562		//电表配置地址
-#define ELECTRICITY_METER_CONF_LEN				882
+#define ELECTRICITY_METER_CONF_LEN				994
 
-#define ELECTRICITY_METER_ALARM_CONF_ADD		22854		//电表告警参数配置
+#define ELECTRICITY_METER_ALARM_CONF_ADD		23526		//电表告警参数配置
 #define ELECTRICITY_METER_ALARM_CONF_LEN		3
 
+#define LAMP_LIST_NUM_ADD						23533		//灯具配置数量表
+#define LAMP_LIST_NUM_LEN						68
 
+#define LAMP_BASIC_CONG_ADD						55022		//灯具基础配置
+#define LAMP_BASIC_CONG_LEN						18
+
+#define LAMP_APPOINTMENT_NUM_ADD				23608		//灯具策略配置数量地址
+#define LAMP_APPOINTMENT_NUM_LEN				6
+
+#define LAMP_STRATEGY_NUM_ADD					23614		//灯具预约配置数量地址
+#define LAMP_STRATEGY_NUM_LEN					6
+
+#define LAMP_CONF_ADD							23620		//单灯基础配置
+#define LAMP_CONF_LEN							28
+
+#define LAMP_APPOINTMENT_ADD					38468		//单灯预约控制配置
+#define LAMP_APPOINTMENT_LEN					116
+
+#define LAMP_STRATEGY_ADD						39116		//单灯策略配置
+#define LAMP_STRATEGY_LEN						31
+
+#define LAMP_GROUP_LIST_NUM_ADD					54988		//灯具每组配置数量表
+#define LAMP_GROUP_LIST_NUM_LEN					34
+
+#define LAMP_FW_STATE_ADD						55039		//灯具固件更新状态EEPROM存储地址
+#define LAMP_FW_STATE_LEN						79
 
 
 
@@ -266,7 +290,24 @@ typedef struct	Uint32TypeNumber
 	
 }__attribute__((packed))Uint32TypeNumber_S;
 
+typedef struct	TimeRange					//时间段
+{
+	u8 s_month;								//起始月
+	u8 s_date;								//起始日
+	u8 s_hour;								//起始时
+	u8 s_minute;							//起始分
+	
+	u8 e_month;								//终止月
+	u8 e_date;								//终止日
+	u8 e_hour;								//终止时
+	u8 e_minute;							//终止分
+	
+	u8 week_enable;							//星期限制
 
+}__attribute__((packed))TimeRange_S;
+
+
+extern SemaphoreHandle_t  xMutex_USART2;
 extern SemaphoreHandle_t  xMutex_SPI2;
 extern SemaphoreHandle_t  xMutex_RTC;
 extern SemaphoreHandle_t  xMutex_Push_xQueue_ServerFrameRx;
@@ -286,7 +327,7 @@ extern QueueHandle_t xQueue_WifiFrameTx;
 extern QueueHandle_t xQueue_EthFrameTx;
 extern QueueHandle_t xQueue_NB_IoTFrameTx;
 extern QueueHandle_t xQueue_ConcentratorFrameStruct;
-extern QueueHandle_t xQueue_LampControllerFrameStruct;
+extern QueueHandle_t xQueue_LampFrameStruct;
 extern QueueHandle_t xQueue_RelayFrameStruct;
 extern QueueHandle_t xQueue_InputCollectorFrameStruct;
 extern QueueHandle_t xQueue_ElectricityMeterFrameStruct;
@@ -303,6 +344,12 @@ extern QueueHandle_t xQueue_RelayRs485Frame;
 extern QueueHandle_t xQueue_InputCollectorRs485Frame;
 extern QueueHandle_t xQueue_ElectricityMeterRs485Frame;
 extern QueueHandle_t xQueue_LumeterRs485Frame;
+extern QueueHandle_t xQueue_PlcFrame;
+extern QueueHandle_t xQueue_LampPlcFrame;
+extern QueueHandle_t xQueue_LampPlcExecuteTaskToPlc;
+extern QueueHandle_t xQueue_LampPlcExecuteTaskFromPlc;
+extern QueueHandle_t xQueue_LampState;
+extern QueueHandle_t xQueue_LampPlcExecuteTaskState;
 
 
 extern time_t SysTick1s;

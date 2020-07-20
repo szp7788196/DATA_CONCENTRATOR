@@ -108,28 +108,28 @@ void HT7038GetParameters(void)
 	{
 		value = value - 0x01000000;
 	}
-	BulitInMeterParas.active_power[1] = (float)value * HT7038_K;
+	BulitInMeterParas.active_power[1] = (float)value * HT7038_K / 1000.0f;
 
 	value = HT7038GetSingleParameter(HT7038_REG_ACTIVE_POWER_B);
 	if(value & (1 << 23))
 	{
 		value = value - 0x01000000;
 	}
-	BulitInMeterParas.active_power[2] = (float)value * HT7038_K;
+	BulitInMeterParas.active_power[2] = (float)value * HT7038_K / 1000.0f;
 
 	value = HT7038GetSingleParameter(HT7038_REG_ACTIVE_POWER_C);
 	if(value & (1 << 23))
 	{
 		value = value - 0x01000000;
 	}
-	BulitInMeterParas.active_power[3] = (float)value * HT7038_K;
+	BulitInMeterParas.active_power[3] = (float)value * HT7038_K / 1000.0f;
 
 	value = HT7038GetSingleParameter(HT7038_REG_ACTIVE_POWER_ABC);
 	if(value & (1 << 23))
 	{
 		value = value - 0x01000000;
 	}
-	BulitInMeterParas.active_power[0] = (float)value * HT7038_K;
+	BulitInMeterParas.active_power[0] = (float)value * HT7038_K / 1000.0f;
 
 	//读取无功功率
 	value = HT7038GetSingleParameter(HT7038_REG_REACTIVE_POWER_A);
@@ -137,28 +137,28 @@ void HT7038GetParameters(void)
 	{
 		value = value - 0x01000000;
 	}
-	BulitInMeterParas.reactive_power[1] = (float)value * HT7038_K;
+	BulitInMeterParas.reactive_power[1] = (float)value * HT7038_K / 1000.0f;
 
 	value = HT7038GetSingleParameter(HT7038_REG_REACTIVE_POWER_B);
 	if(value & (1 << 23))
 	{
 		value = value - 0x01000000;
 	}
-	BulitInMeterParas.reactive_power[2] = (float)value * HT7038_K;
+	BulitInMeterParas.reactive_power[2] = (float)value * HT7038_K / 1000.0f;
 
 	value = HT7038GetSingleParameter(HT7038_REG_REACTIVE_POWER_B);
 	if(value & (1 << 23))
 	{
 		value = value - 0x01000000;
 	}
-	BulitInMeterParas.reactive_power[3]= (float)value * HT7038_K;
+	BulitInMeterParas.reactive_power[3]= (float)value * HT7038_K / 1000.0f;
 
 	value = HT7038GetSingleParameter(HT7038_REG_REACTIVE_POWER_A);
 	if(value & (1 << 23))
 	{
 		value = value - 0x01000000;
 	}
-	BulitInMeterParas.reactive_power[0] = (float)value * HT7038_K;
+	BulitInMeterParas.reactive_power[0] = (float)value * HT7038_K / 1000.0f;
 
 	//读取视在功率
 	value = HT7038GetSingleParameter(HT7038_REG_APPARENT_POWER_A);
@@ -166,28 +166,28 @@ void HT7038GetParameters(void)
 	{
 		value = value - 0x01000000;
 	}
-	BulitInMeterParas.apparent_power[1] = (float)value * HT7038_K;
+	BulitInMeterParas.apparent_power[1] = (float)value * HT7038_K / 1000.0f;
 
 	value = HT7038GetSingleParameter(HT7038_REG_APPARENT_POWER_B);
 	if(value & (1 << 23))
 	{
 		value = value - 0x01000000;
 	}
-	BulitInMeterParas.apparent_power[2] = (float)value * HT7038_K;
+	BulitInMeterParas.apparent_power[2] = (float)value * HT7038_K / 1000.0f;
 
 	value = HT7038GetSingleParameter(HT7038_REG_APPARENT_POWER_C);
 	if(value & (1 << 23))
 	{
 		value = value - 0x01000000;
 	}
-	BulitInMeterParas.apparent_power[3] = (float)value * HT7038_K;
+	BulitInMeterParas.apparent_power[3] = (float)value * HT7038_K / 1000.0f;
 
 	value = HT7038GetSingleParameter(HT7038_REG_APPARENT_POWER_ABC);
 	if(value & (1 << 23))
 	{
 		value = value - 0x01000000;
 	}
-	BulitInMeterParas.apparent_power[0] = (float)value * HT7038_K;
+	BulitInMeterParas.apparent_power[0] = (float)value * HT7038_K / 1000.0f;
 
 	//读取功率因数
 	value = HT7038GetSingleParameter(HT7038_REG_PFACTOR_A);
@@ -298,7 +298,7 @@ void ElectricityMeterGetBuiltOutParas(ElectricityMeterState_S state)
 	Rs485Frame_S *frame1 = NULL;
 	Rs485Frame_S *frame2 = NULL;
 
-	frame1 = (Rs485Frame_S *)mymalloc(sizeof(Rs485Frame_S));
+	frame1 = (Rs485Frame_S *)pvPortMalloc(sizeof(Rs485Frame_S));
 
 	if(frame1 != NULL)
 	{
@@ -306,7 +306,7 @@ void ElectricityMeterGetBuiltOutParas(ElectricityMeterState_S state)
 
 		frame1->len = PackBuiltOutElectricityMeterFrame(state.address,0,outbuf);
 
-		frame1->buf = (u8 *)mymalloc(frame1->len * sizeof(u8));
+		frame1->buf = (u8 *)pvPortMalloc(frame1->len * sizeof(u8));
 
 		if(frame1->buf != NULL)
 		{
@@ -332,7 +332,7 @@ void ElectricityMeterGetBuiltOutParas(ElectricityMeterState_S state)
 	
 	if(state.address >= 32 && state.address <= 47)
 	{
-		frame2 = (Rs485Frame_S *)mymalloc(sizeof(Rs485Frame_S));
+		frame2 = (Rs485Frame_S *)pvPortMalloc(sizeof(Rs485Frame_S));
 		
 		if(frame2 != NULL)
 		{
@@ -340,7 +340,7 @@ void ElectricityMeterGetBuiltOutParas(ElectricityMeterState_S state)
 
 			frame2->len = PackBuiltOutElectricityMeterFrame(state.address,1,outbuf);
 
-			frame2->buf = (u8 *)mymalloc(frame2->len * sizeof(u8));
+			frame2->buf = (u8 *)pvPortMalloc(frame2->len * sizeof(u8));
 
 			if(frame2->buf != NULL)
 			{

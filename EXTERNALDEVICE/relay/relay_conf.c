@@ -10,7 +10,7 @@ u8 RelayRefreshStrategyGroup = 1;													//继电器策略刷新标志
 
 Uint32TypeNumber_S RelayModuleConfigNum;											//继电器模块配置数量
 RelayModuleConfig_S RelayModuleConfig[MAX_RELAY_MODULE_CONF_NUM];					//继电器模块配置
-DefaultSwitchTime_S DefaultSwitchTime;												//默认开关灯时间
+RelayModuleBasicConfig_S RelayModuleBasicConfig;									//继电器模块基础配置
 RelayAlarmConfig_S RelayAlarmConfig;												//继电器模块告警参数配置
 Uint32TypeNumber_S RelayAppointmentNum;												//继电器模块预约控制数量
 Uint32TypeNumber_S RelayStrategyNum;												//继电器模块策略配置数量
@@ -154,41 +154,44 @@ void WriteRelayModuleConfig(u8 i,u8 reset,u8 write_enable)
 }
 
 //读取默认开关灯时间
-void ReadDefaultSwitchTime(void)
+void ReadRelayModuleBasicConfig(void)
 {
 	u16 crc16_cal = 0;
 
-	CAT25X_Read((u8 *)&DefaultSwitchTime,
-	            DEFAULT_SWITCH_TIME_ADD,
-	            sizeof(DefaultSwitchTime_S));
+	CAT25X_Read((u8 *)&RelayModuleBasicConfig,
+	            RELAY_MODULE_BASIC_CONF_ADD,
+	            sizeof(RelayModuleBasicConfig_S));
 
-	crc16_cal = CRC16((u8 *)&DefaultSwitchTime,DEFAULT_SWITCH_TIME_LEN - 2);
+	crc16_cal = CRC16((u8 *)&RelayModuleBasicConfig,RELAY_MODULE_BASIC_CONF_LEN - 2);
 
-	if(crc16_cal != DefaultSwitchTime.crc16)
+	if(crc16_cal != RelayModuleBasicConfig.crc16)
 	{
-		WriteDefaultSwitchTime(1,0);
+		WriteRelayModuleBasicConfig(1,0);
 	}
 }
 
-void WriteDefaultSwitchTime(u8 reset,u8 write_enable)
+void WriteRelayModuleBasicConfig(u8 reset,u8 write_enable)
 {
 	if(reset == 1)
 	{
-		DefaultSwitchTime.on_hour = 18;
-		DefaultSwitchTime.on_minute = 0;
-		DefaultSwitchTime.off_hour = 6;
-		DefaultSwitchTime.off_minute = 0;
+		RelayModuleBasicConfig.on_hour = 18;
+		RelayModuleBasicConfig.on_minute = 0;
+		RelayModuleBasicConfig.off_hour = 6;
+		RelayModuleBasicConfig.off_minute = 0;
+		
+		RelayModuleBasicConfig.state_monitoring_cycle = 30;
+		RelayModuleBasicConfig.state_recording_time = 30;
 
-		DefaultSwitchTime.crc16 = 0;
+		RelayModuleBasicConfig.crc16 = 0;
 	}
 
 	if(write_enable == 1)
 	{
-		DefaultSwitchTime.crc16 = CRC16((u8 *)&DefaultSwitchTime,DEFAULT_SWITCH_TIME_LEN - 2);
+		RelayModuleBasicConfig.crc16 = CRC16((u8 *)&RelayModuleBasicConfig,RELAY_MODULE_BASIC_CONF_LEN - 2);
 
-		CAT25X_Write((u8 *)&DefaultSwitchTime,
-		             DEFAULT_SWITCH_TIME_ADD,
-		             DEFAULT_SWITCH_TIME_LEN);
+		CAT25X_Write((u8 *)&RelayModuleBasicConfig,
+		             RELAY_MODULE_BASIC_CONF_ADD,
+		             RELAY_MODULE_BASIC_CONF_LEN);
 	}
 }
 
@@ -397,7 +400,7 @@ void ReadRelayAppointmentGroup(void)
 
 	ReadRelayAppointmentNum();
 
-	RelayAppointmentGroup = (pRelayAppointment)mymalloc(sizeof(RelayAppointment_S));
+	RelayAppointmentGroup = (pRelayAppointment)pvPortMalloc(sizeof(RelayAppointment_S));
 
 	if(RelayAppointmentGroup == NULL)
 	{
@@ -425,7 +428,7 @@ void ReadRelayAppointmentGroup(void)
 		{
 			pRelayAppointment appointment = NULL;
 
-			appointment = (pRelayAppointment)mymalloc(sizeof(RelayAppointment_S));
+			appointment = (pRelayAppointment)pvPortMalloc(sizeof(RelayAppointment_S));
 
 			if(appointment != NULL)
 			{
@@ -456,7 +459,7 @@ void ReadRelayStrategyGroups(void)
 
 	for(i = 0; i < MAX_RELAY_MODULE_STRATEGY_GROUP_NUM; i ++)
 	{
-		RelayStrategyGroup[i] = (pRelayStrategy)mymalloc(sizeof(RelayStrategy_S));
+		RelayStrategyGroup[i] = (pRelayStrategy)pvPortMalloc(sizeof(RelayStrategy_S));
 
 		if(RelayStrategyGroup[i] != NULL)
 		{
@@ -485,7 +488,7 @@ void ReadRelayStrategyGroups(void)
 		{
 			pRelayStrategy strategy = NULL;
 
-			strategy = (pRelayStrategy)mymalloc(sizeof(RelayStrategy_S));
+			strategy = (pRelayStrategy)pvPortMalloc(sizeof(RelayStrategy_S));
 
 			if(strategy != NULL)
 			{
@@ -763,7 +766,7 @@ void RelayStrategyGroupDelete(u8 group_id)
 				temp_strategy->prev->next = NULL;
 			}
 
-			myfree(temp_strategy);
+			vPortFree(temp_strategy);
 		}
 	}
 
@@ -844,7 +847,7 @@ void RelayAppointmentGroupDelete(void)
 				temp_appointment->prev->next = NULL;
 			}
 
-			myfree(temp_appointment);
+			vPortFree(temp_appointment);
 		}
 	}
 

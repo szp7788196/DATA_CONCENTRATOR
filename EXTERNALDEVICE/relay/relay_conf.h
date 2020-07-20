@@ -86,16 +86,19 @@ typedef struct	RelayModuleCollectState												//继电器模块采集状态
 
 }__attribute__((packed))RelayModuleCollectState_S;
 
-typedef struct	DefaultSwitchTime			//默认开关灯时间
+typedef struct	RelayModuleBasicConfig		//继电器模块基础配置
 {
 	u8 on_hour;								//开灯时
 	u8 on_minute;							//开灯分
 	u8 off_hour;							//关灯时
 	u8 off_minute;							//关灯分
 	
+	u16 state_monitoring_cycle;				//回路状态监测周期 min
+	u8 state_recording_time;				//回路状态记录时长 day
+	
 	u16 crc16;								//校验码 存储用
 	
-}__attribute__((packed))DefaultSwitchTime_S;
+}__attribute__((packed))RelayModuleBasicConfig_S;
 
 typedef struct	RelayAlarmConfig			//继电器模块告警配置参数
 {
@@ -106,22 +109,6 @@ typedef struct	RelayAlarmConfig			//继电器模块告警配置参数
 	u16 crc16;								//校验码 存储用
 
 }__attribute__((packed))RelayAlarmConfig_S;
-
-typedef struct	TimeRange					//时间段
-{
-	u8 s_month;								//起始月
-	u8 s_date;								//起始日
-	u8 s_hour;								//起始时
-	u8 s_minute;							//起始分
-	
-	u8 e_month;								//终止月
-	u8 e_date;								//终止日
-	u8 e_hour;								//终止时
-	u8 e_minute;							//终止分
-	
-	u8 week_enable;							//星期限制
-
-}__attribute__((packed))TimeRange_S;
 
 typedef struct	RelayTaskAction				//继电器任务动作
 {
@@ -220,7 +207,7 @@ extern u8 RelayRefreshStrategyGroup;											//继电器策略刷新标志
 
 extern Uint32TypeNumber_S RelayModuleConfigNum;									//继电器模块配置数量
 extern RelayModuleConfig_S RelayModuleConfig[MAX_RELAY_MODULE_CONF_NUM];		//继电器模块配置
-extern DefaultSwitchTime_S DefaultSwitchTime;									//默认开关灯时间
+extern RelayModuleBasicConfig_S RelayModuleBasicConfig;							//默认开关灯时间
 extern RelayAlarmConfig_S RelayAlarmConfig;										//继电器模块告警参数配置
 extern Uint32TypeNumber_S RelayAppointmentNum;									//继电器模块预约控制数量
 extern Uint32TypeNumber_S RelayStrategyNum;										//继电器模块策略配置数量
@@ -242,8 +229,8 @@ void ReadRelayModuleConfigNum(void);
 void WriteRelayModuleConfigNum(u8 reset,u8 write_enable);
 void ReadRelayModuleConfig(void);
 void WriteRelayModuleConfig(u8 i,u8 reset,u8 write_enable);
-void ReadDefaultSwitchTime(void);
-void WriteDefaultSwitchTime(u8 reset,u8 write_enable);
+void ReadRelayModuleBasicConfig(void);
+void WriteRelayModuleBasicConfig(u8 reset,u8 write_enable);
 void ReadRelayAlarmConfig(void);
 void WriteRelayAlarmConfig(u8 reset,u8 write_enable);
 void ReadRelayAppointmentNum(void);

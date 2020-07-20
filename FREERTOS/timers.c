@@ -79,7 +79,7 @@ task.h is included from an application file. */
 #include "task.h"
 #include "queue.h"
 #include "timers.h"
-#include "malloc.h"
+//#include "malloc.h"
 
 #if ( INCLUDE_xTimerPendFunctionCall == 1 ) && ( configUSE_TIMERS == 0 )
 	#error configUSE_TIMERS must be set to 1 to make the xTimerPendFunctionCall() function available.
@@ -320,7 +320,7 @@ BaseType_t xReturn = pdFAIL;
 	{
 	Timer_t *pxNewTimer;
 
-		pxNewTimer = ( Timer_t * ) mymalloc( sizeof( Timer_t ) );
+		pxNewTimer = ( Timer_t * ) pvPortMalloc( sizeof( Timer_t ) );
 
 		if( pxNewTimer != NULL )
 		{
@@ -841,7 +841,7 @@ TickType_t xTimeNow;
 					{
 						/* The timer can only have been allocated dynamically -
 						free it again. */
-						myfree( pxTimer );
+						vPortFree( pxTimer );
 					}
 					#elif( ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) && ( configSUPPORT_STATIC_ALLOCATION == 1 ) )
 					{
@@ -850,7 +850,7 @@ TickType_t xTimeNow;
 						memory. */
 						if( pxTimer->ucStaticallyAllocated == ( uint8_t ) pdFALSE )
 						{
-							myfree( pxTimer );
+							vPortFree( pxTimer );
 						}
 						else
 						{

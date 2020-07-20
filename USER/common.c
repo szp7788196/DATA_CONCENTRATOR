@@ -4,7 +4,9 @@
 #include "input_collector_conf.h"
 #include "electricity_meter_conf.h"
 #include "e_meter.h"
+#include "lamp_conf.h"
 
+SemaphoreHandle_t  xMutex_USART2 = NULL;
 SemaphoreHandle_t  xMutex_SPI2 = NULL;
 SemaphoreHandle_t  xMutex_RTC = NULL;
 SemaphoreHandle_t  xMutex_Push_xQueue_ServerFrameRx = NULL;
@@ -28,7 +30,7 @@ QueueHandle_t xQueue_WifiFrameTx = NULL;
 QueueHandle_t xQueue_EthFrameTx = NULL;
 QueueHandle_t xQueue_NB_IoTFrameTx = NULL;
 QueueHandle_t xQueue_ConcentratorFrameStruct = NULL;
-QueueHandle_t xQueue_LampControllerFrameStruct = NULL;
+QueueHandle_t xQueue_LampFrameStruct = NULL;
 QueueHandle_t xQueue_RelayFrameStruct = NULL;
 QueueHandle_t xQueue_InputCollectorFrameStruct = NULL;
 QueueHandle_t xQueue_ElectricityMeterFrameStruct = NULL;
@@ -45,6 +47,12 @@ QueueHandle_t xQueue_RelayRs485Frame = NULL;
 QueueHandle_t xQueue_InputCollectorRs485Frame = NULL;
 QueueHandle_t xQueue_ElectricityMeterRs485Frame = NULL;
 QueueHandle_t xQueue_LumeterRs485Frame = NULL;
+QueueHandle_t xQueue_PlcFrame = NULL;
+QueueHandle_t xQueue_LampPlcFrame = NULL;
+QueueHandle_t xQueue_LampPlcExecuteTaskToPlc = NULL;
+QueueHandle_t xQueue_LampPlcExecuteTaskFromPlc = NULL;
+QueueHandle_t xQueue_LampState = NULL;
+QueueHandle_t xQueue_LampPlcExecuteTaskState = NULL;
 
 
 
@@ -611,7 +619,7 @@ u8 GetMemoryForSpecifyPointer(u8 **str,u16 size, u8 *memory)
 	{
 		len = size;
 
-		*str = (u8 *)mymalloc(sizeof(u8) * len + 1);
+		*str = (u8 *)pvPortMalloc(sizeof(u8) * len + 1);
 	}
 
 	if(*str != NULL)
@@ -630,8 +638,8 @@ u8 GetMemoryForSpecifyPointer(u8 **str,u16 size, u8 *memory)
 		}
 		else
 		{
-			myfree(*str);
-			*str = (u8 *)mymalloc(sizeof(u8) * new_len + 1);
+			vPortFree(*str);
+			*str = (u8 *)pvPortMalloc(sizeof(u8) * new_len + 1);
 
 			if(*str != NULL)
 			{
@@ -653,9 +661,9 @@ void ReadTotalConfigurationParameters(void)
 {
 	ReadConcentratorGateWayID();			//读取集控器网关ID
 	ReadRunMode();							//读取集控器运行模式
-	ReadDefaultSwitchTime();				//读取默认开关灯时间
+	ReadRelayModuleBasicConfig();			//读取默认开关灯时间
 	ReadConcentratorBasicConfig();			//读取集控器基础配置参数
-	ReadConcentratorLocalNetConfig();			//读取集控器本地网络配置
+	ReadConcentratorLocalNetConfig();		//读取集控器本地网络配置
 	ReadConcentratorAlarmConfig();			//读取集控器告警配置参数
 	ReadConcentratorLocationConfig();		//读取经纬度年表
 	ReadFrameWareState();					//读取固件升级状态
@@ -674,6 +682,11 @@ void ReadTotalConfigurationParameters(void)
 	ReadElectricityMeterBasicConfig();		//读取电表基础配置参数
 	ReadElectricityMeterConfig();			//读取电表基础配置参数
 	ReadElectricityMeterAlarmConfig();		//读取电表告警配置参数
+	
+	ReadLampBasicConfig();					//读取单灯基础配置
+	ReadLampNumList();						//读取单灯配置个数列表
+	ReadLampGroupListNum();					//读取每组单灯数量表
+	ReadLampFrameWareState();				//读取灯具固件升级状态
 }
 
 

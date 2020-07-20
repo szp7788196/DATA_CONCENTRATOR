@@ -341,9 +341,9 @@ void RelayCollectCurrentState(void)
 	u8 i = 0;
 	static time_t time_s = 0;
 
-	if(ConcentratorBasicConfig.loop_state_monitoring_cycle != 0)
+	if(RelayModuleBasicConfig.state_monitoring_cycle != 0)
 	{
-		if(GetSysTick1s() - time_s >= (ConcentratorBasicConfig.loop_state_monitoring_cycle * 60))
+		if(GetSysTick1s() - time_s >= (RelayModuleBasicConfig.state_monitoring_cycle * 60))
 		{
 			for(i = 0; i < RelayModuleConfigNum.number; i ++)
 			{

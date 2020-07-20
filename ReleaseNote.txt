@@ -11,3 +11,6 @@
 20200529 电表模块已完成
 20200618 基本完成和MMI的通讯，加入LWIP
 20200621 改成KEIL5，完善和MMI的通讯，修改各个任务的优先级，内存管理改为原子的代码，LWIP调试完（长时间运行会死机,正在找原因）
+20200624 解决FreeRTOS堆栈分配过大LWIP无法运行问题，STM32F4的CCMRAM只允许被CPU访问，RTOS堆栈分配过大会导致以太网DMA去访问CCMRAM，最终导致程序死机，LWIP无法运行。
+	 解决方法：参考https://blog.csdn.net/weixin_38428827/article/details/104015442和http://www.armbbs.cn/forum.php?mod=viewthread&tid=3462
+20200720 单灯部分完成基本框架

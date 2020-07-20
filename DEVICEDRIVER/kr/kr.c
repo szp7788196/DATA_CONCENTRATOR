@@ -88,7 +88,7 @@ void GetBuiltOutInputCollectorState(InputCollectorState_S state)
 	u8 outbuf[48] = {0};
 	Rs485Frame_S *frame = NULL;
 
-	frame = (Rs485Frame_S *)mymalloc(sizeof(Rs485Frame_S));
+	frame = (Rs485Frame_S *)pvPortMalloc(sizeof(Rs485Frame_S));
 
 	if(frame != NULL)
 	{
@@ -96,7 +96,7 @@ void GetBuiltOutInputCollectorState(InputCollectorState_S state)
 
 		frame->len = PackBuiltOutInputCollectorFrame(state.address,0xE0,NULL,0,outbuf);
 
-		frame->buf = (u8 *)mymalloc(frame->len * sizeof(u8));
+		frame->buf = (u8 *)pvPortMalloc(frame->len * sizeof(u8));
 
 		if(frame->buf != NULL)
 		{

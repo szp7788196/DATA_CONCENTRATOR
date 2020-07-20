@@ -1484,7 +1484,7 @@ TaskHandle_t xTaskGetIdleTaskHandle( void ) PRIVILEGED_FUNCTION;
 
 		// Allocate a TaskStatus_t structure for each task.  An array could be
 		// allocated statically at compile time.
-		pxTaskStatusArray = mymalloc( uxArraySize * sizeof( TaskStatus_t ) );
+		pxTaskStatusArray = pvPortMalloc( uxArraySize * sizeof( TaskStatus_t ) );
 
 		if( pxTaskStatusArray != NULL )
 		{
@@ -1522,7 +1522,7 @@ TaskHandle_t xTaskGetIdleTaskHandle( void ) PRIVILEGED_FUNCTION;
 			}
 
 			// The array is no longer needed, free the memory it consumes.
-			myfree( pxTaskStatusArray );
+			vPortFree( pxTaskStatusArray );
 		}
 	}
 	</pre>

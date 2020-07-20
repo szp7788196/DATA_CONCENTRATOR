@@ -27,7 +27,7 @@ void vTaskLWIP_INIT(void *pvParameters)
 					"LwIP_DHCP_task",  				/* 任务名称    */
 					configMINIMAL_STACK_SIZE * 2,   /* stack大小,单位word,也就是4字节 */
 					NULL,        					/* 任务参数  */
-					configMAX_PRIORITIES - 13,       /* 任务优先级*/
+					configMAX_PRIORITIES - 14,       /* 任务优先级*/
 					&xHandleTaskDHCP); 				/* 任务句柄  */	
 	}
 //#endif

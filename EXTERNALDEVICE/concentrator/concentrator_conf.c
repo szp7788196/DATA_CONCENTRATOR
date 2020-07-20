@@ -113,7 +113,7 @@ void WriteConcentratorBasicConfig(u8 reset,u8 write_enable)
 {
 	if(reset == 1)
 	{
-		ConcentratorBasicConfig.connection_mode = (u8)MODE_4G;
+		ConcentratorBasicConfig.connection_mode = (u8)MODE_INSIDE;
 
 		memset(ConcentratorBasicConfig.server_ip,0,31);
 		memcpy(ConcentratorBasicConfig.server_ip,"103.48.232.119",14);
@@ -126,27 +126,14 @@ void WriteConcentratorBasicConfig(u8 reset,u8 write_enable)
 		ConcentratorBasicConfig.electric_energy_collection_cycle = 0;
 		ConcentratorBasicConfig.electric_energy_recording_time = 0;
 
-		ConcentratorBasicConfig.loop_state_monitoring_cycle = 0;
-		ConcentratorBasicConfig.loop_state_recording_time = 0;
-
 		ConcentratorBasicConfig.cupboard_alarm_collection_cycle = 0;
 		ConcentratorBasicConfig.cupboard_alarm_recording_time = 0;
-
-		ConcentratorBasicConfig.lamp_state_collection_cycle = 0;
-		ConcentratorBasicConfig.lamp_state_collection_offset = 0;
-		ConcentratorBasicConfig.lamp_state_recording_time = 0;
 
 		ConcentratorBasicConfig.command_response_timeout = 60;
 		ConcentratorBasicConfig.command_retransmission_times = 3;
 
 		ConcentratorBasicConfig.heartbeat_response_timeout = 30;
 		ConcentratorBasicConfig.heartbeat_retransmission_times = 2;
-
-		ConcentratorBasicConfig.lamp_response_timeout = 30;
-		ConcentratorBasicConfig.lamp_retransmission_times = 1;
-
-		ConcentratorBasicConfig.lamp_broadcast_times = 10;
-		ConcentratorBasicConfig.lamp_broadcast_interval_time = 3000;
 
 		memset(ConcentratorBasicConfig.operation_password,0,7);
 		memcpy(ConcentratorBasicConfig.operation_password,"000000",6);
@@ -300,10 +287,10 @@ void WriteConcentratorLocationConfig(u8 reset,u8 write_enable)
 		{
 			for(j = 0; j < 31; j ++)
 			{
-				ConcentratorLocationConfig.switch_time_month_table[i].switch_time[j].on_hour = DefaultSwitchTime.on_hour;
-				ConcentratorLocationConfig.switch_time_month_table[i].switch_time[j].on_minute = DefaultSwitchTime.on_minute;
-				ConcentratorLocationConfig.switch_time_month_table[i].switch_time[j].off_hour = DefaultSwitchTime.off_hour;
-				ConcentratorLocationConfig.switch_time_month_table[i].switch_time[j].off_minute = DefaultSwitchTime.off_minute;
+				ConcentratorLocationConfig.switch_time_month_table[i].switch_time[j].on_hour = RelayModuleBasicConfig.on_hour;
+				ConcentratorLocationConfig.switch_time_month_table[i].switch_time[j].on_minute = RelayModuleBasicConfig.on_minute;
+				ConcentratorLocationConfig.switch_time_month_table[i].switch_time[j].off_hour = RelayModuleBasicConfig.off_hour;
+				ConcentratorLocationConfig.switch_time_month_table[i].switch_time[j].off_minute = RelayModuleBasicConfig.off_minute;
 			}
 		}
 

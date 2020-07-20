@@ -16,12 +16,13 @@ uint8_t rx_fifo[NET_BUF_MAX_LEN];
 uint8_t rx_fifo1[CMD_BUF_MAX_LEN];
 int8_t dl_buf_id = -1;
 
-FIFO(dl_buf,1,NET_BUF_MAX_LEN);
+FIFO(dl_buf,3,DL_BUF_MAX_LEN);
 
 
 
 void USART6_Init(u32 BaudRate)
 {
+	static u8 first_init = 1;
 	//GPIO端口设置
 	GPIO_InitTypeDef GPIO_InitStructure;
 	USART_InitTypeDef USART_InitStructure;
@@ -53,11 +54,16 @@ void USART6_Init(u32 BaudRate)
 	USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;	//收发模式
 	USART_Init(USART6, &USART_InitStructure); //初始化串口1
 	
-	ringbuf_init(&ring_fifo, rx_fifo, sizeof(rx_fifo));
-	ringbuf_init(&ring_fifo1, rx_fifo1, sizeof(rx_fifo1));
-	dl_buf_id=fifo_init(&dl_buf);
-	register_cmd_handler(USART6_Write,&ring_fifo1,&rsp_ok);
-
+	if(first_init == 1)
+	{
+		first_init = 0;
+		
+		ringbuf_init(&ring_fifo, rx_fifo, sizeof(rx_fifo));
+		ringbuf_init(&ring_fifo1, rx_fifo1, sizeof(rx_fifo1));
+		dl_buf_id=fifo_init(&dl_buf);
+		register_cmd_handler(USART6_Write,&ring_fifo1,&rsp_ok);
+	}
+	
 	USART_Cmd(USART6, ENABLE);  //使能串口2
 	USART_ClearFlag(USART6, USART_FLAG_TC);
 	USART_ClearFlag(USART6, USART_FLAG_TXE);
@@ -82,6 +88,7 @@ void USART6_Write(uint8_t *Data, uint32_t len)
 void USART6_IRQHandler(void)                	//串口1中断服务程序
 {
 	u8 data;
+	u16 pos = 0;
 	char temp_buf[8] = {0};
 	u16 recv_len = 0;
 	u8 len_len = 0;
@@ -108,23 +115,34 @@ void USART6_IRQHandler(void)                	//串口1中断服务程序
 		
 		USART_ITConfig(USART6, USART_IT_IDLE, DISABLE);	
 		
-		if(strstr((const char *)ring_fifo.data, "+QIURC: ") != NULL) 
+		ANALYSIS_LOOP:
+		if(strstr((const char *)(ring_fifo.data + pos), "+QIURC: ") != NULL) 
 		{
-			if(strstr((const char *)ring_fifo.data, "\"recv\"") != NULL)
+			if(strstr((const char *)(ring_fifo.data + pos), "\"recv\"") != NULL)
 			{
-				get_str1((u8 *)ring_fifo.data, ",", 2, "\r\n", 2, (unsigned char *)temp_buf);
+				get_str1((u8 *)(ring_fifo.data + pos), ",", 2, "\r\n", 2, (unsigned char *)temp_buf);
 				
 				recv_len = atoi(temp_buf);
 				len_len = strlen(temp_buf);
 				
-				fifo_put(dl_buf_id,recv_len,ring_fifo.data + 21 + len_len);
+				fifo_put(dl_buf_id,recv_len,ring_fifo.data + pos + 21 + len_len);
+				
+				pos += (21 + len_len + recv_len + 2);
+				
+				if(pos < ring_fifo.put_ptr)
+				{
+					goto ANALYSIS_LOOP;
+				}
+				else
+				{
+					goto GET_OUT;
+				}
 			}
 			else if(strstr((const char *)ring_fifo.data, "\"closed\"") != NULL)
 			{
 				EC20ConnectState = CLOSING;
 			}
 		}
-		
 		else
 		{
 			rsp_ok = 1;
@@ -133,6 +151,7 @@ void USART6_IRQHandler(void)                	//串口1中断服务程序
 			memcpy(ring_fifo1.data,ring_fifo.data,ringbuf_elements(&ring_fifo));
 		}
 		
+		GET_OUT:
 		ringbuf_clear(&ring_fifo);
 	}
 }

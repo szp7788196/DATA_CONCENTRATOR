@@ -62,7 +62,7 @@ void RecvRs485FrameQueueAndSendToDeviceAndWaitResponse(void)
 					time_out = 0;
 					responsed = 1;
 
-					resp_rs485_frame = (Rs485Frame_S *)mymalloc(sizeof(Rs485Frame_S));
+					resp_rs485_frame = (Rs485Frame_S *)pvPortMalloc(sizeof(Rs485Frame_S));
 
 					if(resp_rs485_frame != NULL)
 					{
@@ -70,7 +70,7 @@ void RecvRs485FrameQueueAndSendToDeviceAndWaitResponse(void)
 
 						resp_rs485_frame->len = Usart5FrameLen;
 
-						resp_rs485_frame->buf = (u8 *)mymalloc(resp_rs485_frame->len * sizeof(u8));
+						resp_rs485_frame->buf = (u8 *)pvPortMalloc(resp_rs485_frame->len * sizeof(u8));
 
 						if(resp_rs485_frame->buf != NULL)
 						{
@@ -139,11 +139,11 @@ void DeleteRs485Frame(Rs485Frame_S *rs485_frame)
 	{
 		if(rs485_frame->buf != NULL)
 		{
-			myfree(rs485_frame->buf);
+			vPortFree(rs485_frame->buf);
 			rs485_frame->buf = NULL;
 		}
 
-		myfree(rs485_frame);
+		vPortFree(rs485_frame);
 		rs485_frame = NULL;
 	}
 }

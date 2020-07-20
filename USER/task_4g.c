@@ -24,16 +24,17 @@ void vTask4G(void *pvParameters)
 
 	RE_INIT:
 	wait_cnt = 0;
+	LoginResponse = 0;
 	EC20ConnectState = UNKNOW_STATE;
 
 	ec20_soft_init();
 
 	while(1)
 	{
-		while(ConcentratorBasicConfig.connection_mode != (u8)MODE_4G)
-		{
-			delay_ms(10000);
-		}
+//		while(ConcentratorBasicConfig.connection_mode != (u8)MODE_4G)
+//		{
+//			delay_ms(10000);
+//		}
 		
 		if(FlagReConnectToServer == 2)
 		{
@@ -64,12 +65,12 @@ void vTask4G(void *pvParameters)
 			SyncDataTimeFormEC20Module(43200);		//每隔12小时对时一次
 		}
 		
-		if(ConcentratorBasicConfig.connection_mode != (u8)MODE_4G)
-		{
-			ec20_set_AT_QICLOSE();
-			
-			goto RE_INIT;
-		}
+//		if(ConcentratorBasicConfig.connection_mode != (u8)MODE_4G)
+//		{
+//			ec20_set_AT_QICLOSE();
+//			
+//			goto RE_INIT;
+//		}
 
 		switch((u8)EC20ConnectState)
 		{
@@ -146,10 +147,10 @@ void Pull4gTxQueueAndSendFrame(void)
 	{
 		ec20_get_AT_QISEND(tx_frame->buf,tx_frame->len);
 		
-		myfree(tx_frame->buf);
+		vPortFree(tx_frame->buf);
 		tx_frame->buf = NULL;
 
-		myfree(tx_frame);
+		vPortFree(tx_frame);
 		tx_frame = NULL;
 	}
 }

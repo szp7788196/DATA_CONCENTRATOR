@@ -50,10 +50,12 @@ DSTATUS disk_initialize (
 		case SD_CARD://SD卡
 //			res=SD_Init();//SD卡初始化
   			break;
+		
 		case EX_FLASH://外部flash
 			W25QXX_Init();
 			FLASH_SECTOR_COUNT = 1024 * 2 * 2;//W25Q1218,前12M字节给FATFS占用
  			break;
+		
 		default:
 			res=1;
 	}
@@ -103,6 +105,7 @@ DRESULT disk_read (
 			
 			res=0;
 			break;
+			
 		default:
 			res=1;
 	}
@@ -153,6 +156,7 @@ DRESULT disk_write (
 			
 			res=0;
 			break;
+			
 		default:
 			res=1;
 	}
@@ -234,12 +238,12 @@ DWORD get_fattime (void)
 //动态分配内存
 void *ff_memalloc (UINT size)
 {
-	return (void*)mymalloc(size);
+	return (void*)pvPortMalloc(size);
 }
 //释放内存
 void ff_memfree (void* mf)
 {
-	myfree(mf);
+	vPortFree(mf);
 }
 
 

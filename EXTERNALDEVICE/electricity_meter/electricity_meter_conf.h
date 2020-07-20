@@ -31,7 +31,9 @@ typedef struct	ElectricityMeter_Alarm		//数字通道告警配置
 	u8 channel;								//检测端子
 	u8 para_id;								//告警电平
 	float min_value;						//最小值
+	u8 min_range;							//最小值抑制波动范围百分比
 	float max_value;						//最大值
+	u8 max_range;							//最大值抑制波动范围百分比
 	u8 confirm_time;						//确认次数
 	u8 last_run_mode;						//上个运行状态
 	u8 switch_run_mode;						//手自控切换

@@ -16,6 +16,7 @@
 #define FIRMWARE_ERASE_SUCCESS			8
 #define FIRMWARE_ERASE_FAIL				9
 #define FIRMWARE_ERASEING				10
+#define FIRMWARE_DOWNLOADED_SUCCESS		11
 #define FIRMWARE_BAG_SIZE				258
 #define FIRMWARE_RUN_FLASH_BASE_ADD		0x08040000
 #define FIRMWARE_BUCKUP_FLASH_BASE_ADD	0x080A0000
@@ -60,21 +61,12 @@ typedef struct	ConcentratorBasicConfig		//集控器基础配置参数
 	u16 heartbeat_cycle;					//心跳周期 s
 	u16 electric_energy_collection_cycle;	//电能采集周期 min
 	u8 electric_energy_recording_time;		//电能记录时长 day
-	u16 loop_state_monitoring_cycle;		//回路状态监测周期 min
-	u8 loop_state_recording_time;			//回路状态记录时长 day
 	u16 cupboard_alarm_collection_cycle;	//柜控告警采集周期 min
 	u8 cupboard_alarm_recording_time;		//柜控告警记录时长 day
-	u16 lamp_state_collection_cycle;		//灯具状态采集周期 min
-	s16 lamp_state_collection_offset;		//灯具状态采集偏移量 min
-	u8 lamp_state_recording_time;			//灯具状态记录时长 day
 	u16 command_response_timeout;			//指令响应等待时长 sec
 	u8 command_retransmission_times;		//指令超时重发次数
 	u16 heartbeat_response_timeout;			//指令响应等待时长 sec
 	u8 heartbeat_retransmission_times;		//心跳超时重发次数
-	u16 lamp_response_timeout;				//灯具响应等待时长 sec
-	u8 lamp_retransmission_times;			//灯具超时重发次数
-	u8 lamp_broadcast_times;				//灯具广播发送次数
-	u16 lamp_broadcast_interval_time;		//灯具广播间隔时长 ms
 	u8 operation_password[7];				//设备工程维护密码
 	u8 manufacturer_name[33];				//厂家名称
 	u8 manufacturer_website[33];			//厂家网址

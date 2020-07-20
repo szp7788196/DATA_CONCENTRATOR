@@ -44,7 +44,7 @@
 /* Private define ------------------------------------------------------------*/
 /* The time to block waiting for input. */
 #define ETH_LINK_TASK_STACK_SIZE		( configMINIMAL_STACK_SIZE * 2 )
-#define ETH_LINK_TASK_PRIORITY		        ( tskIDLE_PRIORITY + 3 )
+#define ETH_LINK_TASK_PRIORITY		        ( configMAX_PRIORITIES - 15 )
 #define emacBLOCK_TIME_WAITING_ETH_LINK_IT	( ( portTickType ) 100 )
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/

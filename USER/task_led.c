@@ -15,6 +15,7 @@
 #include "ec20.h"
 #include "kr.h"
 #include "kc.h"
+#include "plc.h"
 #include "concentrator_comm.h"
 #include "task_tcp_client.h"
 
@@ -25,7 +26,7 @@ unsigned portBASE_TYPE SatckLED;
 
 u32 FreeHeapSize = 0;
 
-u32 jjjjjj = 0;
+
 void vTaskLED(void *pvParameters)
 {
 	u32 cnt = 0;
@@ -38,8 +39,6 @@ void vTaskLED(void *pvParameters)
 
 	while(1)											//循环一次延时约100ms
 	{
-		jjjjjj ++;
-		
 		if(Usart4RecvEnd == 0xAA)						//处理屏幕发过来的数据
 		{
 			Usart4RecvEnd = 0;
@@ -83,7 +82,7 @@ void vTaskLED(void *pvParameters)
 			                            ConcentratorLocationConfig.latitude);
 		}
 
-		FreeHeapSize = mymem_perused();
+		FreeHeapSize = xPortGetFreeHeapSize();
 
 		if(cnt % 50 == 0)
 		{
@@ -125,13 +124,13 @@ u16 HCI_DataAnalysis(u8 *inbuf,u16 inbuf_len,u8 *outbuf)
 	u16 ret = 0;
 	u8 buf[4] = {0};
 	u8 tmp[9] = {0};
+	u8 plc_addr_w[6] = {0};
+	u8 plc_addr_r[6] = {0};
 
 	if(inbuf_len == 17)
 	{
 		if(MyStrstr(inbuf, "AT+ADD=", inbuf_len, 7) != 0xFFFF)
 		{
-			memset(buf,0,4);
-
 			StrToHex(buf, (char*)inbuf + 7, 4);
 
 			ConcentratorGateWayID.number = (((u32)buf[0] << 24) +
@@ -140,30 +139,56 @@ u16 HCI_DataAnalysis(u8 *inbuf,u16 inbuf_len,u8 *outbuf)
 										   (u32)buf[3]);
 
 			WriteConcentratorGateWayID(0,1);
+			
+			memcpy(&plc_addr_w[2],buf,4);
+			
+			plc_set_addr(plc_addr_w);
 
-			memset(outbuf,0,5);
-			sprintf((char *)outbuf,"OK\r\n");
+			delay_ms(100);
 
-			ret = strlen((char *)outbuf);
+			plc_get_addr(plc_addr_r);
+
+			if(MyStrstr(plc_addr_w,plc_addr_r, 6, 6) != 0xFFFF)
+			{
+				HexToStr((char *)tmp, buf, 4);
+				
+				sprintf((char*)outbuf,"{\"LTUAddr\":\"%s\"}\r\n",tmp);
+
+				ret = strlen((char *)outbuf);
+			}
+			else
+			{
+				sprintf((char*)outbuf,"set address failed\r\n");
+
+				ret = strlen((char *)outbuf);
+			}
 		}
 	}
 	else if(inbuf_len == 8)
 	{
 		if(MyStrstr(inbuf, "AT+ADD", inbuf_len, 6) != 0xFFFF)
 		{
-			memset(tmp,0,9);
-
 			buf[0] = (u8)((ConcentratorGateWayID.number >> 24) & 0x000000FF);		//网关ID
 			buf[1] = (u8)((ConcentratorGateWayID.number >> 16) & 0x000000FF);
 			buf[2] = (u8)((ConcentratorGateWayID.number >>  8) & 0x000000FF);
 			buf[3] = (u8)((ConcentratorGateWayID.number >>  0) & 0x000000FF);
+			
+			plc_get_addr(plc_addr_r);
 
-			HexToStr((char *)tmp, buf, 4);
+			if(MyStrstr(&plc_addr_r[2],buf, 4, 4) != 0xFFFF)
+			{
+				HexToStr((char*)tmp,&plc_addr_r[2],4);
+				
+				sprintf((char*)outbuf,"{\"LTUAddr\":\"%s\"}\r\n",tmp);
 
-			memset(outbuf,0,20);
-			sprintf((char *)outbuf,"%s\r\n",tmp);
+				ret = strlen((char *)outbuf);
+			}
+			else
+			{
+				sprintf((char*)outbuf,"address err! please reset!\r\n");
 
-			ret = strlen((char *)outbuf);
+				ret = strlen((char *)outbuf);
+			}
 		}
 	}
 
@@ -302,10 +327,36 @@ u8 GetLinkTypeLinkState(u8 cmd_code,u8 *outbuf)
 {
 	u8 ret = 0;
 	u8 buf[3] = {0};
-
-	buf[0] = ConcentratorBasicConfig.connection_mode;
 	
-	if(ConcentratorBasicConfig.connection_mode == (u8)MODE_4G)
+	CONNECTION_MODE_E conn_mode = MODE_4G;
+	
+	if(ConcentratorBasicConfig.connection_mode == (u8)MODE_INSIDE)
+	{
+		if(EC20ConnectState == CONNECTED && ETH_ConnectState == ETH_CONNECTED)
+		{
+			conn_mode = MODE_4G;
+		}
+		else if(EC20ConnectState == CONNECTED && ETH_ConnectState != ETH_CONNECTED)
+		{
+			conn_mode = MODE_4G;
+		}
+		else if(EC20ConnectState != CONNECTED && ETH_ConnectState == ETH_CONNECTED)
+		{
+			conn_mode = MODE_ETH;
+		}
+		else
+		{
+			conn_mode = MODE_4G;
+		}
+	}
+	else
+	{
+		conn_mode = (CONNECTION_MODE_E)ConcentratorBasicConfig.connection_mode;
+	}
+
+	buf[0] = (u8)conn_mode;
+	
+	if(conn_mode == MODE_4G)
 	{
 		if(EC20ConnectState == (u8)CONNECTED)
 		{
@@ -314,7 +365,7 @@ u8 GetLinkTypeLinkState(u8 cmd_code,u8 *outbuf)
 
 		buf[2] = 0 - EC20Info.csq;
 	}
-	else if(ConcentratorBasicConfig.connection_mode == (u8)MODE_ETH)
+	else if(conn_mode == MODE_ETH)
 	{
 		if(ETH_ConnectState == (u8)ETH_CONNECTED)
 		{
@@ -533,6 +584,7 @@ u8 SetGateWayID(u8 cmd_code,u8 *data,u8 data_len,u8 *outbuf)
 {
 	u8 ret = 0;
 	u8 err_code = 0;
+	u8 plc_addr_w[6] = {0};
 
 	if(data_len == 4)
 	{
@@ -542,6 +594,10 @@ u8 SetGateWayID(u8 cmd_code,u8 *data,u8 data_len,u8 *outbuf)
 									   (u32)data[3]);
 
 		WriteConcentratorGateWayID(0,1);
+		
+		memcpy(&plc_addr_w[2],data,4);
+			
+		plc_set_addr(plc_addr_w);
 	}
 
 	ret = CombineMMI_Frame(cmd_code,&err_code,1,outbuf);

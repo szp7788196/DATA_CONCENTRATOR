@@ -3,7 +3,7 @@
 #include "delay.h"
 #include <math.h>
 
-float HT7038_K = 0.0;
+float HT7038_K = 0.0f;
 
 
 void HT7038_Init(void)

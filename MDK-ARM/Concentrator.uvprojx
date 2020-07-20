@@ -335,9 +335,9 @@
             <v6Rtti>0</v6Rtti>
             <VariousControls>
               <MiscControls></MiscControls>
-              <Define>STM32F40XX,USE_STDPERIPH_DRIVER</Define>
+              <Define>STM32F40XX,USE_STDPERIPH_DRIVER,USE_USB_OTG_FS</Define>
               <Undefine></Undefine>
-              <IncludePath>..\CORE;..\USER;..\DEVICEDRIVER\dp83848;..\ETHERNET;..\FREERTOS\include;..\FREERTOS\portable\RVDS\ARM_CM4F;..\FWLIB\inc;..\SYSTEM\delay;..\SYSTEM\sys;..\LWIP\lwip-1.4.1\src\include;..\LWIP\lwip-1.4.1\src\include\lwip;..\LWIP\lwip-1.4.1\src\include\ipv4;..\LWIP\lwip-1.4.1\src\include\netif;..\LWIP\lwip-1.4.1\port\STM32F4x7;..\LWIP\lwip-1.4.1\port\STM32F4x7\FreeRTOS;..\PERIPHERAL\usart;..\DEVICEDRIVER\battery;..\DEVICEDRIVER\cat25x;..\DEVICEDRIVER\dp83848;..\DEVICEDRIVER\e_meter;..\DEVICEDRIVER\ec20;..\DEVICEDRIVER\ht7038;..\DEVICEDRIVER\ht7038;..\DEVICEDRIVER\kc;..\DEVICEDRIVER\kr;..\DEVICEDRIVER\led;..\DEVICEDRIVER\rx8010s;..\DEVICEDRIVER\w25qxx;..\FATFS;..\FATFS\src;..\FATFS\exfuns;..\MEMORY;..\MIDDLEWARE;..\PROTOCOL;..\PERIPHERAL\iic;..\PERIPHERAL\spi;..\PERIPHERAL\stmflash;..\PERIPHERAL\usart;..\PERIPHERAL\watch_dog;..\EXTERNALDEVICE\concentrator;..\EXTERNALDEVICE\electricity_meter;..\EXTERNALDEVICE\input_collector;..\EXTERNALDEVICE\relay</IncludePath>
+              <IncludePath>..\CORE;..\USER;..\DEVICEDRIVER\dp83848;..\ETHERNET;..\FREERTOS\include;..\FREERTOS\portable\RVDS\ARM_CM4F;..\FWLIB\inc;..\SYSTEM\delay;..\SYSTEM\sys;..\LWIP\lwip-1.4.1\src\include;..\LWIP\lwip-1.4.1\src\include\lwip;..\LWIP\lwip-1.4.1\src\include\ipv4;..\LWIP\lwip-1.4.1\src\include\netif;..\LWIP\lwip-1.4.1\port\STM32F4x7;..\LWIP\lwip-1.4.1\port\STM32F4x7\FreeRTOS;..\PERIPHERAL\usart;..\DEVICEDRIVER\battery;..\DEVICEDRIVER\cat25x;..\DEVICEDRIVER\dp83848;..\DEVICEDRIVER\e_meter;..\DEVICEDRIVER\ec20;..\DEVICEDRIVER\ht7038;..\DEVICEDRIVER\ht7038;..\DEVICEDRIVER\kc;..\DEVICEDRIVER\kr;..\DEVICEDRIVER\led;..\DEVICEDRIVER\rx8010s;..\DEVICEDRIVER\w25qxx;..\FATFS;..\FATFS\src;..\FATFS\exfuns;..\MEMORY;..\MIDDLEWARE;..\PROTOCOL;..\PERIPHERAL\iic;..\PERIPHERAL\spi;..\PERIPHERAL\stmflash;..\PERIPHERAL\usart;..\PERIPHERAL\watch_dog;..\EXTERNALDEVICE\concentrator;..\EXTERNALDEVICE\electricity_meter;..\EXTERNALDEVICE\input_collector;..\EXTERNALDEVICE\relay;..\USB\USB_APP;..\USB\STM32_USB_OTG_Driver\inc;..\USB\STM32_USB_HOST_Library\Core\inc;..\USB\STM32_USB_HOST_Library\Class\MSC\inc;..\EXTERNALDEVICE\lamp;..\DEVICEDRIVER\plc</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -359,7 +359,7 @@
             </VariousControls>
           </Aads>
           <LDads>
-            <umfTarg>1</umfTarg>
+            <umfTarg>0</umfTarg>
             <Ropi>0</Ropi>
             <Rwpi>0</Rwpi>
             <noStLib>0</noStLib>
@@ -368,7 +368,7 @@
             <TextAddressRange>0x08000000</TextAddressRange>
             <DataAddressRange>0x20000000</DataAddressRange>
             <pXoBase></pXoBase>
-            <ScatterFile></ScatterFile>
+            <ScatterFile>.\Objects\Project.sct</ScatterFile>
             <IncludeLibs></IncludeLibs>
             <IncludeLibsPath></IncludeLibsPath>
             <Misc></Misc>
@@ -392,14 +392,14 @@
               <FilePath>..\USER\common.c</FilePath>
             </File>
             <File>
-              <FileName>rtos_task.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\USER\rtos_task.c</FilePath>
-            </File>
-            <File>
               <FileName>stm32f4xx_it.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\USER\stm32f4xx_it.c</FilePath>
+            </File>
+            <File>
+              <FileName>rtos_task.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\USER\rtos_task.c</FilePath>
             </File>
             <File>
               <FileName>task_4g.c</FileName>
@@ -437,9 +437,19 @@
               <FilePath>..\USER\task_relay.c</FilePath>
             </File>
             <File>
+              <FileName>task_lamp.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\USER\task_lamp.c</FilePath>
+            </File>
+            <File>
               <FileName>task_rs485.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\USER\task_rs485.c</FilePath>
+            </File>
+            <File>
+              <FileName>task_plc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\USER\task_plc.c</FilePath>
             </File>
             <File>
               <FileName>task_store.c</FileName>
@@ -700,6 +710,11 @@
               <FileName>e_meter.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\DEVICEDRIVER\e_meter\e_meter.c</FilePath>
+            </File>
+            <File>
+              <FileName>plc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\DEVICEDRIVER\plc\plc.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1016,11 +1031,6 @@
               <FileType>1</FileType>
               <FilePath>..\MEMORY\ringbuf.c</FilePath>
             </File>
-            <File>
-              <FileName>malloc.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\MEMORY\malloc.c</FilePath>
-            </File>
           </Files>
         </Group>
         <Group>
@@ -1105,6 +1115,21 @@
               <FileName>electricity_meter_event.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\EXTERNALDEVICE\electricity_meter\electricity_meter_event.c</FilePath>
+            </File>
+            <File>
+              <FileName>lamp_comm.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\EXTERNALDEVICE\lamp\lamp_comm.c</FilePath>
+            </File>
+            <File>
+              <FileName>lamp_conf.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\EXTERNALDEVICE\lamp\lamp_conf.c</FilePath>
+            </File>
+            <File>
+              <FileName>lamp_event.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\EXTERNALDEVICE\lamp\lamp_event.c</FilePath>
             </File>
           </Files>
         </Group>

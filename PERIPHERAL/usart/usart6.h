@@ -9,6 +9,7 @@
 
 #define NET_BUF_MAX_LEN		4096
 #define CMD_BUF_MAX_LEN		512
+#define DL_BUF_MAX_LEN		1536
 
 
 extern RingBuf ring_fifo;

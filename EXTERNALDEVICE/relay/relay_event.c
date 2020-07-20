@@ -26,7 +26,7 @@ void RelayDetectStateChanges(void)
 
 			RelayModuleState[i].loop_mirror_state = RelayModuleState[i].loop_current_state;
 
-			module_state = (RelayModuleState_S *)mymalloc(sizeof(RelayModuleState_S));
+			module_state = (RelayModuleState_S *)pvPortMalloc(sizeof(RelayModuleState_S));
 
 			if(module_state != NULL)
 			{
@@ -37,7 +37,7 @@ void RelayDetectStateChanges(void)
 #ifdef DEBUG_LOG
 					printf("send xQueue_RelayModuleState fail.\r\n");
 #endif
-					myfree(module_state);
+					vPortFree(module_state);
 				}
 			}
 		}
@@ -106,7 +106,7 @@ void RelayAlarmTaskAbnormal(void)
 
 				record[i] = 0;
 
-				alarm_report = (AlarmReport_S *)mymalloc(sizeof(AlarmReport_S));
+				alarm_report = (AlarmReport_S *)pvPortMalloc(sizeof(AlarmReport_S));
 
 				if(alarm_report != NULL)
 				{
@@ -124,7 +124,7 @@ void RelayAlarmTaskAbnormal(void)
 					memset(buf,0,25);
 					sprintf(buf, "%d",RelayModuleState[i].address);
 					para_len = strlen(buf);
-					alarm_report->device_address = (u8 *)mymalloc((para_len + 1) * sizeof(u8));
+					alarm_report->device_address = (u8 *)pvPortMalloc((para_len + 1) * sizeof(u8));
 					if(alarm_report->device_address != NULL)
 					{
 						memcpy(alarm_report->device_address,buf,para_len + 1);
@@ -133,7 +133,7 @@ void RelayAlarmTaskAbnormal(void)
 					memset(buf,0,25);
 					sprintf(buf, "%d",RelayModuleState[i].channel);
 					para_len = strlen(buf);
-					alarm_report->device_channel = (u8 *)mymalloc((para_len + 1) * sizeof(u8));
+					alarm_report->device_channel = (u8 *)pvPortMalloc((para_len + 1) * sizeof(u8));
 					if(alarm_report->device_channel != NULL)
 					{
 						memcpy(alarm_report->device_channel,buf,para_len + 1);
@@ -142,7 +142,7 @@ void RelayAlarmTaskAbnormal(void)
 					memset(buf,0,25);
 					sprintf(buf, "%04x",RelayModuleState[i].abnormal_loop);
 					para_len = strlen(buf);
-					alarm_report->current_value = (u8 *)mymalloc((para_len + 1) * sizeof(u8));
+					alarm_report->current_value = (u8 *)pvPortMalloc((para_len + 1) * sizeof(u8));
 					if(alarm_report->current_value != NULL)
 					{
 						memcpy(alarm_report->current_value,buf,para_len + 1);
@@ -151,7 +151,7 @@ void RelayAlarmTaskAbnormal(void)
 					memset(buf,0,25);
 					sprintf(buf, "%d",0);
 					para_len = strlen(buf);
-					alarm_report->set_value = (u8 *)mymalloc((para_len + 1) * sizeof(u8));
+					alarm_report->set_value = (u8 *)pvPortMalloc((para_len + 1) * sizeof(u8));
 					if(alarm_report->set_value != NULL)
 					{
 						memcpy(alarm_report->set_value,buf,para_len + 1);
@@ -167,7 +167,7 @@ void RelayAlarmTaskAbnormal(void)
 					sprintf(tmp, "%d",RelayModuleState[i].controller);
 					strcat(buf,tmp);
 					para_len = strlen(buf);
-					alarm_report->reference_value = (u8 *)mymalloc((para_len + 1) * sizeof(u8));
+					alarm_report->reference_value = (u8 *)pvPortMalloc((para_len + 1) * sizeof(u8));
 					if(alarm_report->reference_value != NULL)
 					{
 						memcpy(alarm_report->reference_value,buf,para_len + 1);
@@ -323,11 +323,11 @@ void RelayAlarmContactAbnormal(void)
 
 				record[i] = 0;
 
-				alarm_report = (AlarmReport_S *)mymalloc(sizeof(AlarmReport_S));
+				alarm_report = (AlarmReport_S *)pvPortMalloc(sizeof(AlarmReport_S));
 
 				if(alarm_report != NULL)
 				{
-					buf = (char *)mymalloc(1300 * sizeof(char));
+					buf = (char *)pvPortMalloc(1300 * sizeof(char));
 
 					if(buf != NULL)
 					{
@@ -346,7 +346,7 @@ void RelayAlarmContactAbnormal(void)
 						memset(buf,0,25);
 						sprintf(buf, "%d",RelayModuleState[i].address);
 						para_len = strlen(buf);
-						alarm_report->device_address = (u8 *)mymalloc((para_len + 1) * sizeof(u8));
+						alarm_report->device_address = (u8 *)pvPortMalloc((para_len + 1) * sizeof(u8));
 						if(alarm_report->device_address != NULL)
 						{
 							memcpy(alarm_report->device_address,buf,para_len + 1);
@@ -355,7 +355,7 @@ void RelayAlarmContactAbnormal(void)
 						memset(buf,0,25);
 						sprintf(buf, "%d",RelayModuleState[i].channel);
 						para_len = strlen(buf);
-						alarm_report->device_channel = (u8 *)mymalloc((para_len + 1) * sizeof(u8));
+						alarm_report->device_channel = (u8 *)pvPortMalloc((para_len + 1) * sizeof(u8));
 						if(alarm_report->device_channel != NULL)
 						{
 							memcpy(alarm_report->device_channel,buf,para_len + 1);
@@ -364,7 +364,7 @@ void RelayAlarmContactAbnormal(void)
 						memset(buf,0,25);
 						sprintf(buf, "%04x",RelayModuleState[i].abnormal_loop);
 						para_len = strlen(buf);
-						alarm_report->current_value = (u8 *)mymalloc((para_len + 1) * sizeof(u8));
+						alarm_report->current_value = (u8 *)pvPortMalloc((para_len + 1) * sizeof(u8));
 						if(alarm_report->current_value != NULL)
 						{
 							memcpy(alarm_report->current_value,buf,para_len + 1);
@@ -414,7 +414,7 @@ void RelayAlarmContactAbnormal(void)
 						}
 						buf[strlen(buf) - 1] = 0;
 						para_len = strlen(buf);
-						alarm_report->set_value = (u8 *)mymalloc((para_len + 1) * sizeof(u8));
+						alarm_report->set_value = (u8 *)pvPortMalloc((para_len + 1) * sizeof(u8));
 						if(alarm_report->set_value != NULL)
 						{
 							memcpy(alarm_report->set_value,buf,para_len + 1);
@@ -423,7 +423,7 @@ void RelayAlarmContactAbnormal(void)
 						memset(buf,0,25);
 						sprintf(buf, "%04x",RelayModuleState[i].loop_current_state);
 						para_len = strlen(buf);
-						alarm_report->reference_value = (u8 *)mymalloc((para_len + 1) * sizeof(u8));
+						alarm_report->reference_value = (u8 *)pvPortMalloc((para_len + 1) * sizeof(u8));
 						if(alarm_report->reference_value != NULL)
 						{
 							memcpy(alarm_report->reference_value,buf,para_len + 1);
@@ -439,7 +439,7 @@ void RelayAlarmContactAbnormal(void)
 
 						PushAlarmReportToAlarmQueue(alarm_report);
 
-						myfree(buf);
+						vPortFree(buf);
 					}
 					else
 					{

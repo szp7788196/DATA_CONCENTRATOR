@@ -56,6 +56,8 @@ void ec20_soft_init(void)
 	RE_INIT:
 	ec20_force_pwr_on();
 	
+	USART6_Init(115200);
+	
 	if(ec20_wait_pwr_on_ready(15) != 1)
 		goto RE_INIT;
 	

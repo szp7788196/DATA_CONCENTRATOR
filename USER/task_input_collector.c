@@ -9,7 +9,7 @@ unsigned portBASE_TYPE SatckCOLLECTOR;
 
 void vTaskINPUT_COLLECTOR(void *pvParameters)
 {
-	u32 cnt = 0;
+	static u32 cnt = 0;
 	
 	while(1)
 	{

@@ -59,7 +59,7 @@
 #define TIMEOUT_180S 18000
 
 
-#define EC20_MAX_RECV_SEND_BUF_LEN	1460
+#define EC20_MAX_RECV_SEND_BUF_LEN	1024
 
 
 typedef enum

@@ -9,6 +9,7 @@
 #include "server_protocol.h"
 #include "task_handle_server_frame.h"
 #include "concentrator_conf.h"
+#include "concentrator_comm.h"
 
 
 u8 ETH_ConnectState = ETH_UNKNOW;
@@ -31,6 +32,7 @@ void vTaskTCP_CLIENT(void *pvParameters)
 	
 	while (1)
 	{
+		LoginResponse = 0;
 		ETH_ConnectState = ETH_UNKNOW;
 		
 //#ifdef USE_DHCP
@@ -111,10 +113,10 @@ void PullEthTxQueueAndSendFrame(void)
 	{
 		netconn_write(tcp_clientconn ,tx_frame->buf,tx_frame->len,NETCONN_COPY); //发送tcp_server_sentbuf中的数据
 		
-		myfree(tx_frame->buf);
+		vPortFree(tx_frame->buf);
 		tx_frame->buf = NULL;
 
-		myfree(tx_frame);
+		vPortFree(tx_frame);
 		tx_frame = NULL;
 	}
 }

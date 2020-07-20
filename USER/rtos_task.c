@@ -10,9 +10,12 @@
 #include "task_handle_server_frame.h"
 #include "task_concentrator.h"
 #include "task_store.h"
+#include "task_lamp.h"
 #include "task_relay.h"
 #include "task_rs485.h"
+#include "task_plc.h"
 #include "task_input_collector.h"
+#include "lamp_comm.h"
 
 /*任务优先级列表
 
@@ -27,13 +30,14 @@ vTaskLAMP					7
 vTaskINPUT_COLLECTOR		8
 vTaskELECTRICITY_METER		9
 vTaskLUMETER				10
-vTaskRS485					11
-vTaskLED					12
-LwIP_DHCP_task				13
-Eth_Link_IT_task			14
-vTaskSTORE					15
-vTaskLWIP_INIT				16
-prvIdleTask					17
+vTaskPLC					11
+vTaskRS485					12
+vTaskLED					13
+LwIP_DHCP_task				14
+Eth_Link_IT_task			15
+vTaskSTORE					16
+vTaskLWIP_INIT				17
+prvIdleTask					18
 
 */
 
@@ -43,14 +47,14 @@ void AppTaskCreate(void)
 {
 	xTaskCreate(vTask4G,    						/* 指示灯任务  */
 				"",  								/* 任务名称    */
-				512,         						/* stack大小,单位word,也就是4字节 */
+				256,         						/* stack大小,单位word,也就是4字节 */
 				NULL,        						/* 任务参数  */
 				configMAX_PRIORITIES - 0,           /* 任务优先级*/
 				&xHandleTask4G);
 
 	xTaskCreate(vTaskHANDLE_SERVER_FRAME,    		/* 指示灯任务  */
 				"",  								/* 任务名称    */
-				512,         						/* stack大小,单位word,也就是4字节 */
+				256,         						/* stack大小,单位word,也就是4字节 */
 				NULL,        						/* 任务参数  */
 				configMAX_PRIORITIES - 4,           /* 任务优先级*/
 				&xHandleTaskHANDLE_SERVER_FRAME); 	/* 任务句柄  */
@@ -69,12 +73,12 @@ void AppTaskCreate(void)
 				configMAX_PRIORITIES - 6,           /* 任务优先级*/
 				&xHandleTaskRELAY); 				/* 任务句柄  */
 				
-//	xTaskCreate(vTaskLAMP,    						/* 指示灯任务  */
-//				"",  								/* 任务名称    */
-//				1024,         						/* stack大小,单位word,也就是4字节 */
-//				NULL,        						/* 任务参数  */
-//				configMAX_PRIORITIES - 7,           /* 任务优先级*/
-//				&xHandleTaskRELAY); 				/* 任务句柄  */
+	xTaskCreate(vTaskLAMP,    						/* 指示灯任务  */
+				"",  								/* 任务名称    */
+				512,         						/* stack大小,单位word,也就是4字节 */
+				NULL,        						/* 任务参数  */
+				configMAX_PRIORITIES - 7,           /* 任务优先级*/
+				&xHandleTaskLAMP); 					/* 任务句柄  */
 				
 	xTaskCreate(vTaskINPUT_COLLECTOR,    			/* 指示灯任务  */
 				"",  								/* 任务名称    */
@@ -97,32 +101,39 @@ void AppTaskCreate(void)
 //				configMAX_PRIORITIES - 10,           /* 任务优先级*/
 //				&xHandleTaskRELAY); 				/* 任务句柄  */
 
-	xTaskCreate(vTaskRS485,    						/* 指示灯任务  */
+	xTaskCreate(vTaskPLC,    						/* 指示灯任务  */
 				"",  								/* 任务名称    */
 				128,         						/* stack大小,单位word,也就是4字节 */
 				NULL,        						/* 任务参数  */
 				configMAX_PRIORITIES - 11,           /* 任务优先级*/
+				&xHandleTaskPLC);
+
+	xTaskCreate(vTaskRS485,    						/* 指示灯任务  */
+				"",  								/* 任务名称    */
+				128,         						/* stack大小,单位word,也就是4字节 */
+				NULL,        						/* 任务参数  */
+				configMAX_PRIORITIES - 12,           /* 任务优先级*/
 				&xHandleTaskRS485);
 
 	xTaskCreate(vTaskLED,    						/* 指示灯任务  */
 				"",  								/* 任务名称    */
 				512,         						/* stack大小,单位word,也就是4字节 */
 				NULL,        						/* 任务参数  */
-				configMAX_PRIORITIES - 12,           /* 任务优先级*/
+				configMAX_PRIORITIES - 13,           /* 任务优先级*/
 				&xHandleTaskLED); 					/* 任务句柄  */
 				
 	xTaskCreate(vTaskSTORE,    						/* 指示灯任务  */
 				"",  								/* 任务名称    */
 				512,         						/* stack大小,单位word,也就是4字节 */
 				NULL,        						/* 任务参数  */
-				configMAX_PRIORITIES - 15,           /* 任务优先级*/
+				configMAX_PRIORITIES - 16,           /* 任务优先级*/
 				&xHandleTaskSTORE); 				/* 任务句柄  */
 				
 	xTaskCreate(vTaskLWIP_INIT,    					/* 指示灯任务  */
 				"vTaskLWIP_INIT",  					/* 任务名称    */
 				configMINIMAL_STACK_SIZE * 2,       /* stack大小,单位word,也就是4字节 */
 				NULL,        						/* 任务参数  */
-				configMAX_PRIORITIES - 16,           /* 任务优先级*/
+				configMAX_PRIORITIES - 17,           /* 任务优先级*/
 				&xHandleTaskLWIP_INIT); 			/* 任务句柄  */
 }
 
@@ -131,6 +142,12 @@ void AppTaskCreate(void)
 void AppObjCreate(void)
 {
 	//互斥锁
+	xMutex_USART2 = xSemaphoreCreateMutex();
+	if(xMutex_USART2 == NULL)
+    {
+
+    }
+	
 	xMutex_SPI2 = xSemaphoreCreateMutex();
 	if(xMutex_SPI2 == NULL)
     {
@@ -234,8 +251,8 @@ void AppObjCreate(void)
 
     }
 
-	xQueue_LampControllerFrameStruct = xQueueCreate(25, sizeof(ServerFrameStruct_S *));
-    if(xQueue_LampControllerFrameStruct == NULL)
+	xQueue_LampFrameStruct = xQueueCreate(25, sizeof(ServerFrameStruct_S *));
+    if(xQueue_LampFrameStruct == NULL)
     {
 
     }
@@ -312,26 +329,62 @@ void AppObjCreate(void)
 
     }
 
-	xQueue_RelayRs485Frame = xQueueCreate(10, sizeof(Rs485Frame_S *));
+	xQueue_RelayRs485Frame = xQueueCreate(20, sizeof(Rs485Frame_S *));
     if(xQueue_RelayRs485Frame == NULL)
     {
 
     }
 
-	xQueue_InputCollectorRs485Frame = xQueueCreate(10, sizeof(Rs485Frame_S *));
+	xQueue_InputCollectorRs485Frame = xQueueCreate(20, sizeof(Rs485Frame_S *));
     if(xQueue_InputCollectorRs485Frame == NULL)
     {
 
     }
 
-	xQueue_ElectricityMeterRs485Frame = xQueueCreate(10, sizeof(Rs485Frame_S *));
+	xQueue_ElectricityMeterRs485Frame = xQueueCreate(20, sizeof(Rs485Frame_S *));
     if(xQueue_ElectricityMeterRs485Frame == NULL)
     {
 
     }
 
-	xQueue_LumeterRs485Frame = xQueueCreate(10, sizeof(Rs485Frame_S *));
+	xQueue_LumeterRs485Frame = xQueueCreate(20, sizeof(Rs485Frame_S *));
     if(xQueue_LumeterRs485Frame == NULL)
+    {
+
+    }
+	
+	xQueue_PlcFrame = xQueueCreate(20, sizeof(PlcFrame_S *));
+    if(xQueue_PlcFrame == NULL)
+    {
+
+    }
+	
+	xQueue_LampPlcFrame = xQueueCreate(20, sizeof(PlcFrame_S *));
+    if(xQueue_LampPlcFrame == NULL)
+    {
+
+    }
+	
+	xQueue_LampPlcExecuteTaskToPlc = xQueueCreate(20, sizeof(LampPlcExecuteTask_S *));
+    if(xQueue_LampPlcExecuteTaskToPlc == NULL)
+    {
+
+    }
+	
+	xQueue_LampPlcExecuteTaskFromPlc = xQueueCreate(20, sizeof(LampPlcExecuteTask_S *));
+    if(xQueue_LampPlcExecuteTaskFromPlc == NULL)
+    {
+
+    }
+	
+	xQueue_LampState = xQueueCreate(20, sizeof(LampState_S *));
+    if(xQueue_LampState == NULL)
+    {
+
+    }
+	
+	xQueue_LampPlcExecuteTaskState = xQueueCreate(5, sizeof(LampPlcExecuteTaskState_S *));
+    if(xQueue_LampPlcExecuteTaskState == NULL)
     {
 
     }

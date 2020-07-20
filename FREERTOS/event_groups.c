@@ -80,7 +80,7 @@ task.h is included from an application file. */
 #include "task.h"
 #include "timers.h"
 #include "event_groups.h"
-#include "malloc.h"
+//#include "malloc.h"
 
 /* Lint e961 and e750 are suppressed as a MISRA exception justified because the
 MPU ports require MPU_WRAPPERS_INCLUDED_FROM_API_FILE to be defined for the
@@ -177,7 +177,7 @@ static BaseType_t prvTestWaitCondition( const EventBits_t uxCurrentEventBits, co
 	EventGroup_t *pxEventBits;
 
 		/* Allocate the event group. */
-		pxEventBits = ( EventGroup_t * ) mymalloc( sizeof( EventGroup_t ) );
+		pxEventBits = ( EventGroup_t * ) pvPortMalloc( sizeof( EventGroup_t ) );
 
 		if( pxEventBits != NULL )
 		{
@@ -643,7 +643,7 @@ const List_t *pxTasksWaitingForBits = &( pxEventBits->xTasksWaitingForBits );
 		{
 			/* The event group can only have been allocated dynamically - free
 			it again. */
-			myfree( pxEventBits );
+			vPortFree( pxEventBits );
 		}
 		#elif( ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) && ( configSUPPORT_STATIC_ALLOCATION == 1 ) )
 		{
@@ -651,7 +651,7 @@ const List_t *pxTasksWaitingForBits = &( pxEventBits->xTasksWaitingForBits );
 			dynamically, so check before attempting to free the memory. */
 			if( pxEventBits->ucStaticallyAllocated == ( uint8_t ) pdFALSE )
 			{
-				myfree( pxEventBits );
+				vPortFree( pxEventBits );
 			}
 			else
 			{
