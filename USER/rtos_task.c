@@ -61,14 +61,14 @@ void AppTaskCreate(void)
 
 	xTaskCreate(vTaskCONCENTRATOR,    				/* 指示灯任务  */
 				"",  								/* 任务名称    */
-				512,         						/* stack大小,单位word,也就是4字节 */
+				256,         						/* stack大小,单位word,也就是4字节 */
 				NULL,        						/* 任务参数  */
 				configMAX_PRIORITIES - 5,           /* 任务优先级*/
 				&xHandleTaskCONCENTRATOR); 			/* 任务句柄  */
 
 	xTaskCreate(vTaskRELAY,    						/* 指示灯任务  */
 				"",  								/* 任务名称    */
-				512,         						/* stack大小,单位word,也就是4字节 */
+				256,         						/* stack大小,单位word,也就是4字节 */
 				NULL,        						/* 任务参数  */
 				configMAX_PRIORITIES - 6,           /* 任务优先级*/
 				&xHandleTaskRELAY); 				/* 任务句柄  */
@@ -82,7 +82,7 @@ void AppTaskCreate(void)
 				
 	xTaskCreate(vTaskINPUT_COLLECTOR,    			/* 指示灯任务  */
 				"",  								/* 任务名称    */
-				512,         						/* stack大小,单位word,也就是4字节 */
+				384,         						/* stack大小,单位word,也就是4字节 */
 				NULL,        						/* 任务参数  */
 				configMAX_PRIORITIES - 8,           /* 任务优先级*/
 				&xHandleTaskINPUT_COLLECTOR); 		/* 任务句柄  */
@@ -117,14 +117,14 @@ void AppTaskCreate(void)
 
 	xTaskCreate(vTaskLED,    						/* 指示灯任务  */
 				"",  								/* 任务名称    */
-				512,         						/* stack大小,单位word,也就是4字节 */
+				384,         						/* stack大小,单位word,也就是4字节 */
 				NULL,        						/* 任务参数  */
 				configMAX_PRIORITIES - 13,           /* 任务优先级*/
 				&xHandleTaskLED); 					/* 任务句柄  */
 				
 	xTaskCreate(vTaskSTORE,    						/* 指示灯任务  */
 				"",  								/* 任务名称    */
-				512,         						/* stack大小,单位word,也就是4字节 */
+				384,         						/* stack大小,单位word,也就是4字节 */
 				NULL,        						/* 任务参数  */
 				configMAX_PRIORITIES - 16,           /* 任务优先级*/
 				&xHandleTaskSTORE); 				/* 任务句柄  */

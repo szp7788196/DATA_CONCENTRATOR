@@ -26,9 +26,9 @@
 #define SD_CARD	 0  //SD卡,卷标为0
 #define EX_FLASH 1	//外部flash,卷标为1
 
-#define FLASH_SECTOR_SIZE 	512		//每个扇区4K字节
+#define FLASH_SECTOR_SIZE 	4096		//每个扇区4K字节
 //W25Q16
-u16	    FLASH_SECTOR_COUNT = 1024 * 2 * 2;	//共2M字节
+u16	    FLASH_SECTOR_COUNT = 512;	//共2M字节
 #define FLASH_BLOCK_SIZE   	8     		//每个BLOCK有16个扇区
 
 
@@ -53,7 +53,7 @@ DSTATUS disk_initialize (
 		
 		case EX_FLASH://外部flash
 			W25QXX_Init();
-			FLASH_SECTOR_COUNT = 1024 * 2 * 2;//W25Q1218,前12M字节给FATFS占用
+			FLASH_SECTOR_COUNT = 512;//W25Q1218,前12M字节给FATFS占用
  			break;
 		
 		default:

@@ -20,6 +20,7 @@ void LampSendOtaRequestToServer(void);
 
 
 void LampRecvAndHandleFrameStruct(void);
+void LampGetLampPlcExecuteTaskInfo(LampPlcExecuteTask_S *task);
 u8 LampSynchronizeTime(ServerFrameStruct_S *server_frame_struct);
 u8 LampResetConfigParameters(ServerFrameStruct_S *server_frame_struct);
 u8 LampAdjustBrightness(ServerFrameStruct_S *server_frame_struct);
@@ -28,11 +29,15 @@ u8 LampSetStrategyGroupSwitch(ServerFrameStruct_S *server_frame_struct);
 u8 LampSetRunMode(ServerFrameStruct_S *server_frame_struct);
 u8 LampSetExecuteState(ServerFrameStruct_S *server_frame_struct);
 u8 LampGetCurrentState(ServerFrameStruct_S *server_frame_struct);
+u8 LampSetAlarmConfiguration(ServerFrameStruct_S *server_frame_struct);
+u8 LampGetAlarmConfiguration(ServerFrameStruct_S *server_frame_struct);
 u8 LampSetBasicConfiguration(ServerFrameStruct_S *server_frame_struct);
 u8 LampGetBasicConfiguration(ServerFrameStruct_S *server_frame_struct);
 u8 LampReSetDeviceAddress(ServerFrameStruct_S *server_frame_struct);
+u8 LampSetLampAppointment(ServerFrameStruct_S *server_frame_struct);
+u8 LampGetLampAppointment(ServerFrameStruct_S *server_frame_struct);
 
-
+u8 LampNodeSearch(ServerFrameStruct_S *server_frame_struct);
 
 u8 LampRequestFrameWareUpDate(ServerFrameStruct_S *server_frame_struct);
 u8 LampRecvFrameWareBag(ServerFrameStruct_S *server_frame_struct);

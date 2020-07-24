@@ -130,6 +130,7 @@ void InputCollectorD_QuantityAbnormal(void)
 	u8 i = 0;
 	u8 j = 0;
 	u8 k = 0;
+	u16 str_len = 0;
 	u16 para_len = 0;
 	u8 state = 0;
 	char tmp[10] = {0};
@@ -235,7 +236,7 @@ void InputCollectorD_QuantityAbnormal(void)
 					if(alarm_report != NULL)
 					{
 						buf = (char *)pvPortMalloc(400 * sizeof(char));
-
+						
 						if(buf != NULL)
 						{
 							if(InputCollectorState[i].d_abnormal_loop != 0)
@@ -324,7 +325,11 @@ void InputCollectorD_QuantityAbnormal(void)
 									strcat(buf,"|");
 								}
 							}
-							buf[strlen(buf) - 1] = 0;
+							str_len = strlen(buf);
+							if(str_len != 0)
+							{
+								buf[str_len - 1] = 0;
+							}
 							para_len = strlen(buf);
 							alarm_report->set_value = (u8 *)pvPortMalloc((para_len + 1) * sizeof(u8));
 							if(alarm_report->set_value != NULL)
@@ -471,7 +476,7 @@ void InputCollectorA_OverQuantityAbnormal(void)
 					if(alarm_report != NULL)
 					{
 						buf = (char *)pvPortMalloc(400 * sizeof(char));
-
+						
 						if(buf != NULL)
 						{
 							if(InputCollectorState[i].a_abnormal_loop != 0)
@@ -739,7 +744,7 @@ void InputCollectorA_UnderQuantityAbnormal(void)
 					if(alarm_report != NULL)
 					{
 						buf = (char *)pvPortMalloc(400 * sizeof(char));
-
+						
 						if(buf != NULL)
 						{
 							if(InputCollectorState[i].a_abnormal_loop != 0)

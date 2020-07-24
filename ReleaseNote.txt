@@ -14,3 +14,4 @@
 20200624 解决FreeRTOS堆栈分配过大LWIP无法运行问题，STM32F4的CCMRAM只允许被CPU访问，RTOS堆栈分配过大会导致以太网DMA去访问CCMRAM，最终导致程序死机，LWIP无法运行。
 	 解决方法：参考https://blog.csdn.net/weixin_38428827/article/details/104015442和http://www.armbbs.cn/forum.php?mod=viewthread&tid=3462
 20200720 单灯部分完成基本框架
+20200724 解决读取空配置后无响应或重启问题，优化单灯PLC通讯框架

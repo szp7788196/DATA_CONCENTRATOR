@@ -15,7 +15,7 @@ void ElectricityMeterSendStateChangesReportFrameToServer(ElectricityMeterState_S
 	ServerFrameStruct_S *server_frame_struct = NULL;		//用于响应服务器
 
 	buf = (char *)pvPortMalloc(500 * sizeof(char));
-
+	
 	if(buf != NULL)
 	{
 		server_frame_struct = (ServerFrameStruct_S *)pvPortMalloc(sizeof(ServerFrameStruct_S));
@@ -125,7 +125,7 @@ void ElectricityMeterSendStateChangesReportFrameToServer(ElectricityMeterState_S
 
 			ConvertFrameStructToFrame(server_frame_struct);
 		}
-
+		
 		vPortFree(buf);
 	}
 }
@@ -290,7 +290,7 @@ u8 ElectricityMeterGetCurrentState(ServerFrameStruct_S *server_frame_struct)
 			ret = ConvertFrameStructToFrame(resp_server_frame_struct);
 
 			buf = (char *)pvPortMalloc(500 * sizeof(char));
-
+			
 			if(buf != NULL)
 			{
 				module_num = server_frame_struct->para_num / 2;
@@ -430,7 +430,7 @@ u8 ElectricityMeterGetCurrentState(ServerFrameStruct_S *server_frame_struct)
 						}
 					}
 				}
-
+				
 				vPortFree(buf);
 			}
 		}
@@ -656,6 +656,7 @@ u8 ElectricityMeterGetAlarmConfiguration(ServerFrameStruct_S *server_frame_struc
 	u8 m = 0;
 	u8 n = 0;
 	u8 ret = 0;
+	u16 str_len = 0;
 	long long thre = {0};
 	char tmp[25] = {0};
 	char *buf = NULL;
@@ -667,7 +668,7 @@ u8 ElectricityMeterGetAlarmConfiguration(ServerFrameStruct_S *server_frame_struc
 	if(resp_server_frame_struct != NULL)
 	{
 		buf = (char *)pvPortMalloc(4096 * sizeof(char));
-
+		
 		if(buf != NULL)
 		{
 			CopyServerFrameStruct(server_frame_struct,resp_server_frame_struct,0);
@@ -785,7 +786,11 @@ u8 ElectricityMeterGetAlarmConfiguration(ServerFrameStruct_S *server_frame_struc
 					}
 				}
 
-				buf[strlen(buf) - 1] = 0;	//去掉最后一个'|'
+				str_len = strlen(buf);
+				if(str_len != 0)
+				{
+					buf[str_len - 1] = 0;
+				}
 				resp_server_frame_struct->para[i].len = strlen(buf);
 				resp_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
 				if(resp_server_frame_struct->para[i].value != NULL)
@@ -796,7 +801,7 @@ u8 ElectricityMeterGetAlarmConfiguration(ServerFrameStruct_S *server_frame_struc
 			}
 
 			ret = ConvertFrameStructToFrame(resp_server_frame_struct);
-
+			
 			vPortFree(buf);
 		}
 		else
@@ -1122,7 +1127,7 @@ u8 ElectricityMeterGetBasicConfiguration(ServerFrameStruct_S *server_frame_struc
 	if(resp_server_frame_struct != NULL)
 	{
 		buf = (char *)pvPortMalloc(500 * sizeof(char));
-
+		
 		if(buf != NULL)
 		{
 			CopyServerFrameStruct(server_frame_struct,resp_server_frame_struct,0);
@@ -1227,14 +1232,13 @@ u8 ElectricityMeterGetBasicConfiguration(ServerFrameStruct_S *server_frame_struc
 			}
 
 			ret = ConvertFrameStructToFrame(resp_server_frame_struct);
-
+			
 			vPortFree(buf);
 		}
 		else
 		{
 			DeleteServerFrameStruct(resp_server_frame_struct);
 		}
-
 	}
 
 	return ret;

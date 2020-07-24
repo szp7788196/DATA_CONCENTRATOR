@@ -57,21 +57,21 @@ int main(void)
 	PLC_Init();											//PLC模块初始化
 	
 	
+	siiize = sizeof(ConcentratorBasicConfig_S);
 	siiize = sizeof(RelayModuleBasicConfig_S);
-	siiize = sizeof(LampTask_S);
-	siiize = sizeof(LampSenceConfig_S);
+	siiize = sizeof(LampBasicConfig_S);
 
 
-//	init_mount_flash();									//初始化并挂载flash
+	init_mount_flash();									//初始化并挂载flash
 
-//	ReadTotalConfigurationParameters();					//读取所有配置参数
+	ReadTotalConfigurationParameters();					//读取所有配置参数
 
-//	IWDG_Feed_Thread();									//上电第一次喂看门狗
+	IWDG_Feed_Thread();									//上电第一次喂看门狗
 
-//	AppObjCreate();										//创建消息队列
-//	AppTaskCreate();									//创建任务
+	AppObjCreate();										//创建消息队列
+	AppTaskCreate();									//创建任务
 
-//	vTaskStartScheduler();          					//开启任务调度
+	vTaskStartScheduler();          					//开启任务调度
 }
 
 

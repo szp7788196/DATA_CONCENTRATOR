@@ -687,6 +687,8 @@ void ReadTotalConfigurationParameters(void)
 	ReadLampNumList();						//读取单灯配置个数列表
 	ReadLampGroupListNum();					//读取每组单灯数量表
 	ReadLampFrameWareState();				//读取灯具固件升级状态
+	ReadLampAppointmentNum();				//读取单灯预约控制配置数量
+	ReadLampNodeLossAlarmConfig();			//读取灯具节点丢失告警配置		
 }
 
 

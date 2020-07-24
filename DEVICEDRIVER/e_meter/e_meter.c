@@ -317,7 +317,7 @@ void ElectricityMeterGetBuiltOutParas(ElectricityMeterState_S state)
 			if(xQueueSend(xQueue_Rs485Rs485Frame,(void *)&frame1,(TickType_t)10) != pdPASS)
 			{
 #ifdef DEBUG_LOG
-				printf("send xQueue_Rs485Rs485Frame fail.\r\n");
+				printf("meter send xQueue_Rs485Rs485Frame fail.\r\n");
 #endif
 				DeleteRs485Frame(frame1);
 			}
@@ -351,7 +351,7 @@ void ElectricityMeterGetBuiltOutParas(ElectricityMeterState_S state)
 				if(xQueueSend(xQueue_Rs485Rs485Frame,(void *)&frame2,(TickType_t)10) != pdPASS)
 				{
 #ifdef DEBUG_LOG
-					printf("send xQueue_Rs485Rs485Frame fail.\r\n");
+					printf("meter send xQueue_Rs485Rs485Frame fail.\r\n");
 #endif
 					DeleteRs485Frame(frame2);
 				}

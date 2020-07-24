@@ -11,6 +11,7 @@ LampGroupListNum_S LampGroupListNum;					//每组单灯数量
 Uint32TypeNumber_S LampAppointmentNum;					//单灯预约控制数量
 Uint32TypeNumber_S LampStrategyNum;						//单灯策略配置数量
 FrameWareState_S LampFrameWareState;					//固件升级状态
+LampNodeLossAlarmConfig_S LampNodeLossAlarmConfig;		//节点丢失告警配置
 
 
 
@@ -80,9 +81,7 @@ void WriteLampNumList(u8 reset,u8 write_enable)
 {
 	if(reset == 1)
 	{
-		LampNumList.number = 0;
-
-		LampNumList.crc16 = 0;
+		memset(&LampNumList,0,sizeof(LampListNum_S));
 	}
 
 	if(write_enable == 1)
@@ -174,8 +173,7 @@ void WriteLampGroupListNum(u8 reset,u8 write_enable)
 {
 	if(reset == 1)
 	{
-		memset(LampGroupListNum.list,0,MAX_LAMP_GROUP_NUM);
-		LampGroupListNum.crc16 = 0;
+		memset(&LampGroupListNum,0,sizeof(LampGroupListNum_S));
 	}
 
 	if(write_enable == 1)
@@ -185,6 +183,83 @@ void WriteLampGroupListNum(u8 reset,u8 write_enable)
 		CAT25X_Write((u8 *)&LampGroupListNum,
 		             LAMP_GROUP_LIST_NUM_ADD,
 		             LAMP_GROUP_LIST_NUM_LEN);
+	}
+}
+
+void ReadLampAppointmentNum(void)
+{
+	u16 crc16_cal = 0;
+
+	CAT25X_Read((u8 *)&LampAppointmentNum,
+	            LAMP_APPOINTMENT_NUM_ADD,
+	            sizeof(Uint32TypeNumber_S));
+
+	crc16_cal = CRC16((u8 *)&LampAppointmentNum,LAMP_APPOINTMENT_NUM_LEN - 2);
+
+	if(crc16_cal != LampAppointmentNum.crc16 ||
+	   LampAppointmentNum.number > MAX_LAMP_APPOINTMENT_NUM)
+	{
+		WriteLampAppointmentNum(1,0);
+	}
+}
+
+void WriteLampAppointmentNum(u8 reset,u8 write_enable)
+{
+	if(reset == 1)
+	{
+		LampAppointmentNum.number = 0;
+
+		LampAppointmentNum.crc16 = 0;
+	}
+
+	if(write_enable == 1)
+	{
+		LampAppointmentNum.crc16 = CRC16((u8 *)&LampAppointmentNum,LAMP_APPOINTMENT_NUM_LEN - 2);
+
+		CAT25X_Write((u8 *)&LampAppointmentNum,
+		             LAMP_APPOINTMENT_NUM_ADD,
+		             LAMP_APPOINTMENT_NUM_LEN);
+	}
+}
+
+u8 ReadLampAppointment(u8 i,LampSenceConfig_S *appointment)
+{
+	u8 ret = 0;
+	u16 crc16_cal = 0;
+	
+	if(appointment == NULL)
+	{
+		return ret;
+	}
+
+	CAT25X_Read((u8 *)appointment,
+	            LAMP_APPOINTMENT_ADD + LAMP_APPOINTMENT_LEN * i,
+	            sizeof(LampSenceConfig_S));
+
+	crc16_cal = CRC16((u8 *)appointment,LAMP_APPOINTMENT_LEN - 2);
+
+	if(crc16_cal == appointment->crc16)
+	{
+		ret = 1;
+	}
+	
+	return ret;
+}
+
+void WriteLampAppointment(u8 i,LampSenceConfig_S *appointment,u8 reset,u8 write_enable)
+{
+	if(reset == 1)
+	{
+		memset(appointment,0,sizeof(LampSenceConfig_S));
+	}
+
+	if(write_enable == 1)
+	{
+		appointment->crc16 = CRC16((u8 *)appointment,LAMP_APPOINTMENT_LEN - 2);
+
+		CAT25X_Write((u8 *)appointment,
+		             LAMP_APPOINTMENT_ADD + LAMP_APPOINTMENT_LEN * i,
+		             LAMP_APPOINTMENT_LEN);
 	}
 }
 
@@ -366,6 +441,41 @@ void WriteLampFrameWareState(u8 reset,u8 write_enable)
 		LampFrameWareState.crc16 = CRC16((u8 *)&LampFrameWareState,LAMP_FW_STATE_LEN - 2);
 
 		CAT25X_Write((u8 *)&LampFrameWareState,LAMP_FW_STATE_ADD,LAMP_FW_STATE_LEN);
+	}
+}
+
+void ReadLampNodeLossAlarmConfig(void)
+{
+	u16 crc16_cal = 0;
+
+	CAT25X_Read((u8 *)&LampNodeLossAlarmConfig,
+	            LAMP_NODE_LOSS_ALARM_CONF_ADD,
+	            sizeof(LampNodeLossAlarmConfig_S));
+
+	crc16_cal = CRC16((u8 *)&LampNodeLossAlarmConfig,LAMP_NODE_LOSS_ALARM_CONF_LEN - 2);
+
+	if(crc16_cal != LampNodeLossAlarmConfig.crc16)
+	{
+		WriteLampNodeLossAlarmConfig(1,0);
+	}
+}
+
+void WriteLampNodeLossAlarmConfig(u8 reset,u8 write_enable)
+{
+	if(reset == 1)
+	{
+		LampNodeLossAlarmConfig.enable = 0;
+
+		LampNodeLossAlarmConfig.crc16 = 0;
+	}
+
+	if(write_enable == 1)
+	{
+		LampNodeLossAlarmConfig.crc16 = CRC16((u8 *)&LampNodeLossAlarmConfig,LAMP_NODE_LOSS_ALARM_CONF_LEN - 2);
+
+		CAT25X_Write((u8 *)&LampNodeLossAlarmConfig,
+		             LAMP_NODE_LOSS_ALARM_CONF_ADD,
+		             LAMP_NODE_LOSS_ALARM_CONF_LEN);
 	}
 }
 

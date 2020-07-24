@@ -30,7 +30,10 @@
 #define MAX_LAMP_ALARM_E_PARA_NUM			3		//可配置告警的电参数种类
 
 #define MAX_LAMP_STRATEGY_GROUP_NUM			256
+#define MAX_LAMP_APPOINTMENT_NUM			10
 #define MAX_LAMP_APPOINTMENT_TIME_RANGE_NUM	10		//每个预约控制最多10个时间段
+
+
 
 typedef struct	LampListNum							//用于统计单灯配置个数
 {
@@ -50,6 +53,13 @@ typedef struct	LampGroupListNum					//用于统计每组单灯配置个数
 	
 }__attribute__((packed))LampGroupListNum_S;
 
+typedef struct	LampNodeLossAlarmConfig
+{
+	u8 enable;										//告警使能
+
+	u16 crc16;										//校验码 存储用
+}__attribute__((packed))LampNodeLossAlarmConfig_S;
+
 typedef struct	ElectriccalParaAlarm
 {
 	u8 channel;									//灯头通道
@@ -63,6 +73,16 @@ typedef struct	ElectriccalParaAlarm
 
 typedef struct	LampAlarm
 {	
+	u8 lamp_fault_alarm_enable;						//灯具故障告警使能
+	u8 power_module_fault_alarm_enable;				//电源故障告警使能
+	u8 capacitor_fault_alarm_enable;				//补偿电容故障告警使能
+	u8 relay_fault_alarm_enable;					//继电器故障告警使能
+	
+	u8 temperature_alarm_enable;					//高低温告警使能
+	s8 temperature_alarm_low_thre;					//高低温告警低温阈值
+	u8 temperature_alarm_high_thre;					//高低温告警高温阈值
+	u16 temperature_alarm_duration;					//高低温告警检测时长
+	
 	u8 leakage_alarm_enable;						//漏电告警使能
 	u16 leakage_alarm_c_thre;						//漏电告警电流阈值
 	u8 leakage_alarm_v_thre;						//漏电告警电压阈值
@@ -72,8 +92,11 @@ typedef struct	LampAlarm
 	u8 gate_magnetism_alarm_type;					//门磁告警检测类型
 	
 	u8 post_tilt_alarm_enable;						//灯杆倾斜告警使能
-	u16 post_tilt_alarm_thre;						//灯杆倾斜告警阈值
+	s8 post_tilt_alarm_thre;						//灯杆倾斜告警阈值
 	u16 post_tilt_alarm_duration;					//灯杆倾斜告警检测时长
+	
+	u8 electrical_para_alarm_enable;				//电参数越限告警使能
+	ElectriccalParaAlarm_S electrical_para_alarm_thre[MAX_LAMP_CH_NUM][MAX_LAMP_ALARM_E_PARA_NUM];
 	
 	u8 abnormal_light_on_alarm_enable;				//异常开灯告警使能
 	u16 abnormal_light_on_alarm_c_thre;				//异常开灯告警电流阈值
@@ -85,9 +108,14 @@ typedef struct	LampAlarm
 	u16 abnormal_light_off_alarm_p_thre;			//异常关灯告警功率阈值
 	u16 abnormal_light_off_alarm_duration;			//异常关灯告警检测时长
 	
-	u8 electrical_para_alarm_enable;							//电参数越限告警使能
-	ElectriccalParaAlarm_S electrical_para_alarm_thre[MAX_LAMP_CH_NUM][MAX_LAMP_ALARM_E_PARA_NUM];
+	u8 light_on_fault_alarm_enable;							//亮灯异常告警使能
+	u8 light_on_fault_alarm_rated_power[MAX_LAMP_CH_NUM];	//灯具1额定功率
+	u8 light_on_fault_alarm_low_thre[MAX_LAMP_CH_NUM];		//灯具1最小功率超限百分比
+	u8 light_on_fault_alarm_high_thre[MAX_LAMP_CH_NUM];		//灯具1最小功率超限百分比
+	u16 light_on_fault_alarm_duration[MAX_LAMP_CH_NUM];		//亮灯异常告警检测时长
 	
+	u8 task_light_state_fault_alarm_enhable;		//任务亮灯状态异常告警使能
+
 }__attribute__((packed))LampAlarm_S;
 
 typedef struct	LampBasicConfig
@@ -116,6 +144,7 @@ typedef struct	LampConfig
 	u8 light_wane;											//光衰
 	u8 auto_report;											//单灯自动上报使能
 	u8 adjust_type;											//调光方式
+	u8 node_loss_check_times;								//节点丢失检测次数
 	u8 default_brightness;									//各通初始道亮度 高4字节代表1灯头 低4字节表示灯头2
 	u8 group[MAX_LAMP_GROUP_NUM];							//设备所属组号
 
@@ -144,8 +173,6 @@ typedef struct	LampSenceConfig									//单灯场景模式配置
 	u8 priority;												//优先级
 	u8 time_range_num;											//有效时间范围数量
 	TimeRange_S range[MAX_LAMP_APPOINTMENT_TIME_RANGE_NUM];		//场景时间段
-	u8 conf_mode;												//配置模式 0配置所有 1配置指定组 2配置指定地址
-	u16 group_add[MAX_LAMP_GROUP_NUM];							//组号或地址
 	
 	u16 crc16;													//校验码 存储用
 
@@ -169,7 +196,8 @@ extern LampGroupListNum_S LampGroupListNum;						//每组单灯数量
 extern LampListNum_S LampNumList;								//已配置的单灯数量
 extern Uint32TypeNumber_S LampAppointmentNum;					//单灯预约控制数量
 extern Uint32TypeNumber_S LampStrategyNum;						//单灯策略配置数量
-extern FrameWareState_S LampFrameWareState;					//固件升级状态
+extern FrameWareState_S LampFrameWareState;						//固件升级状态
+extern LampNodeLossAlarmConfig_S LampNodeLossAlarmConfig;		//节点丢失告警配置
 
 
 
@@ -179,6 +207,10 @@ void WriteLampBasicConfig(u8 reset,u8 write_enable);
 void ReadLampNumList(void);
 void WriteLampNumList(u8 reset,u8 write_enable);
 u8 ReadSpecifyLampNumList(u16 i);
+void ReadLampAppointmentNum(void);
+void WriteLampAppointmentNum(u8 reset,u8 write_enable);
+u8 ReadLampAppointment(u8 i,LampSenceConfig_S *appointment);
+void WriteLampAppointment(u8 i,LampSenceConfig_S *appointment,u8 reset,u8 write_enable);
 void WriteSpecifyLampNumList(u16 i,u8 mode);
 void ReadLampGroupListNum(void);
 void WriteLampGroupListNum(u8 reset,u8 write_enable);
@@ -190,7 +222,8 @@ u8 ReadLampSenceConfig(u16 i,LampSenceConfig_S *sence);
 void WriteLampSenceConfig(u8 i,u8 reset,LampSenceConfig_S sence);
 u8 ReadLampFrameWareState(void);
 void WriteLampFrameWareState(u8 reset,u8 write_enable);
-
+void ReadLampNodeLossAlarmConfig(void);
+void WriteLampNodeLossAlarmConfig(u8 reset,u8 write_enable);
 
 
 

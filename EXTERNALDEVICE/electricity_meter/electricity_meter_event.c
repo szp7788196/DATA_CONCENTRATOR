@@ -162,7 +162,7 @@ void ElectricityMeterCombineParasThreOverAlarm(u8 i,u8 j,u8 m,double reference_v
 	if(alarm_report != NULL)
 	{
 		buf = (char *)pvPortMalloc(100 * sizeof(char));
-
+		
 		if(buf != NULL)
 		{
 			if(ElectricityMeterState[i].abnormal_ch != 0)
@@ -305,7 +305,7 @@ void ElectricityMeterCombineParasThreOverAlarm(u8 i,u8 j,u8 m,double reference_v
 						 calendar.min,calendar.sec);
 
 			PushAlarmReportToAlarmQueue(alarm_report);
-			
+		
 			vPortFree(buf);
 		}
 		else

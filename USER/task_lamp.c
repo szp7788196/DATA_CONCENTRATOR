@@ -14,8 +14,6 @@ void vTaskLAMP(void *pvParameters)
 {
 	while(1)
 	{
-		
-		
 		LampRecvLampStateAndSendToServer();					//发送单灯运行状态包
 
 		delay_ms(100);

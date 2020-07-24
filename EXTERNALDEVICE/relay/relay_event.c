@@ -194,6 +194,7 @@ void RelayAlarmContactAbnormal(void)
 	u8 i = 0;
 	u8 j = 0;
 	u8 k = 0;
+	u16 str_len = 0;
 	u16 para_len = 0;
 	u8 out_state = 0;
 	u8 in_state = 0;
@@ -203,7 +204,7 @@ void RelayAlarmContactAbnormal(void)
 	u8 cmp_mode = 0;
 	u8 cmpared = 0;
 	char tmp[10] = {0};
-//	char *buf = NULL;
+	char buf[1300];
 	static s8 cnt[MAX_RELAY_MODULE_CONF_NUM][MAX_RELAY_MODULE_LOOP_CH_NUM] = {0};
 	static u8 occur[MAX_RELAY_MODULE_CONF_NUM][MAX_RELAY_MODULE_LOOP_CH_NUM] = {0};
 	static u8 record[MAX_RELAY_MODULE_CONF_NUM] = {0};
@@ -318,7 +319,6 @@ void RelayAlarmContactAbnormal(void)
 
 			if(record[i] == 1)
 			{
-				char *buf = NULL;
 				AlarmReport_S *alarm_report = NULL;
 
 				record[i] = 0;
@@ -327,124 +327,117 @@ void RelayAlarmContactAbnormal(void)
 
 				if(alarm_report != NULL)
 				{
-					buf = (char *)pvPortMalloc(1300 * sizeof(char));
-
-					if(buf != NULL)
+					if(RelayModuleState[i].abnormal_loop != 0)
 					{
-						if(RelayModuleState[i].abnormal_loop != 0)
-						{
-							alarm_report->record_type = 1;
-						}
-						else if(RelayModuleState[i].abnormal_loop == 0)
-						{
-							alarm_report->record_type = 0;
-						}
-
-						alarm_report->device_type = (u8)RELAY;
-						alarm_report->alarm_type = RELAY_CONTACT_ABNORMAL;
-
-						memset(buf,0,25);
-						sprintf(buf, "%d",RelayModuleState[i].address);
-						para_len = strlen(buf);
-						alarm_report->device_address = (u8 *)pvPortMalloc((para_len + 1) * sizeof(u8));
-						if(alarm_report->device_address != NULL)
-						{
-							memcpy(alarm_report->device_address,buf,para_len + 1);
-						}
-
-						memset(buf,0,25);
-						sprintf(buf, "%d",RelayModuleState[i].channel);
-						para_len = strlen(buf);
-						alarm_report->device_channel = (u8 *)pvPortMalloc((para_len + 1) * sizeof(u8));
-						if(alarm_report->device_channel != NULL)
-						{
-							memcpy(alarm_report->device_channel,buf,para_len + 1);
-						}
-
-						memset(buf,0,25);
-						sprintf(buf, "%04x",RelayModuleState[i].abnormal_loop);
-						para_len = strlen(buf);
-						alarm_report->current_value = (u8 *)pvPortMalloc((para_len + 1) * sizeof(u8));
-						if(alarm_report->current_value != NULL)
-						{
-							memcpy(alarm_report->current_value,buf,para_len + 1);
-						}
-
-						memset(buf,0,1300);
-						for(k = 0; k < RelayModuleConfig[i].loop_num; k ++)
-						{
-							if(RelayModuleConfig[i].loop_alarm_thre[k][0] == k + 1 &&
-							  (RelayModuleState[i].abnormal_loop & (1 << k)) != 0)
-							{
-								memset(tmp,0,10);
-								sprintf(tmp, "%x",RelayModuleConfig[i].address);
-								strcat(buf,tmp);
-								strcat(buf,",");
-
-								memset(tmp,0,10);
-								sprintf(tmp, "%d",RelayModuleConfig[i].channel);
-								strcat(buf,tmp);
-								strcat(buf,",");
-
-								memset(tmp,0,10);
-								sprintf(tmp, "%d",RelayModuleConfig[i].loop_alarm_thre[k][0]);
-								strcat(buf,tmp);
-								strcat(buf,",");
-
-								memset(tmp,0,10);
-								sprintf(tmp, "%d",RelayModuleConfig[i].loop_alarm_thre[k][1]);
-								strcat(buf,tmp);
-								strcat(buf,",");
-
-								memset(tmp,0,10);
-								sprintf(tmp, "%d",RelayModuleConfig[i].loop_alarm_thre[k][2]);
-								strcat(buf,tmp);
-								strcat(buf,",");
-
-								memset(tmp,0,10);
-								sprintf(tmp, "%d",RelayModuleConfig[i].loop_alarm_thre[k][3]);
-								strcat(buf,tmp);
-								strcat(buf,",");
-
-								memset(tmp,0,10);
-								sprintf(tmp, "%d",RelayModuleConfig[i].loop_alarm_thre[k][4]);
-								strcat(buf,tmp);
-								strcat(buf,"|");
-							}
-						}
-						buf[strlen(buf) - 1] = 0;
-						para_len = strlen(buf);
-						alarm_report->set_value = (u8 *)pvPortMalloc((para_len + 1) * sizeof(u8));
-						if(alarm_report->set_value != NULL)
-						{
-							memcpy(alarm_report->set_value,buf,para_len + 1);
-						}
-
-						memset(buf,0,25);
-						sprintf(buf, "%04x",RelayModuleState[i].loop_current_state);
-						para_len = strlen(buf);
-						alarm_report->reference_value = (u8 *)pvPortMalloc((para_len + 1) * sizeof(u8));
-						if(alarm_report->reference_value != NULL)
-						{
-							memcpy(alarm_report->reference_value,buf,para_len + 1);
-						}
-
-						alarm_report->occur_time[14] = 0;
-						TimeToString(alarm_report->occur_time,
-									 calendar.w_year,
-									 calendar.w_month,
-									 calendar.w_date,
-									 calendar.hour,
-									 calendar.min,calendar.sec);
-
-						PushAlarmReportToAlarmQueue(alarm_report);
-
-						vPortFree(buf);
+						alarm_report->record_type = 1;
 					}
-					else
+					else if(RelayModuleState[i].abnormal_loop == 0)
 					{
-						DeleteAlarmReport(alarm_report);
+						alarm_report->record_type = 0;
 					}
+
+					alarm_report->device_type = (u8)RELAY;
+					alarm_report->alarm_type = RELAY_CONTACT_ABNORMAL;
+
+					memset(buf,0,25);
+					sprintf(buf, "%d",RelayModuleState[i].address);
+					para_len = strlen(buf);
+					alarm_report->device_address = (u8 *)pvPortMalloc((para_len + 1) * sizeof(u8));
+					if(alarm_report->device_address != NULL)
+					{
+						memcpy(alarm_report->device_address,buf,para_len + 1);
+					}
+
+					memset(buf,0,25);
+					sprintf(buf, "%d",RelayModuleState[i].channel);
+					para_len = strlen(buf);
+					alarm_report->device_channel = (u8 *)pvPortMalloc((para_len + 1) * sizeof(u8));
+					if(alarm_report->device_channel != NULL)
+					{
+						memcpy(alarm_report->device_channel,buf,para_len + 1);
+					}
+
+					memset(buf,0,25);
+					sprintf(buf, "%04x",RelayModuleState[i].abnormal_loop);
+					para_len = strlen(buf);
+					alarm_report->current_value = (u8 *)pvPortMalloc((para_len + 1) * sizeof(u8));
+					if(alarm_report->current_value != NULL)
+					{
+						memcpy(alarm_report->current_value,buf,para_len + 1);
+					}
+
+					memset(buf,0,1300);
+					for(k = 0; k < RelayModuleConfig[i].loop_num; k ++)
+					{
+						if(RelayModuleConfig[i].loop_alarm_thre[k][0] == k + 1 &&
+						  (RelayModuleState[i].abnormal_loop & (1 << k)) != 0)
+						{
+							memset(tmp,0,10);
+							sprintf(tmp, "%x",RelayModuleConfig[i].address);
+							strcat(buf,tmp);
+							strcat(buf,",");
+
+							memset(tmp,0,10);
+							sprintf(tmp, "%d",RelayModuleConfig[i].channel);
+							strcat(buf,tmp);
+							strcat(buf,",");
+
+							memset(tmp,0,10);
+							sprintf(tmp, "%d",RelayModuleConfig[i].loop_alarm_thre[k][0]);
+							strcat(buf,tmp);
+							strcat(buf,",");
+
+							memset(tmp,0,10);
+							sprintf(tmp, "%d",RelayModuleConfig[i].loop_alarm_thre[k][1]);
+							strcat(buf,tmp);
+							strcat(buf,",");
+
+							memset(tmp,0,10);
+							sprintf(tmp, "%d",RelayModuleConfig[i].loop_alarm_thre[k][2]);
+							strcat(buf,tmp);
+							strcat(buf,",");
+
+							memset(tmp,0,10);
+							sprintf(tmp, "%d",RelayModuleConfig[i].loop_alarm_thre[k][3]);
+							strcat(buf,tmp);
+							strcat(buf,",");
+
+							memset(tmp,0,10);
+							sprintf(tmp, "%d",RelayModuleConfig[i].loop_alarm_thre[k][4]);
+							strcat(buf,tmp);
+							strcat(buf,"|");
+						}
+					}
+					str_len = strlen(buf);
+					if(str_len != 0)
+					{
+						buf[str_len - 1] = 0;
+					}
+					para_len = strlen(buf);
+					alarm_report->set_value = (u8 *)pvPortMalloc((para_len + 1) * sizeof(u8));
+					if(alarm_report->set_value != NULL)
+					{
+						memcpy(alarm_report->set_value,buf,para_len + 1);
+					}
+
+					memset(buf,0,25);
+					sprintf(buf, "%04x",RelayModuleState[i].loop_current_state);
+					para_len = strlen(buf);
+					alarm_report->reference_value = (u8 *)pvPortMalloc((para_len + 1) * sizeof(u8));
+					if(alarm_report->reference_value != NULL)
+					{
+						memcpy(alarm_report->reference_value,buf,para_len + 1);
+					}
+
+					alarm_report->occur_time[14] = 0;
+					TimeToString(alarm_report->occur_time,
+								 calendar.w_year,
+								 calendar.w_month,
+								 calendar.w_date,
+								 calendar.hour,
+								 calendar.min,calendar.sec);
+
+					PushAlarmReportToAlarmQueue(alarm_report);
 				}
 			}
 		}

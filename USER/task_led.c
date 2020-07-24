@@ -493,8 +493,8 @@ u8 SetDO_State(u8 cmd_code,u8 *data,u8 data_len,u8 *outbuf)
 			{
 				RelayModuleState_S state;
 
-				RelayModuleState[i].loop_current_channel = 0xFFFF;
-				RelayModuleState[i].loop_current_state = (((u16)(*(data + 2))) << 8) + *(data + 3);
+				state.loop_current_channel = 0xFFFF;
+				state.loop_current_state = (((u16)(*(data + 2))) << 8) + *(data + 3);
 
 				ControlAllBuiltInRelay(state);
 			}

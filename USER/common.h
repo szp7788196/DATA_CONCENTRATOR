@@ -48,7 +48,7 @@
 
  
 #define CONCENTRATOR_BASIC_CONF_ADD				0			//集控器基础参数配置EEPROM存储地址
-#define CONCENTRATOR_BASIC_CONF_LEN				141
+#define CONCENTRATOR_BASIC_CONF_LEN				127
 
 #define CONCENTRATOR_RUN_MODE_ADD				151			//集控器运行模式EEPROM存储地址
 #define CONCENTRATOR_RUN_MODE_LEN				3
@@ -125,8 +125,8 @@
 #define LAMP_LIST_NUM_ADD						23533		//灯具配置数量表
 #define LAMP_LIST_NUM_LEN						68
 
-#define LAMP_BASIC_CONG_ADD						55022		//灯具基础配置
-#define LAMP_BASIC_CONG_LEN						18
+#define LAMP_NODE_LOSS_ALARM_CONF_ADD			23601		//灯具节点丢失告警配置地址
+#define LAMP_NODE_LOSS_ALARM_CONF_LEN			3
 
 #define LAMP_APPOINTMENT_NUM_ADD				23608		//灯具策略配置数量地址
 #define LAMP_APPOINTMENT_NUM_LEN				6
@@ -135,18 +135,21 @@
 #define LAMP_STRATEGY_NUM_LEN					6
 
 #define LAMP_CONF_ADD							23620		//单灯基础配置
-#define LAMP_CONF_LEN							28
+#define LAMP_CONF_LEN							29
 
 #define LAMP_APPOINTMENT_ADD					38468		//单灯预约控制配置
-#define LAMP_APPOINTMENT_LEN					116
+#define LAMP_APPOINTMENT_LEN					95
 
-#define LAMP_STRATEGY_ADD						39116		//单灯策略配置
+#define LAMP_STRATEGY_ADD						39418		//单灯策略配置
 #define LAMP_STRATEGY_LEN						31
 
-#define LAMP_GROUP_LIST_NUM_ADD					54988		//灯具每组配置数量表
-#define LAMP_GROUP_LIST_NUM_LEN					34
+#define LAMP_GROUP_LIST_NUM_ADD					55290		//灯具每组配置数量表
+#define LAMP_GROUP_LIST_NUM_LEN					22
 
-#define LAMP_FW_STATE_ADD						55039		//灯具固件更新状态EEPROM存储地址
+#define LAMP_BASIC_CONG_ADD						55312		//灯具基础配置
+#define LAMP_BASIC_CONG_LEN						18
+
+#define LAMP_FW_STATE_ADD						55330		//灯具固件更新状态EEPROM存储地址
 #define LAMP_FW_STATE_LEN						79
 
 

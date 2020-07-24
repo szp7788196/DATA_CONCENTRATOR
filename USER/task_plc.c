@@ -43,118 +43,166 @@ void vTaskPLC(void *pvParameters)
 
 void RecvAndExecuteLampPlcExecuteTask(void)
 {
-	u8 ret = 0;
 	static time_t time_sec = 0;
-	static u16 dev_index = 0;
-	static u8 broadcast_state = 0;
+	u8 ret = 0;
+	u8 i = 0;
 	u8 j = 0;
 	u8 k = 0;
+	u8 got_frame = 0;
 	BaseType_t xResult;
 	LampConfig_S lamp_config;
 	LampPlcExecuteTaskState_S task_state;
 
-	static LampPlcExecuteTask_S *recv_task = NULL;
 	static LampPlcExecuteTask_S *task_progress = NULL;
+	static LampPlcExecuteTask_S *task_backup = NULL;
 	PlcFrame_S frame;
 
-	if(recv_task == NULL)
+	if(task_progress == NULL)
 	{
-		xResult = xQueueReceive(xQueue_LampPlcExecuteTaskToPlc,(void *)&recv_task,(TickType_t)pdMS_TO_TICKS(1));
+		xResult = xQueueReceive(xQueue_LampPlcExecuteTaskToPlc,(void *)&task_progress,(TickType_t)pdMS_TO_TICKS(1));
 
 		if(xResult == pdPASS)
 		{
-			task_progress = (LampPlcExecuteTask_S *)pvPortMalloc(sizeof(LampPlcExecuteTask_S));
+			time_sec = GetSysTick1s();			//记录开始时间
 
-			if(task_progress != NULL)
+			if(task_progress->notify_enable == 1)
 			{
-				memcpy(task_progress,recv_task,sizeof(LampPlcExecuteTask_S));
+				LampPlcExecuteTask_S *task_notify = NULL;
 
-				if(recv_task->notify_enable == 1)
+				task_notify = (LampPlcExecuteTask_S *)pvPortMalloc(sizeof(LampPlcExecuteTask_S));
+
+				if(task_notify != NULL)
 				{
-					if(xQueueSend(xQueue_LampPlcExecuteTaskFromPlc,(void *)&task_progress,(TickType_t)10) != pdPASS)
+					ret = CopyLampPlcExecuteTask(task_notify,task_progress);
+
+					if(ret == 1)
 					{
+						if(xQueueSend(xQueue_LampPlcExecuteTaskFromPlc,(void *)&task_notify,(TickType_t)10) != pdPASS)
+						{
 #ifdef DEBUG_LOG
-						printf("send xQueue_LampPlcExecuteTaskFromPlc fail.\r\n");
+							printf("send xQueue_LampPlcExecuteTaskFromPlc fail.\r\n");
 #endif
-						DeleteLampPlcExecuteTask(task_progress);
+							DeleteLampPlcExecuteTask(task_notify);
+						}
+					}
+					else
+					{
+						DeleteLampPlcExecuteTask(task_notify);
+						task_notify = NULL;
 					}
 				}
 			}
-			else
-			{
-				DeleteLampPlcExecuteTask(task_progress);
-				DeleteLampPlcExecuteTask(recv_task);
-
-				task_progress = NULL;
-				recv_task = NULL;
-			}
-
-			time_sec = GetSysTick1s();			//记录开始时间
-
-			dev_index = 0;
-			broadcast_state = 0;
 		}
 	}
 
-	if(recv_task != NULL)
+	xResult = xQueueReceive(xQueue_LampPlcExecuteTaskState,(void *)&task_state,(TickType_t)pdMS_TO_TICKS(1));
+
+	if(xResult == pdPASS)
 	{
-
-		xResult = xQueueReceive(xQueue_LampPlcExecuteTaskState,(void *)&task_state,(TickType_t)pdMS_TO_TICKS(1));
-
-		if(xResult == pdPASS)
+		switch(task_state.state)
 		{
-			if(task_state.cmd_code == recv_task->cmd_code)
-			{
-				if(task_state.state == 1)		//停止执行当前任务
+			case (u8)STATE_START:
+				if(task_progress == NULL)
 				{
-					task_progress->state = STATE_FINISHED;
+					if(task_state.cmd_code == task_backup->cmd_code)
+					{
+						task_progress = task_backup;
 
-					goto FINISHED;
+						task_backup = NULL;
+					}
 				}
-			}
-		}
+			break;
 
-		if(recv_task->broadcast_type == 0)
+			case (u8)STATE_STOP:
+				if(task_progress != NULL)
+				{
+					if(task_state.cmd_code == task_progress->cmd_code)
+					{
+						task_progress->state = STATE_FINISHED;
+
+						goto FINISHED;
+					}
+				}
+			break;
+
+			case (u8)STATE_SUSPEND:
+				if(task_progress != NULL)
+				{
+					if(task_state.cmd_code == task_progress->cmd_code)
+					{
+						if(task_backup != NULL)
+						{
+							DeleteLampPlcExecuteTask(task_backup);
+
+							task_backup = NULL;
+						}
+
+						if(task_backup == NULL)
+						{
+							task_backup = task_progress;
+
+							task_progress = NULL;
+
+							goto FINISHED;
+						}
+					}
+				}
+			break;
+
+			default:
+			break;
+		}
+	}
+
+	if(task_progress != NULL)
+	{
+		if(task_progress->broadcast_type == 0)
 		{
-			if(recv_task->execute_type == 0)
+			if(task_progress->execute_type == 0)
 			{
 				memset(&frame,0,sizeof(PlcFrame_S));
 
-				frame.address = 0xFFFF;					//直接广播
+				frame.address = 0xFFFF;						//直接广播
 				frame.type = 0;
-				frame.group_id = 0;
 				frame.wait_ack = 0;
 				frame.resp_ack = 0;
 				task_progress->success_num = task_progress->dev_num;
 				task_progress->failed_num = task_progress->dev_num;
+				task_progress->executed_num ++;
 
-				CombinePlcUserFrame(recv_task,&frame);
+				if(task_progress->executed_num <= task_progress->execute_total_num)
+				{
+					got_frame = CombinePlcUserFrame(task_progress,&frame);
+				}
+				else
+				{
+					task_progress->state = STATE_FINISHED;
+				}
 			}
 			else
 			{
-				if(recv_task->cmd_code <= 0x010F && broadcast_state == 0)
+				if(task_progress->cmd_code <= 0x010F && task_progress->broadcast_state == 0)
 				{
-					broadcast_state = 1;
+					task_progress->broadcast_state = 1;
 
 					memset(&frame,0,sizeof(PlcFrame_S));
 
 					frame.address = 0xFFFF;					//先执行广播
 					frame.type = 0;
-					frame.group_id = 0;
 					frame.wait_ack = 0;
 					frame.resp_ack = 0;
 
-					CombinePlcUserFrame(recv_task,&frame);
+					got_frame = CombinePlcUserFrame(task_progress,&frame);
 				}
 
 				READ_DEVICE_CONF1:
-				ret = ReadSpecifyLampNumList(dev_index);
+				ret = ReadSpecifyLampNumList(task_progress->executed_index);
 
 				if(ret == 1)
 				{
 					memset(&lamp_config,0,sizeof(LampConfig_S));
 
-					ret = ReadLampConfig(dev_index,&lamp_config);
+					ret = ReadLampConfig(task_progress->executed_index,&lamp_config);
 
 					if(ret == 1)
 					{
@@ -162,17 +210,26 @@ void RecvAndExecuteLampPlcExecuteTask(void)
 
 						frame.address = lamp_config.address;		//单播
 						frame.type = 1;
-						frame.group_id = 0;
 						frame.wait_ack = 1;
-						frame.resp_ack = recv_task->execute_type - 1;
+						frame.resp_ack = task_progress->execute_type - 1;
+						task_progress->executed_num ++;
 
-						CombinePlcUserFrame(recv_task,&frame);
+						if(task_progress->executed_num <= task_progress->execute_total_num)
+						{
+							got_frame = CombinePlcUserFrame(task_progress,&frame);
+						}
+						else
+						{
+							task_progress->state = STATE_FINISHED;
+						}
 					}
 				}
 
-				if(dev_index <= MAX_LAMP_CONF_NUM)
+				task_progress->executed_index ++;
+
+				if(task_progress->executed_index <= MAX_LAMP_CONF_NUM)
 				{
-					if(frame.cmd_code == 0x00)
+					if(got_frame == 0)
 					{
 						goto READ_DEVICE_CONF1;
 					}
@@ -183,60 +240,63 @@ void RecvAndExecuteLampPlcExecuteTask(void)
 				}
 			}
 		}
-		else if(recv_task->broadcast_type == 1)
+		else if(task_progress->broadcast_type == 1)
 		{
-			if(recv_task->execute_type == 0)
+			if(task_progress->execute_type == 0)
 			{
-				for(j = 0; j < MAX_LAMP_GROUP_NUM; j ++)				//直接组播
+				memset(&frame,0,sizeof(PlcFrame_S));						//直接组播
+
+				frame.address = 0xFFFF;
+				frame.type = 0;
+				frame.group_num = task_progress->group_num;
+				for(i = 0; i < task_progress->group_num; i ++)
 				{
-					if(recv_task->group_dev_id[j] != 0)
-					{
-						memset(&frame,0,sizeof(PlcFrame_S));
+					frame.group_id[i] = (u8)task_progress->group_dev_id[i];
+				}
+				frame.wait_ack = 0;
+				frame.resp_ack = 0;
+				task_progress->success_num = task_progress->dev_num;
+				task_progress->failed_num = task_progress->dev_num;
+				task_progress->executed_num ++;
 
-						frame.address = 0xFFFF;
-						frame.type = 0;
-						frame.group_id = recv_task->group_dev_id[j];
-						frame.wait_ack = 0;
-						frame.resp_ack = 0;
-						task_progress->success_num = task_progress->dev_num;
-						task_progress->failed_num = task_progress->dev_num;
-						task_progress->state = STATE_FINISHED;
-
-						CombinePlcUserFrame(recv_task,&frame);
-					}
+				if(task_progress->executed_num <= task_progress->execute_total_num)
+				{
+					got_frame = CombinePlcUserFrame(task_progress,&frame);
+				}
+				else
+				{
+					task_progress->state = STATE_FINISHED;
 				}
 			}
 			else
 			{
-				if(recv_task->cmd_code <= 0x010F && broadcast_state == 0)
+				if(task_progress->cmd_code <= 0x010F && task_progress->broadcast_state == 0)
 				{
-					broadcast_state = 1;
+					task_progress->broadcast_state = 1;
 
-					for(j = 0; j < MAX_LAMP_GROUP_NUM; j ++)				//先组播
+					memset(&frame,0,sizeof(PlcFrame_S));						//先组播
+
+					frame.address = 0xFFFF;
+					frame.type = 0;
+					frame.group_num = task_progress->group_num;
+					for(i = 0; i < task_progress->group_num; i ++)
 					{
-						if(recv_task->group_dev_id[j] != 0)
-						{
-							memset(&frame,0,sizeof(PlcFrame_S));
-
-							frame.address = 0xFFFF;
-							frame.type = 0;
-							frame.group_id = recv_task->group_dev_id[j];
-							frame.wait_ack = 0;
-							frame.resp_ack = 0;
-
-							CombinePlcUserFrame(recv_task,&frame);
-						}
+						frame.group_id[i] = (u8)task_progress->group_dev_id[i];
 					}
+					frame.wait_ack = 0;
+					frame.resp_ack = 0;
+
+					got_frame = CombinePlcUserFrame(task_progress,&frame);
 				}
 
 				READ_DEVICE_CONF2:
-				ret = ReadSpecifyLampNumList(dev_index ++);
+				ret = ReadSpecifyLampNumList(task_progress->executed_index);
 
 				if(ret == 1)
 				{
 					memset(&lamp_config,0,sizeof(LampConfig_S));
 
-					ret = ReadLampConfig(dev_index,&lamp_config);
+					ret = ReadLampConfig(task_progress->executed_index,&lamp_config);
 
 					if(ret == 1)
 					{
@@ -244,26 +304,35 @@ void RecvAndExecuteLampPlcExecuteTask(void)
 						{
 							for(k = 0; k < MAX_LAMP_GROUP_NUM; k ++)
 							{
-								if(lamp_config.group[j] == recv_task->group_dev_id[k])
+								if(lamp_config.group[j] == task_progress->group_dev_id[k])
 								{
 									memset(&frame,0,sizeof(PlcFrame_S));
 
 									frame.address = lamp_config.address;		//单播
 									frame.type = 1;
-									frame.group_id = 0;
 									frame.wait_ack = 1;
-									frame.resp_ack = recv_task->execute_type - 1;
+									frame.resp_ack = task_progress->execute_type - 1;
+									task_progress->executed_num ++;
 
-									CombinePlcUserFrame(recv_task,&frame);
+									if(task_progress->executed_num <= task_progress->execute_total_num)
+									{
+										got_frame = CombinePlcUserFrame(task_progress,&frame);
+									}
+									else
+									{
+										task_progress->state = STATE_FINISHED;
+									}
 								}
 							}
 						}
 					}
 				}
 
-				if(dev_index <= MAX_LAMP_CONF_NUM)
+				task_progress->executed_index ++;
+
+				if(task_progress->executed_index <= MAX_LAMP_CONF_NUM)
 				{
-					if(frame.cmd_code == 0x00)
+					if(got_frame == 0)
 					{
 						goto READ_DEVICE_CONF2;
 					}
@@ -274,40 +343,46 @@ void RecvAndExecuteLampPlcExecuteTask(void)
 				}
 			}
 		}
-		else if(recv_task->broadcast_type == 2)
+		else if(task_progress->broadcast_type == 2)
 		{
-			READ_DEVICE_CONF3:
-			if(recv_task->group_dev_id[dev_index ++] != 0)
+			if(task_progress->group_dev_id[task_progress->executed_index] != 0)
 			{
 				memset(&frame,0,sizeof(PlcFrame_S));
 
-				frame.address = recv_task->group_dev_id[dev_index];
+				frame.address = task_progress->group_dev_id[task_progress->executed_index];
 				frame.type = 1;
-				frame.group_id = 0;
 				frame.wait_ack = 1;
-				frame.resp_ack = recv_task->execute_type - 1;
+				frame.resp_ack = task_progress->execute_type - 1;
+				task_progress->executed_num ++;
 
-				CombinePlcUserFrame(recv_task,&frame);
-			}
-			
-			if(dev_index <= MAX_LAMP_CONF_NUM)
-			{
-				if(frame.cmd_code == 0x00)
+				if(task_progress->executed_num <= task_progress->execute_total_num)
 				{
-					goto READ_DEVICE_CONF2;
+					got_frame = CombinePlcUserFrame(task_progress,&frame);
+				}
+				else
+				{
+					task_progress->state = STATE_FINISHED;
 				}
 			}
-			else
+
+			task_progress->executed_index ++;
+
+			if(task_progress->executed_index >= task_progress->dev_num)
 			{
-				task_progress->state = STATE_FINISHED;
+				if(task_progress->executed_num < task_progress->execute_total_num)
+				{
+					task_progress->executed_index = 0;
+				}
+				else
+				{
+					task_progress->state = STATE_FINISHED;
+				}
 			}
 		}
 
-		if(frame.cmd_code != 0x00)
+		if(got_frame == 1)
 		{
 			task_progress->state = SendPlcFrameToDeviceAndWaitResponse(frame);		//向PLC发送数据并等待返回
-			
-			frame.cmd_code = 0x00;
 		}
 
 		if(frame.buf != NULL)
@@ -332,25 +407,39 @@ void RecvAndExecuteLampPlcExecuteTask(void)
 				task_progress->timeout_num ++;
 			}
 
-			task_progress->state = STATE_IDLE;
+			task_progress->state = STATE_START;
 
-			if(recv_task->notify_enable == 1)
+			if(task_progress->notify_enable == 1)
 			{
-				if(xQueueSend(xQueue_LampPlcExecuteTaskFromPlc,(void *)&task_progress,(TickType_t)10) != pdPASS)
+				LampPlcExecuteTask_S *task_notify = NULL;
+
+				task_notify = (LampPlcExecuteTask_S *)pvPortMalloc(sizeof(LampPlcExecuteTask_S));
+
+				if(task_notify != NULL)
 				{
+					ret = CopyLampPlcExecuteTask(task_notify,task_progress);
+
+					if(ret == 1)
+					{
+						if(xQueueSend(xQueue_LampPlcExecuteTaskFromPlc,(void *)&task_notify,(TickType_t)10) != pdPASS)
+						{
 #ifdef DEBUG_LOG
-					printf("send xQueue_LampPlcExecuteTaskFromPlc fail.\r\n");
+							printf("send xQueue_LampPlcExecuteTaskFromPlc fail.\r\n");
 #endif
-					DeleteLampPlcExecuteTask(task_progress);
+							DeleteLampPlcExecuteTask(task_notify);
+						}
+					}
+					else
+					{
+						DeleteLampPlcExecuteTask(task_notify);
+						task_notify = NULL;
+					}
 				}
 			}
 		}
 		else if(task_progress->state == STATE_FINISHED)
 		{
 			FINISHED:
-			DeleteLampPlcExecuteTask(recv_task);
-			recv_task = NULL;
-
 			if(frame.buf != NULL)
 			{
 				vPortFree(frame.buf);
@@ -359,7 +448,7 @@ void RecvAndExecuteLampPlcExecuteTask(void)
 
 			task_progress->spent_time = GetSysTick1s() - time_sec;		//计算总耗时
 
-			if(recv_task->notify_enable == 1)
+			if(task_progress->notify_enable == 1)
 			{
 				if(xQueueSend(xQueue_LampPlcExecuteTaskFromPlc,(void *)&task_progress,(TickType_t)10) != pdPASS)
 				{
@@ -381,6 +470,7 @@ void RecvAndExecuteLampPlcExecuteTask(void)
 
 u8 CombinePlcUserFrame(LampPlcExecuteTask_S *task,PlcFrame_S *frame)
 {
+	u8 ret = 1;
 	u8 buf[256] = {0};
 	LampStrategyGroupSwitch_S *strategy_switch = NULL;
 
@@ -496,10 +586,6 @@ u8 CombinePlcUserFrame(LampPlcExecuteTask_S *task,PlcFrame_S *frame)
 
 		break;
 
-		case 0x01A6:	//告警配置同步（预留）
-
-		break;
-
 		case 0x01D2:	//重新写址
 
 		break;
@@ -545,7 +631,7 @@ u8 CombinePlcUserFrame(LampPlcExecuteTask_S *task,PlcFrame_S *frame)
 		break;
 	}
 
-	return frame->len;
+	return ret;
 }
 
 u8 CombinePlcBottomFrame(PlcFrame_S *frame,u8 *outbuf)
@@ -577,7 +663,7 @@ u8 CombinePlcBottomFrame(PlcFrame_S *frame,u8 *outbuf)
 
 EXECUTE_STATE_E SendPlcFrameToDeviceAndWaitResponse(PlcFrame_S in_frame)
 {
-	EXECUTE_STATE_E ret = STATE_IDLE;
+	EXECUTE_STATE_E ret = STATE_START;
 	PlcFrame_S *ack_frame = NULL;
 	u8 send_buf[256] = {0};
 	u8 send_len = 0;
@@ -708,7 +794,7 @@ PlcFrame_S* RecvAndAnalysisPlcBottomFrame(u8 mode)
 
 	if(Usart2RecvEnd != 0xAA)
 	{
-		return NULL;
+		goto GET_OUT;
 	}
 
 	if(Usart2FrameLen < 8)
@@ -716,7 +802,7 @@ PlcFrame_S* RecvAndAnalysisPlcBottomFrame(u8 mode)
 		Usart2RecvEnd = 0;
 		Usart2FrameLen = 0;
 
-		return NULL;
+		goto GET_OUT;
 	}
 
 	inbuf = Usart2RxBuf;
@@ -734,7 +820,7 @@ PlcFrame_S* RecvAndAnalysisPlcBottomFrame(u8 mode)
 
 	if(check_sum_read != check_sum_cal)
 	{
-		return NULL;
+		goto GET_OUT;
 	}
 
 	check_xor_read = *(inbuf + len - 1);
@@ -743,12 +829,12 @@ PlcFrame_S* RecvAndAnalysisPlcBottomFrame(u8 mode)
 
 	if(check_xor_read != check_xor_cal)
 	{
-		return NULL;
+		goto GET_OUT;
 	}
 
 	if(*(inbuf + 0) != 0x79)
 	{
-		return 0;
+		goto GET_OUT;
 	}
 
 	frame_len = (((u16)(*(inbuf + 2))) << 8) + (u16)(*(inbuf + 1));
@@ -778,7 +864,7 @@ PlcFrame_S* RecvAndAnalysisPlcBottomFrame(u8 mode)
 
 			if(frame_len != user_data_len + 3 + 6 + 2)
 			{
-				return NULL;
+				goto GET_OUT;
 			}
 
 			msg = inbuf + 16;
@@ -792,7 +878,6 @@ PlcFrame_S* RecvAndAnalysisPlcBottomFrame(u8 mode)
 				ack_frame->wait_ack = 1;
 				ack_frame->resp_ack = 1;
 				ack_frame->cmd_code = 0;
-				ack_frame->group_id = 0;
 
 				ack_frame->buf = (u8 *)pvPortMalloc(user_data_len * sizeof(u8));
 
@@ -813,9 +898,34 @@ PlcFrame_S* RecvAndAnalysisPlcBottomFrame(u8 mode)
 		break;
 	}
 
+	GET_OUT:
 	xSemaphoreGive(xMutex_USART2);
 
 	return ack_frame;
+}
+
+u8 CopyLampPlcExecuteTask(LampPlcExecuteTask_S *d_task,LampPlcExecuteTask_S *s_task)
+{
+	u8 ret = 1;
+
+	if(s_task == NULL || s_task == NULL)
+	{
+		return 0;
+	}
+	else
+	{
+		memset(d_task,0,sizeof(LampPlcExecuteTask_S));
+	}
+
+	memcpy(d_task,s_task,sizeof(LampPlcExecuteTask_S));
+
+	d_task->data = NULL;
+
+	d_task->data = (void *)pvPortMalloc(d_task->data_len * sizeof(u8));
+
+	memcpy(d_task->data,s_task->data,d_task->data_len);
+
+	return ret;
 }
 
 //释放PlcFrame结构体申请的内存

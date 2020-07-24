@@ -3,12 +3,15 @@
 #include "history_record.h"
 #include "common.h"
 #include "fattester.h"
+#include "exfuns.h"
 
 
 
 
 TaskHandle_t xHandleTaskSTORE = NULL;
 unsigned portBASE_TYPE SatckSTORE;
+u32 total_size = 0;
+u32 free_size = 0;
 
 void vTaskSTORE(void *pvParameters)
 {
@@ -35,10 +38,12 @@ void RecvAndStoreAlarmReport(void)
 	{
 		StoreAlarmToSpiFlash(alarm_report);
 
-		mf_scan_files("1:CONCEN/ALARM");
+		mf_scan_files("1:");
 
 		DeleteAlarmReport(alarm_report);
 	}
+	
+	exf_getfree("1:",&total_size,&free_size);
 }
 
 void RecvAndSendEventHistoryToServer(void)

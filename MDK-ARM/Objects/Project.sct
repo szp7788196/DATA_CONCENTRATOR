@@ -14,4 +14,7 @@ LR_IROM1 0x08000000 0x00100000  {    ; load region size_region
   RW_IRAM2 0x10000000 0x00010000  {
    .ANY (ccmram)
   }
+;  RW_IRAM3 0x2001E000 UNINIT 0x00002000 {  ; STACK ADDRESS
+;  startup_stm32f40_41xxx.o (STACK)
+;  }
 }

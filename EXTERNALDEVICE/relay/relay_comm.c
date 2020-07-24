@@ -12,12 +12,13 @@ void RelaySendStateChangesReportFrameToServer(RelayModuleState_S *module_state)
 	u8 i = 0;
 	u8 m = 0;
 	u8 n = 0;
+	u16 str_len = 0;
 	char tmp[10] = {0};
 	char *buf = NULL;
 	ServerFrameStruct_S *server_frame_struct = NULL;		//用于响应服务器
 
 	buf = (char *)pvPortMalloc(400 * sizeof(char));
-
+	
 	if(buf != NULL)
 	{
 		server_frame_struct = (ServerFrameStruct_S *)pvPortMalloc(sizeof(ServerFrameStruct_S));
@@ -124,8 +125,12 @@ void RelaySendStateChangesReportFrameToServer(RelayModuleState_S *module_state)
 									strcat(buf,",");
 								}
 							}
-
-							buf[strlen(buf) - 1] = '\0';
+							
+							str_len = strlen(buf);
+							if(str_len != 0)
+							{
+								buf[str_len - 1] = 0;
+							}
 						}
 						else
 						{
@@ -152,7 +157,7 @@ void RelaySendStateChangesReportFrameToServer(RelayModuleState_S *module_state)
 
 			ConvertFrameStructToFrame(server_frame_struct);
 		}
-
+		
 		vPortFree(buf);
 	}
 }
@@ -663,6 +668,7 @@ u8 RelayGetCurrentState(ServerFrameStruct_S *server_frame_struct)
 	u8 m = 0;
 	u8 n = 0;
 	u8 ret = 0;
+	u16 str_len = 0;
 	u8 module_num = 0;
 	u8 add = 0;
 	u8 ch = 0;
@@ -686,7 +692,6 @@ u8 RelayGetCurrentState(ServerFrameStruct_S *server_frame_struct)
 			ret = ConvertFrameStructToFrame(resp_server_frame_struct);
 
 			buf = (char *)pvPortMalloc(400 * sizeof(char));
-
 			if(buf != NULL)
 			{
 				module_num = server_frame_struct->para_num / 2;
@@ -811,7 +816,11 @@ u8 RelayGetCurrentState(ServerFrameStruct_S *server_frame_struct)
 													}
 												}
 
-												buf[strlen(buf) - 1] = '\0';
+												str_len = strlen(buf);
+												if(str_len != 0)
+												{
+													buf[str_len - 1] = 0;
+												}
 											}
 											else
 											{
@@ -840,7 +849,6 @@ u8 RelayGetCurrentState(ServerFrameStruct_S *server_frame_struct)
 						}
 					}
 				}
-
 				vPortFree(buf);
 			}
 		}
@@ -1125,6 +1133,7 @@ u8 RelayGetAlarmConfiguration(ServerFrameStruct_S *server_frame_struct)
 	u8 j = 0;
 	u8 m = 0;
 	u8 ret = 0;
+	u16 str_len = 0;
 	char tmp[10] = {0};
 	char *buf = NULL;
 
@@ -1135,7 +1144,7 @@ u8 RelayGetAlarmConfiguration(ServerFrameStruct_S *server_frame_struct)
 	if(resp_server_frame_struct != NULL)
 	{
 		buf = (char *)pvPortMalloc(1100 * sizeof(char));
-
+		
 		if(buf != NULL)
 		{
 			CopyServerFrameStruct(server_frame_struct,resp_server_frame_struct,0);
@@ -1229,7 +1238,11 @@ u8 RelayGetAlarmConfiguration(ServerFrameStruct_S *server_frame_struct)
 					}
 				}
 
-				buf[strlen(buf) - 1] = 0;	//去掉最后一个'|'
+				str_len = strlen(buf);
+				if(str_len != 0)
+				{
+					buf[str_len - 1] = 0;
+				}
 				resp_server_frame_struct->para[i].len = strlen(buf);
 				resp_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
 				if(resp_server_frame_struct->para[i].value != NULL)
@@ -1261,7 +1274,7 @@ u8 RelayGetAlarmConfiguration(ServerFrameStruct_S *server_frame_struct)
 			}
 
 			ret = ConvertFrameStructToFrame(resp_server_frame_struct);
-
+			
 			vPortFree(buf);
 		}
 		else
@@ -1672,6 +1685,7 @@ u8 RelayGetBasicConfiguration(ServerFrameStruct_S *server_frame_struct)
 	u8 en = 0;
 	u8 ret = 0;
 	u16 time = 0;
+	u16 str_len = 0;
 	u8 group_num = 0;
 	char tmp[10] = {0};
 	char *buf = NULL;
@@ -1691,7 +1705,7 @@ u8 RelayGetBasicConfiguration(ServerFrameStruct_S *server_frame_struct)
 			resp_server_frame_struct->msg_type 	= (u8)DEVICE_RESPONSE_UP;	//响应服务器类型
 			resp_server_frame_struct->msg_len 	= 10;
 			resp_server_frame_struct->err_code 	= (u8)NO_ERR;
-			resp_server_frame_struct->para_num 	= 3;
+			resp_server_frame_struct->para_num 	= 5;
 
 			resp_server_frame_struct->para = (Parameter_S *)pvPortMalloc(resp_server_frame_struct->para_num * sizeof(Parameter_S));
 
@@ -1873,7 +1887,11 @@ u8 RelayGetBasicConfiguration(ServerFrameStruct_S *server_frame_struct)
 					}
 				}
 
-				buf[strlen(buf) - 1] = 0;
+				str_len = strlen(buf);
+				if(str_len != 0)
+				{
+					buf[str_len - 1] = 0;
+				}
 				resp_server_frame_struct->para[i].len = strlen(buf);
 				resp_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
 				if(resp_server_frame_struct->para[i].value != NULL)
@@ -2047,7 +2065,7 @@ u8 RelayGetRelayAppointment(ServerFrameStruct_S *server_frame_struct)
 	if(resp_server_frame_struct != NULL)
 	{
 		buf = (char *)pvPortMalloc(220 * sizeof(char));
-
+		
 		if(buf != NULL)
 		{
 			CopyServerFrameStruct(server_frame_struct,resp_server_frame_struct,0);
@@ -2144,7 +2162,7 @@ u8 RelayGetRelayAppointment(ServerFrameStruct_S *server_frame_struct)
 			}
 
 			ret = ConvertFrameStructToFrame(resp_server_frame_struct);
-
+			
 			vPortFree(buf);
 		}
 		else

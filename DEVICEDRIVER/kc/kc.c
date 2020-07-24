@@ -149,7 +149,7 @@ void ControlAllBuiltOutRelay(RelayModuleState_S state)
 			if(xQueueSend(xQueue_Rs485Rs485Frame,(void *)&frame,(TickType_t)10) != pdPASS)
 			{
 #ifdef DEBUG_LOG
-				printf("send xQueue_Rs485Rs485Frame fail.\r\n");
+				printf("relay send xQueue_Rs485Rs485Frame fail.\r\n");
 #endif
 				DeleteRs485Frame(frame);
 			}
@@ -188,7 +188,7 @@ void GetBuiltOutRelayState(RelayModuleState_S state)
 			if(xQueueSend(xQueue_Rs485Rs485Frame,(void *)&frame,(TickType_t)10) != pdPASS)
 			{
 #ifdef DEBUG_LOG
-				printf("send xQueue_Rs485Rs485Frame fail.\r\n");
+				printf("relay send xQueue_Rs485Rs485Frame fail.\r\n");
 #endif
 				DeleteRs485Frame(frame);
 			}

@@ -1603,7 +1603,7 @@ u8 GetBasicConfiguration(ServerFrameStruct_S *server_frame_struct)
 		resp_server_frame_struct->msg_type 	= (u8)DEVICE_RESPONSE_UP;	//响应服务器类型
 		resp_server_frame_struct->msg_len 	= 10;
 		resp_server_frame_struct->err_code 	= (u8)NO_ERR;
-		resp_server_frame_struct->para_num = 24;
+		resp_server_frame_struct->para_num = 15;
 
 		resp_server_frame_struct->para = (Parameter_S *)pvPortMalloc(resp_server_frame_struct->para_num * sizeof(Parameter_S));
 

@@ -107,7 +107,7 @@ void GetBuiltOutInputCollectorState(InputCollectorState_S state)
 			if(xQueueSend(xQueue_Rs485Rs485Frame,(void *)&frame,(TickType_t)10) != pdPASS)
 			{
 #ifdef DEBUG_LOG
-				printf("send xQueue_Rs485Rs485Frame fail.\r\n");
+				printf("data collector send xQueue_Rs485Rs485Frame fail.\r\n");
 #endif
 				DeleteRs485Frame(frame);
 			}

@@ -94,7 +94,7 @@ u8 exfuns_init(void)
 
 	file = (FIL*)pvPortMalloc(sizeof(FIL));		//为file申请内存
 
-	fatbuf = (u8*)pvPortMalloc(512);				//为fatbuf申请内存
+	fatbuf = (u8*)pvPortMalloc(4096);				//为fatbuf申请内存
 
 	if(file && fatbuf)
 	{
