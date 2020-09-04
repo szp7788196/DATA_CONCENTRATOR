@@ -168,21 +168,21 @@ void DebugMon_Handler(void)
   */
 void EXTI0_IRQHandler(void)
 {
-  portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
+	portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
 
-  if(EXTI_GetITStatus(ETH_LINK_EXTI_LINE) != RESET)
-  {
-  /* Give the semaphore to wakeup LwIP task */
-  xSemaphoreGiveFromISR( ETH_link_xSemaphore, &xHigherPriorityTaskWoken );
-  }
-   /* Clear interrupt pending bit */
-   EXTI_ClearITPendingBit(ETH_LINK_EXTI_LINE);
+	if(EXTI_GetITStatus(ETH_LINK_EXTI_LINE) != RESET)
+	{
+		/* Give the semaphore to wakeup LwIP task */
+		xSemaphoreGiveFromISR( ETH_link_xSemaphore, &xHigherPriorityTaskWoken );
+	}
+	/* Clear interrupt pending bit */
+	EXTI_ClearITPendingBit(ETH_LINK_EXTI_LINE);
 
-    /* Switch tasks if necessary. */
-  if( xHigherPriorityTaskWoken != pdFALSE )
-  {
-    portEND_SWITCHING_ISR( xHigherPriorityTaskWoken );
-  }
+	/* Switch tasks if necessary. */
+	if( xHigherPriorityTaskWoken != pdFALSE )
+	{
+		portEND_SWITCHING_ISR( xHigherPriorityTaskWoken );
+	}
 }
 
 /**
@@ -212,10 +212,10 @@ void ETH_IRQHandler()
 
 	ETH_DMAClearITPendingBit(ETH_DMA_IT_NIS);
 
-//	if( xHigherPriorityTaskWoken != pdFALSE )
-//	{
+	if( xHigherPriorityTaskWoken != pdFALSE )
+	{
 		portEND_SWITCHING_ISR( xHigherPriorityTaskWoken );
-//	}
+	}
 }
 
 //void ETH_IRQHandler()

@@ -10,7 +10,13 @@
 u32 STMFLASH_ReadWord(u32 faddr)
 {
 	return *(vu32*)faddr; 
-}  
+}
+
+u16 STMFLASH_ReadHalfWord(u32 faddr)
+{
+	return *(vu16*)faddr; 
+}
+
 //获取某个地址所在的flash扇区
 //addr:flash地址
 //返回值:0~11,即addr所在的扇区

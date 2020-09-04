@@ -10,6 +10,7 @@
 #include "task_handle_server_frame.h"
 #include "concentrator_conf.h"
 #include "concentrator_comm.h"
+#include "ec20.h"
 
 
 u8 ETH_ConnectState = ETH_UNKNOW;
@@ -32,9 +33,17 @@ void vTaskTCP_CLIENT(void *pvParameters)
 	
 	while (1)
 	{
-		LoginResponse = 0;
+		RE_CONNECT:
 		ETH_ConnectState = ETH_UNKNOW;
-		
+
+		if((ConcentratorBasicConfig.connection_mode == (u8)MODE_INSIDE && 
+		   EC20ConnectState == CONNECTED) || 
+		   ConcentratorBasicConfig.connection_mode == (u8)MODE_4G)
+		{
+			delay_ms(1000);
+			
+			goto RE_CONNECT;
+		}
 //#ifdef USE_DHCP
 		if(lwipdev.dhcpenable == 1)
 		{
@@ -64,11 +73,21 @@ void vTaskTCP_CLIENT(void *pvParameters)
 			
 			tcp_clientconn->recv_timeout = 10;
 			netconn_getaddr(tcp_clientconn,&loca_ipaddr,&loca_port,1); //获取本地IP主机IP地址和端口号
+			
+			ETH_ConnectState = ETH_CONNECTED;
+
+#ifdef DEBUG_LOG
 			printf("连接上服务器%d.%d.%d.%d,本机端口号为:%d\r\n",lwipdev.remoteip[0],lwipdev.remoteip[1], lwipdev.remoteip[2],lwipdev.remoteip[3],loca_port);
+#endif
 			
 			while(1)
 			{
-				ETH_ConnectState = ETH_CONNECTED;
+				if((ConcentratorBasicConfig.connection_mode == (u8)MODE_INSIDE && 
+				   EC20ConnectState == CONNECTED) || 
+				   ConcentratorBasicConfig.connection_mode == (u8)MODE_4G)
+				{
+					goto CLOSE_CONNECTION;
+				}
 				
 				if((recv_err = netconn_recv(tcp_clientconn,&recvbuf)) == ERR_OK)  //接收到数据
 				{
@@ -86,11 +105,16 @@ void vTaskTCP_CLIENT(void *pvParameters)
 				
 				PullEthTxQueueAndSendFrame();
 				
-				if(recv_err == ERR_CLSD)  //关闭连接
+				if(recv_err == ERR_CLSD || recv_err == ERR_ABRT)  //关闭连接
 				{
+					CLOSE_CONNECTION:
 					netconn_close(tcp_clientconn);
 					netconn_delete(tcp_clientconn);
+#ifdef DEBUG_LOG
 					printf("服务器%d.%d.%d.%d断开连接\r\n",lwipdev.remoteip[0],lwipdev.remoteip[1], lwipdev.remoteip[2],lwipdev.remoteip[3]);
+#endif
+					LoginResponse = 0;
+					
 					break;
 				}
 				

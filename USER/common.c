@@ -5,6 +5,7 @@
 #include "electricity_meter_conf.h"
 #include "e_meter.h"
 #include "lamp_conf.h"
+#include "lumeter_conf.h"
 
 SemaphoreHandle_t  xMutex_USART2 = NULL;
 SemaphoreHandle_t  xMutex_SPI2 = NULL;
@@ -57,8 +58,30 @@ QueueHandle_t xQueue_LampPlcExecuteTaskState = NULL;
 
 
 
-time_t SysTick1s = 86400;
+time_t SysTick1s = DEFAULT_TIME_SEC;
 time_t SysTick10ms = 0;
+
+
+//冒泡排序
+void bubbleSort(u32 *arr,int n)
+{
+	int m,i,j;
+	
+	for(i = 0; i < n - 1; i ++)
+	{
+		for(j = 0; j < n - 1 - i; j ++)
+		{
+			if(arr[j] > arr[j + 1])
+			{
+				m = arr[j];
+				
+				arr[j] = arr[j + 1];
+				
+				arr[j + 1] = m;
+			}
+		}	
+	}	
+}
 
 //获取系统1秒滴答时钟
 time_t GetSysTick1s(void)
@@ -688,7 +711,12 @@ void ReadTotalConfigurationParameters(void)
 	ReadLampGroupListNum();					//读取每组单灯数量表
 	ReadLampFrameWareState();				//读取灯具固件升级状态
 	ReadLampAppointmentNum();				//读取单灯预约控制配置数量
-	ReadLampNodeLossAlarmConfig();			//读取灯具节点丢失告警配置		
+	ReadLampStrategyNumList();				//读取单灯任务配置个数列表
+	
+	ReadLumeterConfigNum();					//读取光照计配置个数
+	ReadLumeterBasicConfig();				//读取光照计基础配置
+	ReadLumeterAlarmConfig();				//读取光照计告警配置
+	ReadLumeterConfig();					//读取光照计配置
 }
 
 

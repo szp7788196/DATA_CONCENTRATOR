@@ -21,6 +21,7 @@
 #include "electricity_meter_conf.h"
 #include "lamp_conf.h"
 #include "lamp_event.h"
+#include "lumeter_conf.h"
 
 
 //u8 eprombuf[100];
@@ -57,9 +58,9 @@ int main(void)
 	PLC_Init();											//PLC模块初始化
 	
 	
-	siiize = sizeof(ConcentratorBasicConfig_S);
-	siiize = sizeof(RelayModuleBasicConfig_S);
-	siiize = sizeof(LampBasicConfig_S);
+	siiize = sizeof(LumeterBasicConfig_S);
+	siiize = sizeof(LumeterConfig_S);
+	siiize = sizeof(LumeterAlarmConfig_S);
 
 
 	init_mount_flash();									//初始化并挂载flash

@@ -39,7 +39,7 @@ void RelaySendStateChangesReportFrameToServer(RelayModuleState_S *module_state)
 			{
 				server_frame_struct->para[i].type = 0x3001;
 				memset(buf,0,25);
-				sprintf(buf, "%x",module_state->address);
+				sprintf(buf, "%X",module_state->address);
 				server_frame_struct->para[i].len = strlen(buf);
 				server_frame_struct->para[i].value = (u8 *)pvPortMalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
 				if(server_frame_struct->para[i].value != NULL)
@@ -61,7 +61,7 @@ void RelaySendStateChangesReportFrameToServer(RelayModuleState_S *module_state)
 
 				server_frame_struct->para[i].type = 0x3003;
 				memset(buf,0,25);
-				sprintf(buf, "%04x",module_state->loop_channel_bit);
+				sprintf(buf, "%04X",module_state->loop_channel_bit);
 				server_frame_struct->para[i].len = strlen(buf);
 				server_frame_struct->para[i].value = (u8 *)pvPortMalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
 				if(server_frame_struct->para[i].value != NULL)
@@ -72,7 +72,7 @@ void RelaySendStateChangesReportFrameToServer(RelayModuleState_S *module_state)
 
 				server_frame_struct->para[i].type = 0x3004;
 				memset(buf,0,25);
-				sprintf(buf, "%04x",module_state->loop_current_state);
+				sprintf(buf, "%04X",module_state->loop_current_state);
 				server_frame_struct->para[i].len = strlen(buf);
 				server_frame_struct->para[i].value = (u8 *)pvPortMalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
 				if(server_frame_struct->para[i].value != NULL)
@@ -153,9 +153,13 @@ void RelaySendStateChangesReportFrameToServer(RelayModuleState_S *module_state)
 					memcpy(server_frame_struct->para[i].value,buf,server_frame_struct->para[i].len + 1);
 				}
 				i ++;
+				
+				ConvertFrameStructToFrame(server_frame_struct);
 			}
-
-			ConvertFrameStructToFrame(server_frame_struct);
+			else
+			{
+				DeleteServerFrameStruct(server_frame_struct);
+			}
 		}
 		
 		vPortFree(buf);
@@ -727,7 +731,7 @@ u8 RelayGetCurrentState(ServerFrameStruct_S *server_frame_struct)
 
 									state_server_frame_struct->para[i].type = 0x3001;
 									memset(buf,0,25);
-									sprintf(buf, "%x",RelayModuleState[j].address);
+									sprintf(buf, "%X",RelayModuleState[j].address);
 									state_server_frame_struct->para[i].len = strlen(buf);
 									state_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((state_server_frame_struct->para[i].len + 1) * sizeof(u8));
 									if(state_server_frame_struct->para[i].value != NULL)
@@ -749,7 +753,7 @@ u8 RelayGetCurrentState(ServerFrameStruct_S *server_frame_struct)
 
 									state_server_frame_struct->para[i].type = 0x3003;
 									memset(buf,0,25);
-									sprintf(buf, "%04x",RelayModuleState[j].loop_channel_bit);
+									sprintf(buf, "%04X",RelayModuleState[j].loop_channel_bit);
 									state_server_frame_struct->para[i].len = strlen(buf);
 									state_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((state_server_frame_struct->para[i].len + 1) * sizeof(u8));
 									if(state_server_frame_struct->para[i].value != NULL)
@@ -760,7 +764,7 @@ u8 RelayGetCurrentState(ServerFrameStruct_S *server_frame_struct)
 
 									state_server_frame_struct->para[i].type = 0x3004;
 									memset(buf,0,25);
-									sprintf(buf, "%04x",RelayModuleState[j].loop_current_state);
+									sprintf(buf, "%04X",RelayModuleState[j].loop_current_state);
 									state_server_frame_struct->para[i].len = strlen(buf);
 									state_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((state_server_frame_struct->para[i].len + 1) * sizeof(u8));
 									if(state_server_frame_struct->para[i].value != NULL)
@@ -842,9 +846,13 @@ u8 RelayGetCurrentState(ServerFrameStruct_S *server_frame_struct)
 										memcpy(state_server_frame_struct->para[i].value,buf,state_server_frame_struct->para[i].len + 1);
 									}
 									i ++;
+									
+									ret = ConvertFrameStructToFrame(state_server_frame_struct);
 								}
-								
-								ret = ConvertFrameStructToFrame(state_server_frame_struct);
+								else
+								{
+									DeleteServerFrameStruct(state_server_frame_struct);
+								}
 							}
 						}
 					}
@@ -1201,7 +1209,7 @@ u8 RelayGetAlarmConfiguration(ServerFrameStruct_S *server_frame_struct)
 						if(RelayModuleConfig[m].loop_alarm_thre[j][0] == j + 1)
 						{
 							memset(tmp,0,10);
-							sprintf(tmp, "%x",RelayModuleConfig[m].address);
+							sprintf(tmp, "%X",RelayModuleConfig[m].address);
 							strcat(buf,tmp);
 							strcat(buf,",");
 
@@ -1221,7 +1229,7 @@ u8 RelayGetAlarmConfiguration(ServerFrameStruct_S *server_frame_struct)
 							strcat(buf,",");
 
 							memset(tmp,0,10);
-							sprintf(tmp, "%x",RelayModuleConfig[m].loop_alarm_thre[j][2]);
+							sprintf(tmp, "%X",RelayModuleConfig[m].loop_alarm_thre[j][2]);
 							strcat(buf,tmp);
 							strcat(buf,",");
 
@@ -1271,10 +1279,14 @@ u8 RelayGetAlarmConfiguration(ServerFrameStruct_S *server_frame_struct)
 					memcpy(resp_server_frame_struct->para[i].value,buf,resp_server_frame_struct->para[i].len + 1);
 				}
 				i ++;
+				
+				ret = ConvertFrameStructToFrame(resp_server_frame_struct);
+			}
+			else
+			{
+				DeleteServerFrameStruct(resp_server_frame_struct);
 			}
 
-			ret = ConvertFrameStructToFrame(resp_server_frame_struct);
-			
 			vPortFree(buf);
 		}
 		else
@@ -1402,9 +1414,13 @@ u8 RelayGetAlarmReportHistory(ServerFrameStruct_S *server_frame_struct)
 				memcpy(resp_server_frame_struct->para[i].value,buf,resp_server_frame_struct->para[i].len + 1);
 			}
 			i ++;
+			
+			ret = ConvertFrameStructToFrame(resp_server_frame_struct);
 		}
-
-		ret = ConvertFrameStructToFrame(resp_server_frame_struct);
+		else
+		{
+			DeleteServerFrameStruct(resp_server_frame_struct);
+		}
 	}
 
 	return ret;
@@ -1765,7 +1781,7 @@ u8 RelayGetBasicConfiguration(ServerFrameStruct_S *server_frame_struct)
 				for(m = 0; m < RelayModuleConfigNum.number; m ++)
 				{
 					memset(tmp,0,10);
-					sprintf(tmp, "%x",RelayModuleConfig[m].address);
+					sprintf(tmp, "%X",RelayModuleConfig[m].address);
 					strcat(buf,tmp);
 					strcat(buf,",");
 
@@ -1809,7 +1825,7 @@ u8 RelayGetBasicConfiguration(ServerFrameStruct_S *server_frame_struct)
 					for(j = 0; j < RelayModuleConfig[m].loop_num; j ++)
 					{
 						memset(tmp,0,10);
-						sprintf(tmp, "%x",RelayModuleConfig[m].address);
+						sprintf(tmp, "%X",RelayModuleConfig[m].address);
 						strcat(buf,tmp);
 						strcat(buf,",");
 
@@ -1899,9 +1915,13 @@ u8 RelayGetBasicConfiguration(ServerFrameStruct_S *server_frame_struct)
 					memcpy(resp_server_frame_struct->para[i].value,buf,resp_server_frame_struct->para[i].len + 1);
 				}
 				i ++;
+				
+				ret = ConvertFrameStructToFrame(resp_server_frame_struct);
 			}
-
-			ret = ConvertFrameStructToFrame(resp_server_frame_struct);
+			else
+			{
+				DeleteServerFrameStruct(resp_server_frame_struct);
+			}
 
 			vPortFree(buf);
 		}
@@ -2064,7 +2084,7 @@ u8 RelayGetRelayAppointment(ServerFrameStruct_S *server_frame_struct)
 
 	if(resp_server_frame_struct != NULL)
 	{
-		buf = (char *)pvPortMalloc(220 * sizeof(char));
+		buf = (char *)pvPortMalloc(256 * sizeof(char));
 		
 		if(buf != NULL)
 		{
@@ -2081,7 +2101,7 @@ u8 RelayGetRelayAppointment(ServerFrameStruct_S *server_frame_struct)
 			{
 				for(i = 0; i < resp_server_frame_struct->para_num; i ++)
 				{
-					memset(buf,0,220);
+					memset(buf,0,256);
 					memset(&appointment,0,sizeof(RelaySenceConfig_S));
 
 					ret = ReadRelayAppointment(i,&appointment);
@@ -2143,7 +2163,7 @@ u8 RelayGetRelayAppointment(ServerFrameStruct_S *server_frame_struct)
 							}
 							strcat(buf,",");
 							memset(tmp,0,10);
-							sprintf(tmp, "%02x",appointment.range[j].week_enable);
+							sprintf(tmp, "%02X",appointment.range[j].week_enable);
 							strcat(buf,tmp);
 							if(j < appointment.time_range_num - 1)
 							{
@@ -2159,10 +2179,14 @@ u8 RelayGetRelayAppointment(ServerFrameStruct_S *server_frame_struct)
 						memcpy(resp_server_frame_struct->para[i].value,buf,resp_server_frame_struct->para[i].len + 1);
 					}
 				}
+				
+				ret = ConvertFrameStructToFrame(resp_server_frame_struct);
+			}
+			else
+			{
+				DeleteServerFrameStruct(resp_server_frame_struct);
 			}
 
-			ret = ConvertFrameStructToFrame(resp_server_frame_struct);
-			
 			vPortFree(buf);
 		}
 		else
@@ -2436,7 +2460,7 @@ u8 RelayGetRelayStrategy(ServerFrameStruct_S *server_frame_struct)
 					for(j = 0; j < strategy.action_num; j ++)
 					{
 						memset(tmp,0,10);
-						sprintf(tmp, "%x",strategy.action[j].module_address);
+						sprintf(tmp, "%X",strategy.action[j].module_address);
 						strcat(buf,tmp);
 						strcat(buf,",");
 
@@ -2446,12 +2470,12 @@ u8 RelayGetRelayStrategy(ServerFrameStruct_S *server_frame_struct)
 						strcat(buf,",");
 
 						memset(tmp,0,10);
-						sprintf(tmp, "%04x",strategy.action[j].loop_channel);
+						sprintf(tmp, "%04X",strategy.action[j].loop_channel);
 						strcat(buf,tmp);
 						strcat(buf,",");
 
 						memset(tmp,0,10);
-						sprintf(tmp, "%04x",strategy.action[j].loop_action);
+						sprintf(tmp, "%04X",strategy.action[j].loop_action);
 						strcat(buf,tmp);
 						if(j < strategy.action_num - 1)
 						{
@@ -2467,9 +2491,13 @@ u8 RelayGetRelayStrategy(ServerFrameStruct_S *server_frame_struct)
 					memcpy(resp_server_frame_struct->para[i].value,buf,resp_server_frame_struct->para[i].len + 1);
 				}
 			}
+			
+			ret = ConvertFrameStructToFrame(resp_server_frame_struct);
 		}
-
-		ret = ConvertFrameStructToFrame(resp_server_frame_struct);
+		else
+		{
+			DeleteServerFrameStruct(resp_server_frame_struct);
+		}
 	}
 
 	return ret;

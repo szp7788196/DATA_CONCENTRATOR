@@ -532,7 +532,7 @@ CONNECT_STATE_E ec20_get_AT_QISTATE(void)
 	CONNECT_STATE_E ret = UNKNOW_STATE;
 	char buf[32];
 
-    if(AT_SendCmd("AT+QISTATE=1,0\r\n", "OK", 100,0,TIMEOUT_1S) == 1)
+    if(AT_SendCmd("AT+QISTATE=1,0\r\n", "OK", 100,3,TIMEOUT_1S) == 1)
     {
 		if(search_str((unsigned char *)result_ptr->data, "+QISTATE:") != -1)
 		{
@@ -617,7 +617,7 @@ unsigned char ec20_get_AT_QISEND(unsigned char *buf,unsigned short len)
 	{
 		ec20_send_data(buf,len);
 
-		ret = AT_SendData(buf,len,"SEND OK",0,0,TIMEOUT_1S);
+		ret = AT_SendData(buf,len,"SEND OK",100,0,TIMEOUT_1S);
 	}
 	
 	ringbuf_clear(result_ptr);

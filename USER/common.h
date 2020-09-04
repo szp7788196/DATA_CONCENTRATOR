@@ -46,6 +46,8 @@
 #define SOFT_WARE_VRESION						101			//软件版本号
 #define HARD_WARE_VRESION						101			//硬件版本号
 
+#define DEFAULT_TIME_SEC						86400
+
  
 #define CONCENTRATOR_BASIC_CONF_ADD				0			//集控器基础参数配置EEPROM存储地址
 #define CONCENTRATOR_BASIC_CONF_LEN				127
@@ -134,24 +136,38 @@
 #define LAMP_STRATEGY_NUM_ADD					23614		//灯具预约配置数量地址
 #define LAMP_STRATEGY_NUM_LEN					6
 
-#define LAMP_CONF_ADD							23620		//单灯基础配置
-#define LAMP_CONF_LEN							29
-
-#define LAMP_APPOINTMENT_ADD					38468		//单灯预约控制配置
-#define LAMP_APPOINTMENT_LEN					95
-
-#define LAMP_STRATEGY_ADD						39418		//单灯策略配置
-#define LAMP_STRATEGY_LEN						31
-
-#define LAMP_GROUP_LIST_NUM_ADD					55290		//灯具每组配置数量表
+#define LAMP_GROUP_LIST_NUM_ADD					23620		//灯具每组配置数量表
 #define LAMP_GROUP_LIST_NUM_LEN					22
 
-#define LAMP_BASIC_CONG_ADD						55312		//灯具基础配置
+#define LAMP_BASIC_CONG_ADD						23642		//灯具基础配置
 #define LAMP_BASIC_CONG_LEN						18
 
-#define LAMP_FW_STATE_ADD						55330		//灯具固件更新状态EEPROM存储地址
+#define LAMP_FW_STATE_ADD						23660		//灯具固件更新状态EEPROM存储地址
 #define LAMP_FW_STATE_LEN						79
 
+#define LAMP_APPOINTMENT_ADD					23739		//单灯预约控制配置
+#define LAMP_APPOINTMENT_LEN					95
+
+#define LAMP_CONF_ADD							24689		//单灯基础配置
+#define LAMP_CONF_LEN							31
+
+#define LAMP_STRATEGY_ADD						40561		//单灯策略配置
+#define LAMP_STRATEGY_LEN						51
+
+#define LAMP_STRATEGY_LIST_NUM_ADD				66673		//单灯任务配置数量列表
+#define LAMP_STRATEGY_LIST_NUM_LEN				68
+
+#define LUMETER_CONF_NUM_ADD					70000		//光照计配置数量地址
+#define LUMETER_CONF_NUM_LEN					6
+
+#define LUMETER_BASIC_CONF_ADD					70006		//光照计基础配置
+#define LUMETER_BASIC_CONF_LEN					25
+
+#define LUMETER_ALARM_CONF_ADD					70031		//光照计告警参数配置
+#define LUMETER_ALARM_CONF_LEN					4
+
+#define LUMETER_CONF_ADD						70035		//光照计配置地址
+#define LUMETER_CONF_LEN						42
 
 
 
@@ -358,6 +374,7 @@ extern QueueHandle_t xQueue_LampPlcExecuteTaskState;
 extern time_t SysTick1s;
 extern time_t SysTick10ms;
 
+void bubbleSort(u32 *arr,int n);
 time_t GetSysTick1s(void);
 time_t GetSysTick10ms(void);
 u8 char_upper(u8 c);

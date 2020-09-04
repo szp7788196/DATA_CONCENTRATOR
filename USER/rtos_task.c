@@ -15,6 +15,7 @@
 #include "task_rs485.h"
 #include "task_plc.h"
 #include "task_input_collector.h"
+#include "task_lumeter.h"
 #include "lamp_comm.h"
 
 /*任务优先级列表
@@ -50,7 +51,7 @@ void AppTaskCreate(void)
 				256,         						/* stack大小,单位word,也就是4字节 */
 				NULL,        						/* 任务参数  */
 				configMAX_PRIORITIES - 0,           /* 任务优先级*/
-				&xHandleTask4G);
+				&xHandleTask4G);					/* 任务句柄  */
 
 	xTaskCreate(vTaskHANDLE_SERVER_FRAME,    		/* 指示灯任务  */
 				"",  								/* 任务名称    */
@@ -75,7 +76,7 @@ void AppTaskCreate(void)
 				
 	xTaskCreate(vTaskLAMP,    						/* 指示灯任务  */
 				"",  								/* 任务名称    */
-				512,         						/* stack大小,单位word,也就是4字节 */
+				384,         						/* stack大小,单位word,也就是4字节 */
 				NULL,        						/* 任务参数  */
 				configMAX_PRIORITIES - 7,           /* 任务优先级*/
 				&xHandleTaskLAMP); 					/* 任务句柄  */
@@ -94,46 +95,46 @@ void AppTaskCreate(void)
 				configMAX_PRIORITIES - 9,           /* 任务优先级*/
 				&xHandleTaskELECTRICITY_METER); 	/* 任务句柄  */
 				
-//	xTaskCreate(vTaskLUMETER,    						/* 指示灯任务  */
-//				"",  								/* 任务名称    */
-//				1024,         						/* stack大小,单位word,也就是4字节 */
-//				NULL,        						/* 任务参数  */
-//				configMAX_PRIORITIES - 10,           /* 任务优先级*/
-//				&xHandleTaskRELAY); 				/* 任务句柄  */
-
-	xTaskCreate(vTaskPLC,    						/* 指示灯任务  */
+	xTaskCreate(vTaskLUMETER,    					/* 指示灯任务  */
 				"",  								/* 任务名称    */
 				128,         						/* stack大小,单位word,也就是4字节 */
 				NULL,        						/* 任务参数  */
-				configMAX_PRIORITIES - 11,           /* 任务优先级*/
-				&xHandleTaskPLC);
+				configMAX_PRIORITIES - 10,          /* 任务优先级*/
+				&xHandleTaskRELAY); 				/* 任务句柄  */
+
+	xTaskCreate(vTaskPLC,    						/* 指示灯任务  */
+				"",  								/* 任务名称    */
+				384,         						/* stack大小,单位word,也就是4字节 */
+				NULL,        						/* 任务参数  */
+				configMAX_PRIORITIES - 11,          /* 任务优先级*/
+				&xHandleTaskPLC);					/* 任务句柄  */
 
 	xTaskCreate(vTaskRS485,    						/* 指示灯任务  */
 				"",  								/* 任务名称    */
 				128,         						/* stack大小,单位word,也就是4字节 */
 				NULL,        						/* 任务参数  */
-				configMAX_PRIORITIES - 12,           /* 任务优先级*/
-				&xHandleTaskRS485);
+				configMAX_PRIORITIES - 12,          /* 任务优先级*/
+				&xHandleTaskRS485);					/* 任务句柄  */
 
 	xTaskCreate(vTaskLED,    						/* 指示灯任务  */
 				"",  								/* 任务名称    */
 				384,         						/* stack大小,单位word,也就是4字节 */
 				NULL,        						/* 任务参数  */
-				configMAX_PRIORITIES - 13,           /* 任务优先级*/
+				configMAX_PRIORITIES - 13,          /* 任务优先级*/
 				&xHandleTaskLED); 					/* 任务句柄  */
 				
 	xTaskCreate(vTaskSTORE,    						/* 指示灯任务  */
 				"",  								/* 任务名称    */
 				384,         						/* stack大小,单位word,也就是4字节 */
 				NULL,        						/* 任务参数  */
-				configMAX_PRIORITIES - 16,           /* 任务优先级*/
+				configMAX_PRIORITIES - 16,          /* 任务优先级*/
 				&xHandleTaskSTORE); 				/* 任务句柄  */
 				
 	xTaskCreate(vTaskLWIP_INIT,    					/* 指示灯任务  */
 				"vTaskLWIP_INIT",  					/* 任务名称    */
 				configMINIMAL_STACK_SIZE * 2,       /* stack大小,单位word,也就是4字节 */
 				NULL,        						/* 任务参数  */
-				configMAX_PRIORITIES - 17,           /* 任务优先级*/
+				configMAX_PRIORITIES - 17,          /* 任务优先级*/
 				&xHandleTaskLWIP_INIT); 			/* 任务句柄  */
 }
 

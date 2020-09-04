@@ -196,7 +196,7 @@ void ElectricityMeterCombineParasThreOverAlarm(u8 i,u8 j,u8 m,double reference_v
 			}
 			
 			memset(buf,0,25);
-			sprintf(buf, "%04x",ElectricityMeterState[i].abnormal_ch);
+			sprintf(buf, "%04X",ElectricityMeterState[i].abnormal_ch);
 			para_len = strlen(buf);
 			alarm_report->current_value = (u8 *)pvPortMalloc((para_len + 1) * sizeof(u8));
 			if(alarm_report->current_value != NULL)
@@ -206,12 +206,12 @@ void ElectricityMeterCombineParasThreOverAlarm(u8 i,u8 j,u8 m,double reference_v
 			
 			memset(buf,0,100);
 			memset(tmp,0,10);
-			sprintf(tmp, "%x",ElectricityMeterConfig[i].address);
+			sprintf(tmp, "%X",ElectricityMeterConfig[i].address);
 			strcat(buf,tmp);
 			strcat(buf,",");
 			
 			memset(tmp,0,10);
-			sprintf(tmp, "%x",ElectricityMeterConfig[i].channel);
+			sprintf(tmp, "%X",ElectricityMeterConfig[i].channel);
 			strcat(buf,tmp);
 			strcat(buf,",");
 

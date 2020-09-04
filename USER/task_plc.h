@@ -31,8 +31,7 @@ typedef struct	LampPlcExecuteTask
 	u8 broadcast_type;							//播送方式 0广播 1组播 2单播
 	u8 execute_type;							//执行方式 0广播通讯 1逐个通讯 2逐个通讯并返回结果
 	u8 group_num;								//组数量
-	u16 group_dev_id[MAX_LAMP_GROUP_NUM + 1];	//组号或设备号
-	u8 content_type;							//内容类别
+	u32 group_dev_id[MAX_LAMP_GROUP_NUM + 1];	//组号或设备号
 	void *data;									//发送数据
 	u8 data_len;								//数据长度
 	u16 success_num;							//成功数
@@ -55,7 +54,7 @@ typedef struct	LampPlcExecuteTaskState
 typedef struct	PlcFrame
 {
 	u8 type;								//播送类型  0：广播 1：单播
-	u16 address;							//设备地址
+	u32 address;							//设备地址
 	u8 cmd_code;							//命令字
 	u8 group_num;							//组数量
 	u8 group_id[MAX_LAMP_GROUP_NUM + 1];	//组号
@@ -78,11 +77,7 @@ extern TaskHandle_t xHandleTaskPLC;
 void vTaskPLC(void *pvParameters);
 
 void RecvAndExecuteLampPlcExecuteTask(void);
-u8 CombinePlcUserFrame(LampPlcExecuteTask_S *task,PlcFrame_S *frame);
-u8 CombinePlcBottomFrame(PlcFrame_S *frame,u8 *outbuf);
-EXECUTE_STATE_E SendPlcFrameToDeviceAndWaitResponse(PlcFrame_S in_frame);
-void AnalysisPlcUserFrame(PlcFrame_S *user_frame);
-PlcFrame_S* RecvAndAnalysisPlcBottomFrame(u8 mode);
+
 
 u8 CopyLampPlcExecuteTask(LampPlcExecuteTask_S *s_task,LampPlcExecuteTask_S *d_task);
 void DeletePlcFrame(PlcFrame_S *plc_frame);

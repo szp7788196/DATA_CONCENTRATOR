@@ -22,9 +22,9 @@ void CAT25X_Init(void);
 //void CAT25X_Write_Disable(void);
 //void CAT25X_Write_SR(u8 stat);
 //u8 CAT25X_Read_SR(void);
-void CAT25X_Read(u8* Buff,u16 ReadAddr,u16 Num);
-void CAT25X_Write_Page(u8* Buff,u16 ReadAddr,u16 Num);
-void CAT25X_Write(u8* Buff,u16 ReadAddr,u16 Num);
+void CAT25X_Read(u8* Buff,u32 ReadAddr,u16 Num);
+void CAT25X_Write_Page(u8* Buff,u32 ReadAddr,u16 Num);
+void CAT25X_Write(u8* Buff,u32 ReadAddr,u16 Num);
 
 
 

@@ -40,7 +40,7 @@ void InputCollectorSendStateChangesReportFrameToServer(InputCollectorState_S *mo
 
 				server_frame_struct->para[i].type = 0x3001;
 				memset(buf,0,25);
-				sprintf(buf, "%x",module_state->address);
+				sprintf(buf, "%X",module_state->address);
 				server_frame_struct->para[i].len = strlen(buf);
 				server_frame_struct->para[i].value = (u8 *)pvPortMalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
 				if(server_frame_struct->para[i].value != NULL)
@@ -64,7 +64,7 @@ void InputCollectorSendStateChangesReportFrameToServer(InputCollectorState_S *mo
 				memset(buf,0,25);
 				if(module_state->d_channel_bit != 0)
 				{
-					sprintf(buf, "%04x",module_state->d_channel_bit);
+					sprintf(buf, "%04X",module_state->d_channel_bit);
 					server_frame_struct->para[i].len = strlen(buf);
 				}
 				else
@@ -80,7 +80,7 @@ void InputCollectorSendStateChangesReportFrameToServer(InputCollectorState_S *mo
 
 				server_frame_struct->para[i].type = 0x3004;
 				memset(buf,0,25);
-				sprintf(buf, "%04x",module_state->d_current_state);
+				sprintf(buf, "%04X",module_state->d_current_state);
 				server_frame_struct->para[i].len = strlen(buf);
 				server_frame_struct->para[i].value = (u8 *)pvPortMalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
 				if(server_frame_struct->para[i].value != NULL)
@@ -93,7 +93,7 @@ void InputCollectorSendStateChangesReportFrameToServer(InputCollectorState_S *mo
 				memset(buf,0,25);
 				if(module_state->a_channel_bit != 0)
 				{
-					sprintf(buf, "%04x",module_state->a_channel_bit);
+					sprintf(buf, "%04X",module_state->a_channel_bit);
 					server_frame_struct->para[i].len = strlen(buf);
 				}
 				else
@@ -136,9 +136,13 @@ void InputCollectorSendStateChangesReportFrameToServer(InputCollectorState_S *mo
 					memcpy(server_frame_struct->para[i].value,buf,server_frame_struct->para[i].len + 1);
 				}
 				i ++;
+				
+				ConvertFrameStructToFrame(server_frame_struct);
 			}
-
-			ConvertFrameStructToFrame(server_frame_struct);
+			else
+			{
+				DeleteServerFrameStruct(server_frame_struct);
+			}
 		}
 		
 		vPortFree(buf);
@@ -352,7 +356,7 @@ u8 InputCollectorGetCurrentState(ServerFrameStruct_S *server_frame_struct)
 
 									state_server_frame_struct->para[i].type = 0x3001;
 									memset(buf,0,25);
-									sprintf(buf, "%x",InputCollectorState[j].address);
+									sprintf(buf, "%X",InputCollectorState[j].address);
 									state_server_frame_struct->para[i].len = strlen(buf);
 									state_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((state_server_frame_struct->para[i].len + 1) * sizeof(u8));
 									if(state_server_frame_struct->para[i].value != NULL)
@@ -376,7 +380,7 @@ u8 InputCollectorGetCurrentState(ServerFrameStruct_S *server_frame_struct)
 									memset(buf,0,25);
 									if(InputCollectorState[j].d_channel_bit != 0)
 									{
-										sprintf(buf, "%04x",InputCollectorState[j].d_channel_bit);
+										sprintf(buf, "%04X",InputCollectorState[j].d_channel_bit);
 										state_server_frame_struct->para[i].len = strlen(buf);
 									}
 									else
@@ -392,7 +396,7 @@ u8 InputCollectorGetCurrentState(ServerFrameStruct_S *server_frame_struct)
 
 									state_server_frame_struct->para[i].type = 0x3004;
 									memset(buf,0,25);
-									sprintf(buf, "%04x",InputCollectorState[j].d_current_state);
+									sprintf(buf, "%04X",InputCollectorState[j].d_current_state);
 									state_server_frame_struct->para[i].len = strlen(buf);
 									state_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((state_server_frame_struct->para[i].len + 1) * sizeof(u8));
 									if(state_server_frame_struct->para[i].value != NULL)
@@ -405,7 +409,7 @@ u8 InputCollectorGetCurrentState(ServerFrameStruct_S *server_frame_struct)
 									memset(buf,0,25);
 									if(InputCollectorState[j].a_channel_bit != 0)
 									{
-										sprintf(buf, "%04x",InputCollectorState[j].a_channel_bit);
+										sprintf(buf, "%04X",InputCollectorState[j].a_channel_bit);
 										state_server_frame_struct->para[i].len = strlen(buf);
 									}
 									else
@@ -439,9 +443,13 @@ u8 InputCollectorGetCurrentState(ServerFrameStruct_S *server_frame_struct)
 										memcpy(state_server_frame_struct->para[i].value,buf,state_server_frame_struct->para[i].len + 1);
 									}
 									i ++;
+									
+									ret = ConvertFrameStructToFrame(state_server_frame_struct);
 								}
-								
-								ret = ConvertFrameStructToFrame(state_server_frame_struct);
+								else
+								{
+									DeleteServerFrameStruct(state_server_frame_struct);
+								}
 							}
 						}
 					}
@@ -478,7 +486,7 @@ u8 InputCollectorSetAlarmConfiguration(ServerFrameStruct_S *server_frame_struct)
 		switch(server_frame_struct->para[j].type)
 		{
 			case 0x6001:
-				InputCollectorAlarmConfig.d_quantity_abnormal_alarm_enable = myatoi((char *)server_frame_struct->para[i].value);
+				InputCollectorAlarmConfig.d_quantity_abnormal_alarm_enable = myatoi((char *)server_frame_struct->para[j].value);
 			break;
 
 			case 0x4002:
@@ -592,7 +600,7 @@ u8 InputCollectorSetAlarmConfiguration(ServerFrameStruct_S *server_frame_struct)
 			break;
 
 			case 0x6003:
-				InputCollectorAlarmConfig.a_quantity_abnormal_alarm_enable = myatoi((char *)server_frame_struct->para[i].value);
+				InputCollectorAlarmConfig.a_quantity_abnormal_alarm_enable = myatoi((char *)server_frame_struct->para[j].value);
 			break;
 
 			case 0x4004:
@@ -804,7 +812,7 @@ u8 InputCollectorGetAlarmConfiguration(ServerFrameStruct_S *server_frame_struct)
 						if(InputCollectorConfig[m].d_alarm_thre[j].channel == j + 1)
 						{
 							memset(tmp,0,10);
-							sprintf(tmp, "%x",InputCollectorConfig[m].address);
+							sprintf(tmp, "%X",InputCollectorConfig[m].address);
 							strcat(buf,tmp);
 							strcat(buf,",");
 
@@ -881,7 +889,7 @@ u8 InputCollectorGetAlarmConfiguration(ServerFrameStruct_S *server_frame_struct)
 						if(InputCollectorConfig[m].a_alarm_thre[j].channel == j + 1)
 						{
 							memset(tmp,0,10);
-							sprintf(tmp, "%x",InputCollectorConfig[m].address);
+							sprintf(tmp, "%X",InputCollectorConfig[m].address);
 							strcat(buf,tmp);
 							strcat(buf,",");
 
@@ -956,10 +964,14 @@ u8 InputCollectorGetAlarmConfiguration(ServerFrameStruct_S *server_frame_struct)
 					memcpy(resp_server_frame_struct->para[i].value,buf,resp_server_frame_struct->para[i].len + 1);
 				}
 				i ++;
+				
+				ret = ConvertFrameStructToFrame(resp_server_frame_struct);
+			}
+			else
+			{
+				DeleteServerFrameStruct(resp_server_frame_struct);
 			}
 
-			ret = ConvertFrameStructToFrame(resp_server_frame_struct);
-			
 			vPortFree(buf);
 		}
 		else
@@ -1087,9 +1099,13 @@ u8 InputCollectorGetAlarmReportHistory(ServerFrameStruct_S *server_frame_struct)
 				memcpy(resp_server_frame_struct->para[i].value,buf,resp_server_frame_struct->para[i].len + 1);
 			}
 			i ++;
+			
+			ret = ConvertFrameStructToFrame(resp_server_frame_struct);
 		}
-
-		ret = ConvertFrameStructToFrame(resp_server_frame_struct);
+		else
+		{
+			DeleteServerFrameStruct(resp_server_frame_struct);
+		}
 	}
 
 	return ret;
@@ -1299,7 +1315,7 @@ u8 InputCollectorGetBasicConfiguration(ServerFrameStruct_S *server_frame_struct)
 				for(m = 0; m < InputCollectorConfigNum.number; m ++)
 				{
 					memset(tmp,0,10);
-					sprintf(tmp, "%x",InputCollectorConfig[m].address);
+					sprintf(tmp, "%X",InputCollectorConfig[m].address);
 					strcat(buf,tmp);
 					strcat(buf,",");
 
@@ -1343,10 +1359,14 @@ u8 InputCollectorGetBasicConfiguration(ServerFrameStruct_S *server_frame_struct)
 					memcpy(resp_server_frame_struct->para[i].value,buf,resp_server_frame_struct->para[i].len + 1);
 				}
 				i ++;
+				
+				ret = ConvertFrameStructToFrame(resp_server_frame_struct);
+			}
+			else
+			{
+				DeleteServerFrameStruct(resp_server_frame_struct);
 			}
 
-			ret = ConvertFrameStructToFrame(resp_server_frame_struct);
-			
 			vPortFree(buf);
 		}
 		else

@@ -8,6 +8,7 @@
 #include "rx8010s.h"
 #include "kc.h"
 #include "concentrator_conf.h"
+#include "lumeter_conf.h"
 
 
 
@@ -53,6 +54,7 @@ void RelayExecuteStrategyGroup(void)
 	u16 gate1 = 0;
 	u16 gate2 = 0;
 	u16 gate_n = 0;
+	static u32 Illuminance_value = 0;
 	static time_t time_s = 0;
 
 	static SunRiseSetTime_S sun_rise_set_time;
@@ -81,14 +83,16 @@ void RelayExecuteStrategyGroup(void)
 		if(sun_rise_set_time.rise_h != SunRiseSetTime.rise_h ||
 		   sun_rise_set_time.rise_m != SunRiseSetTime.rise_m ||
 		   sun_rise_set_time.set_h != SunRiseSetTime.set_h ||
-		   sun_rise_set_time.set_m != SunRiseSetTime.set_m)
+		   sun_rise_set_time.set_m != SunRiseSetTime.set_m ||
+		   Illuminance_value != LumeterAppValue)
 		{
 			sun_rise_set_time.rise_h = SunRiseSetTime.rise_h;
 			sun_rise_set_time.rise_m = SunRiseSetTime.rise_m;
 			sun_rise_set_time.set_h = SunRiseSetTime.set_h;
 			sun_rise_set_time.set_m = SunRiseSetTime.set_m;
+			Illuminance_value = LumeterAppValue;
 
-			RefreshRelayStrategyGroupActionTime(CurrentRelayStrategyGroup->group_id);
+			RefreshRelayStrategyGroupActionTime(CurrentRelayStrategyGroup->group_id,Illuminance_value);
 		}
 
 		if(CurrentRelayStrategyGroup != NULL && CurrentRelayStrategyGroup->next != NULL)		//判断策略列表是否不为空
@@ -242,11 +246,12 @@ void RelayExecuteTemporaryStrategyGroup(void)
 							}
 						}
 					}
+					
+					RelayStrategyGroupSwitchTemp.type = 0;
 				}
 			}
 		}
 
-		RelayStrategyGroupSwitchTemp.type = 0;
 		CurrentRelayStrategyGroupTemp = NULL;
 	}
 }

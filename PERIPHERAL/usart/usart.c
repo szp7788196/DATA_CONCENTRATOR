@@ -96,7 +96,7 @@ void USART1_Init(u32 BaudRate)
 	USART_ClearFlag(USART1, USART_FLAG_TXE);
 	
 	NVIC_InitStructure.NVIC_IRQChannel = USART1_IRQn;
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 7;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 4;
     NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStructure);
@@ -143,7 +143,7 @@ void USART2_Init(u32 BaudRate)
 
 	//Usart1 NVIC 配置
 	NVIC_InitStructure.NVIC_IRQChannel = USART2_IRQn;//串口1中断通道
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority=8;//抢占优先级3
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority=2;//抢占优先级3
 	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;			//IRQ通道使能
 	NVIC_Init(&NVIC_InitStructure);	//根据指定的参数初始化VIC寄存器、	
@@ -184,7 +184,7 @@ void USART4_Init(u32 BaudRate)
 	USART_ITConfig(UART4, USART_IT_IDLE,ENABLE);
 	
 	NVIC_InitStructure.NVIC_IRQChannel = UART4_IRQn;
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority=4;
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority=3;
 	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&NVIC_InitStructure);
@@ -259,7 +259,7 @@ void USART5_Init(u32 BaudRate,u16 check_mode)
 	
 	//Usart1 NVIC 配置
 	NVIC_InitStructure.NVIC_IRQChannel = UART5_IRQn;//串口1中断通道
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 6;//抢占优先级3
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;//抢占优先级3
 	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;			//IRQ通道使能
 	NVIC_Init(&NVIC_InitStructure);	//根据指定的参数初始化VIC寄存器、	
@@ -429,7 +429,7 @@ void TIM2_Init(u16 TIM2_Interval_xus)
     NVIC_InitTypeDef  NVIC_InitStructure;
     
     NVIC_InitStructure.NVIC_IRQChannel = TIM2_IRQn;
-  	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 8;//设置中断优先级
+  	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 5;//设置中断优先级
   	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
   	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
   	NVIC_Init(&NVIC_InitStructure);	

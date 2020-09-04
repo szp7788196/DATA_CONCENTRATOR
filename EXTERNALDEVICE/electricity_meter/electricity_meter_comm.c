@@ -38,7 +38,7 @@ void ElectricityMeterSendStateChangesReportFrameToServer(ElectricityMeterState_S
 
 				server_frame_struct->para[i].type = 0x3001;
 				memset(buf,0,25);
-				sprintf(buf, "%x",module_state->address);
+				sprintf(buf, "%X",module_state->address);
 				server_frame_struct->para[i].len = strlen(buf);
 				server_frame_struct->para[i].value = (u8 *)pvPortMalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
 				if(server_frame_struct->para[i].value != NULL)
@@ -121,9 +121,13 @@ void ElectricityMeterSendStateChangesReportFrameToServer(ElectricityMeterState_S
 					}
 					i ++;
 				}
+				
+				ConvertFrameStructToFrame(server_frame_struct);
 			}
-
-			ConvertFrameStructToFrame(server_frame_struct);
+			else
+			{
+				DeleteServerFrameStruct(server_frame_struct);
+			}
 		}
 		
 		vPortFree(buf);
@@ -340,7 +344,7 @@ u8 ElectricityMeterGetCurrentState(ServerFrameStruct_S *server_frame_struct)
 
 									state_server_frame_struct->para[i].type = 0x3001;
 									memset(buf,0,25);
-									sprintf(buf, "%x",ElectricityMeterState[j].address);
+									sprintf(buf, "%X",ElectricityMeterState[j].address);
 									state_server_frame_struct->para[i].len = strlen(buf);
 									state_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((state_server_frame_struct->para[i].len + 1) * sizeof(u8));
 									if(state_server_frame_struct->para[i].value != NULL)
@@ -423,9 +427,13 @@ u8 ElectricityMeterGetCurrentState(ServerFrameStruct_S *server_frame_struct)
 										}
 										i ++;
 									}
+									
+									ret = ConvertFrameStructToFrame(state_server_frame_struct);
 								}
-
-								ret = ConvertFrameStructToFrame(state_server_frame_struct);
+								else
+								{
+									DeleteServerFrameStruct(state_server_frame_struct);
+								}
 							}
 						}
 					}
@@ -707,7 +715,7 @@ u8 ElectricityMeterGetAlarmConfiguration(ServerFrameStruct_S *server_frame_struc
 							   ElectricityMeterConfig[m].alarm_thre[k][n].para_id != 0)
 							{
 								memset(tmp,0,10);
-								sprintf(tmp, "%x",ElectricityMeterConfig[m].address);
+								sprintf(tmp, "%X",ElectricityMeterConfig[m].address);
 								strcat(buf,tmp);
 								strcat(buf,",");
 
@@ -798,10 +806,14 @@ u8 ElectricityMeterGetAlarmConfiguration(ServerFrameStruct_S *server_frame_struc
 					memcpy(resp_server_frame_struct->para[i].value,buf,resp_server_frame_struct->para[i].len + 1);
 				}
 				i ++;
+				
+				ret = ConvertFrameStructToFrame(resp_server_frame_struct);
+			}
+			else
+			{
+				DeleteServerFrameStruct(resp_server_frame_struct);
 			}
 
-			ret = ConvertFrameStructToFrame(resp_server_frame_struct);
-			
 			vPortFree(buf);
 		}
 		else
@@ -929,9 +941,13 @@ u8 ElectricityMeterGetAlarmReportHistory(ServerFrameStruct_S *server_frame_struc
 				memcpy(resp_server_frame_struct->para[i].value,buf,resp_server_frame_struct->para[i].len + 1);
 			}
 			i ++;
+			
+			ret = ConvertFrameStructToFrame(resp_server_frame_struct);
 		}
-
-		ret = ConvertFrameStructToFrame(resp_server_frame_struct);
+		else
+		{
+			DeleteServerFrameStruct(resp_server_frame_struct);
+		}
 	}
 
 	return ret;
@@ -1170,7 +1186,7 @@ u8 ElectricityMeterGetBasicConfiguration(ServerFrameStruct_S *server_frame_struc
 				for(m = 0; m < ElectricityMeterConfigNum.number; m ++)
 				{
 					memset(tmp,0,10);
-					sprintf(tmp, "%x",ElectricityMeterConfig[m].address);
+					sprintf(tmp, "%X",ElectricityMeterConfig[m].address);
 					strcat(buf,tmp);
 					strcat(buf,",");
 
@@ -1229,10 +1245,14 @@ u8 ElectricityMeterGetBasicConfiguration(ServerFrameStruct_S *server_frame_struc
 					memcpy(resp_server_frame_struct->para[i].value,buf,resp_server_frame_struct->para[i].len + 1);
 				}
 				i ++;
+				
+				ret = ConvertFrameStructToFrame(resp_server_frame_struct);
+			}
+			else
+			{
+				DeleteServerFrameStruct(resp_server_frame_struct);
 			}
 
-			ret = ConvertFrameStructToFrame(resp_server_frame_struct);
-			
 			vPortFree(buf);
 		}
 		else

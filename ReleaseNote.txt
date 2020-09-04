@@ -15,3 +15,4 @@
 	 解决方法：参考https://blog.csdn.net/weixin_38428827/article/details/104015442和http://www.armbbs.cn/forum.php?mod=viewthread&tid=3462
 20200720 单灯部分完成基本框架
 20200724 解决读取空配置后无响应或重启问题，优化单灯PLC通讯框架
+20200724 除透传外，协议中提到的功能已全部完成，同时解决了运行一段时间死机的问题

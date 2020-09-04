@@ -154,6 +154,7 @@ void InitServerFrameStruct(ServerFrameStruct_S *server_frame_struct)
 		server_frame_struct->gateway_id 		= ConcentratorGateWayID.number;
 		server_frame_struct->device_id 			= 0x00000000;
 		server_frame_struct->para_num			= 0;
+		server_frame_struct->para = NULL;
 		server_frame_struct->stop				= 0x03;
 	}
 }
@@ -439,6 +440,7 @@ u8 CopyServerFrameStruct(ServerFrameStruct_S *s_server_frame_struct,ServerFrameS
 	d_server_frame_struct->gateway_id 		= s_server_frame_struct->gateway_id;
 	d_server_frame_struct->device_id 		= s_server_frame_struct->device_id;
 	d_server_frame_struct->para_num			= s_server_frame_struct->para_num;
+	d_server_frame_struct->para				= NULL;
 	d_server_frame_struct->stop				= s_server_frame_struct->stop;
 
 	if(mode == 1)

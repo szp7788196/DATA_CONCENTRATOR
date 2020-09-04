@@ -108,7 +108,7 @@ char AT_SendData(uint8_t* data, uint16_t len,uint8_t *result,uint16_t waittime,u
 
 	ringbuf_clear(result_ptr);//清除之前可能残留的信息
 #ifdef DEBUG_LOG
-	printf("cmd:%s\r\n",cmd);
+	printf("cmd:%s\r\n",data);
 #endif
 	callback((uint8_t*)data, len);
 
@@ -158,7 +158,7 @@ char AT_SendData(uint8_t* data, uint16_t len,uint8_t *result,uint16_t waittime,u
 			if(retry_num > 0 && retry_num < retry + 1)
 			{
 #ifdef DEBUG_LOG
-				printf("retry cmd:%s",cmd);
+				printf("retry cmd:%s",data);
 #endif
 				callback((uint8_t*)data, len);
 			}

@@ -249,7 +249,7 @@ void ETH_NVIC_Config(void)
 
   /* Enable the Ethernet global Interrupt */
   NVIC_InitStructure.NVIC_IRQChannel = ETH_IRQn;
-  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 11;
   NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
   NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
   NVIC_Init(&NVIC_InitStructure);
@@ -322,7 +322,7 @@ void Eth_Link_EXTIConfig(void)
 
   /* Enable and set the EXTI interrupt to priority 1*/
   NVIC_InitStructure.NVIC_IRQChannel = ETH_LINK_EXTI_IRQn;
-  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 14;
+  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 12;
   NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
   NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
   NVIC_Init(&NVIC_InitStructure);

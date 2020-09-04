@@ -76,7 +76,7 @@ void CAT25X_Wait_Busy(void)
 }
 
 //读数据
-void CAT25X_Read(u8* Buff,u16 ReadAddr,u16 Num)
+void CAT25X_Read(u8* Buff,u32 ReadAddr,u16 Num)
 {
  	u16 i;
 
@@ -101,7 +101,7 @@ void CAT25X_Read(u8* Buff,u16 ReadAddr,u16 Num)
 }
 
 //写单页数据数据，Num不超过64byte
-void CAT25X_Write_Page(u8* Buff,u16 ReadAddr,u16 Num)
+void CAT25X_Write_Page(u8* Buff,u32 ReadAddr,u16 Num)
 {
  	u16 i;
 
@@ -134,7 +134,7 @@ void CAT25X_Write_Page(u8* Buff,u16 ReadAddr,u16 Num)
 }
 
 //写数据
-void CAT25X_Write(u8* Buff,u16 WriteAddr,u16 Num)
+void CAT25X_Write(u8* Buff,u32 WriteAddr,u16 Num)
 {
 	u16 i = 0;
 	uint16_t addr = 0;

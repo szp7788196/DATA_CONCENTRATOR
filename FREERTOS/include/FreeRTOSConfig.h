@@ -126,6 +126,16 @@
 #define configUSE_IDLE_HOOK						0                       //1，使用空闲钩子；0，不使用
 #define configUSE_TICK_HOOK						0                       //1，使用时间片钩子；0，不使用
 
+////1- in the _OS_Config.h file (ex. FreeRTOSConfig.h) enable the following macros :
+//#define configUSE_IDLE_HOOK        1
+//#define configUSE_TICK_HOOK        1
+
+////2- in the _OS_Config.h define the following macros :
+//#define traceTASK_SWITCHED_IN()  extern void StartIdleMonitor(void); \
+//								 StartIdleMonitor()
+//#define traceTASK_SWITCHED_OUT() extern void EndIdleMonitor(void); \
+//								 EndIdleMonitor()
+
 /***************************************************************************************************************/
 /*                                FreeRTOS与运行时间和任务状态收集有关的配置选项                                 */
 /***************************************************************************************************************/
@@ -176,17 +186,19 @@
 #endif
 
 #define configLIBRARY_LOWEST_INTERRUPT_PRIORITY			15                      //中断最低优先级
-#define configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY	5                       //系统可管理的最高中断优先级
-//#define configKERNEL_INTERRUPT_PRIORITY 		( configLIBRARY_LOWEST_INTERRUPT_PRIORITY << (8 - configPRIO_BITS) )
-//#define configMAX_SYSCALL_INTERRUPT_PRIORITY 	( configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY << (8 - configPRIO_BITS) )
-#define configKERNEL_INTERRUPT_PRIORITY 		0xFF
-#define configMAX_SYSCALL_INTERRUPT_PRIORITY 	0x0F
+#define configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY	11                      //系统可管理的最高中断优先级
+#define configKERNEL_INTERRUPT_PRIORITY 		( configLIBRARY_LOWEST_INTERRUPT_PRIORITY << (8 - configPRIO_BITS) )
+#define configMAX_SYSCALL_INTERRUPT_PRIORITY 	( configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY << (8 - configPRIO_BITS) )
+//#define configKERNEL_INTERRUPT_PRIORITY 		0xFF
+//#define configMAX_SYSCALL_INTERRUPT_PRIORITY 	0x0B
 
 /***************************************************************************************************************/
 /*                                FreeRTOS与中断服务函数有关的配置选项                                          */
 /***************************************************************************************************************/
 #define xPortPendSVHandler 	PendSV_Handler
 #define vPortSVCHandler 	SVC_Handler
+
+
 
 #endif /* FREERTOS_CONFIG_H */
 

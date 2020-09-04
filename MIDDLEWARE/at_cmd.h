@@ -2,6 +2,7 @@
 #define AT_CMD_H
 #include <stdint.h>
 #include "ringbuf.h"
+#include "common.h"
 
 
 extern RingBuf *result_ptr;

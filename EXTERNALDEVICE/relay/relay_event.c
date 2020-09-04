@@ -140,7 +140,7 @@ void RelayAlarmTaskAbnormal(void)
 					}
 
 					memset(buf,0,25);
-					sprintf(buf, "%04x",RelayModuleState[i].abnormal_loop);
+					sprintf(buf, "%04X",RelayModuleState[i].abnormal_loop);
 					para_len = strlen(buf);
 					alarm_report->current_value = (u8 *)pvPortMalloc((para_len + 1) * sizeof(u8));
 					if(alarm_report->current_value != NULL)
@@ -158,10 +158,10 @@ void RelayAlarmTaskAbnormal(void)
 					}
 
 					memset(buf,0,25);
-					sprintf(tmp, "%04x",RelayModuleState[i].loop_task_state);
+					sprintf(tmp, "%04X",RelayModuleState[i].loop_task_state);
 					strcat(buf,tmp);
 					strcat(buf,",");
-					sprintf(tmp, "%04x",RelayModuleState[i].loop_current_state);
+					sprintf(tmp, "%04X",RelayModuleState[i].loop_current_state);
 					strcat(buf,tmp);
 					strcat(buf,",");
 					sprintf(tmp, "%d",RelayModuleState[i].controller);
@@ -358,7 +358,7 @@ void RelayAlarmContactAbnormal(void)
 					}
 
 					memset(buf,0,25);
-					sprintf(buf, "%04x",RelayModuleState[i].abnormal_loop);
+					sprintf(buf, "%04X",RelayModuleState[i].abnormal_loop);
 					para_len = strlen(buf);
 					alarm_report->current_value = (u8 *)pvPortMalloc((para_len + 1) * sizeof(u8));
 					if(alarm_report->current_value != NULL)
@@ -373,7 +373,7 @@ void RelayAlarmContactAbnormal(void)
 						  (RelayModuleState[i].abnormal_loop & (1 << k)) != 0)
 						{
 							memset(tmp,0,10);
-							sprintf(tmp, "%x",RelayModuleConfig[i].address);
+							sprintf(tmp, "%X",RelayModuleConfig[i].address);
 							strcat(buf,tmp);
 							strcat(buf,",");
 
@@ -421,7 +421,7 @@ void RelayAlarmContactAbnormal(void)
 					}
 
 					memset(buf,0,25);
-					sprintf(buf, "%04x",RelayModuleState[i].loop_current_state);
+					sprintf(buf, "%04X",RelayModuleState[i].loop_current_state);
 					para_len = strlen(buf);
 					alarm_report->reference_value = (u8 *)pvPortMalloc((para_len + 1) * sizeof(u8));
 					if(alarm_report->reference_value != NULL)

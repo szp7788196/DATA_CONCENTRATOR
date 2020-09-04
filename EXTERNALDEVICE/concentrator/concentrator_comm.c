@@ -9,6 +9,7 @@
 #include "input_collector_comm.h"
 #include "electricity_meter_comm.h"
 #include "lamp_comm.h"
+#include "lumeter_comm.h"
 
 
 //不需要存储的数据
@@ -131,9 +132,13 @@ void SendLoginFrameToServer(void)
 				memcpy(server_frame_struct->para[i].value,buf,server_frame_struct->para[i].len + 1);
 			}
 			i ++;
+			
+			ConvertFrameStructToFrame(server_frame_struct);
 		}
-
-		ConvertFrameStructToFrame(server_frame_struct);
+		else
+		{
+			DeleteServerFrameStruct(server_frame_struct);
+		}
 	}
 }
 
@@ -181,9 +186,13 @@ void SendHeartBeatFrameToServer(void)
 				memcpy(server_frame_struct->para[i].value,buf,server_frame_struct->para[i].len + 1);
 			}
 			i ++;
+			
+			ConvertFrameStructToFrame(server_frame_struct);
 		}
-
-		ConvertFrameStructToFrame(server_frame_struct);
+		else
+		{
+			DeleteServerFrameStruct(server_frame_struct);
+		}
 	}
 }
 
@@ -240,9 +249,13 @@ void SendOtaRequestFrameToServer(FrameWareState_S frame_ware_state)
 				memcpy(server_frame_struct->para[i].value,buf,server_frame_struct->para[i].len + 1);
 			}
 			i ++;
+			
+			ConvertFrameStructToFrame(server_frame_struct);
 		}
-
-		ConvertFrameStructToFrame(server_frame_struct);
+		else
+		{
+			DeleteServerFrameStruct(server_frame_struct);
+		}
 	}
 }
 
@@ -308,9 +321,13 @@ void SendOtaCompleteFrameToServer(void)
 				memcpy(server_frame_struct->para[i].value,buf,server_frame_struct->para[i].len + 1);
 			}
 			i ++;
+			
+			ConvertFrameStructToFrame(server_frame_struct);
 		}
-
-		ConvertFrameStructToFrame(server_frame_struct);
+	}
+	else
+	{
+		DeleteServerFrameStruct(server_frame_struct);
 	}
 }
 
@@ -425,9 +442,13 @@ void SendAlarmReportFrameToServer(AlarmReport_S *alarm_report)
 					memcpy(server_frame_struct->para[i].value,alarm_report->occur_time,server_frame_struct->para[i].len + 1);
 				}
 				i ++;
+				
+				ConvertFrameStructToFrame(server_frame_struct);
 			}
-
-			ConvertFrameStructToFrame(server_frame_struct);
+			else
+			{
+				DeleteServerFrameStruct(server_frame_struct);
+			}
 		}
 	}
 }
@@ -623,7 +644,7 @@ void AutoSendFrameToServer(void)
 			}
 		}
 	}
-	else
+//	else
 	{
 		retry_times1 = 0;
 
@@ -637,6 +658,7 @@ void AutoSendFrameToServer(void)
 		LampSendExecuteLampPlcExecuteTaskToServer();		//发送单灯执行状态包
 		LampSendOtaCompleteNoticeToServer();				//发送单灯升级完成通知包
 		LampSendOtaRequestToServer();						//发送单灯固件请求包
+		LumeterSendStateChangesReportToServer();			//发送光照计状态包
 	}
 }
 
@@ -1145,9 +1167,13 @@ u8 QueryState(ServerFrameStruct_S *server_frame_struct)
 				resp_server_frame_struct->para[i].value[0] = 0;
 			}
 			i ++;
+			
+			ret = ConvertFrameStructToFrame(resp_server_frame_struct);
 		}
-
-		ret = ConvertFrameStructToFrame(resp_server_frame_struct);
+		else
+		{
+			DeleteServerFrameStruct(resp_server_frame_struct);
+		}
 	}
 
 	return ret;
@@ -1435,9 +1461,13 @@ u8 GetAlarmConfiguration(ServerFrameStruct_S *server_frame_struct)
 				memcpy(resp_server_frame_struct->para[i].value,buf,resp_server_frame_struct->para[i].len + 1);
 			}
 			i ++;
+			
+			ret = ConvertFrameStructToFrame(resp_server_frame_struct);
 		}
-
-		ret = ConvertFrameStructToFrame(resp_server_frame_struct);
+		else
+		{
+			DeleteServerFrameStruct(resp_server_frame_struct);
+		}
 	}
 
 	return ret;
@@ -1763,9 +1793,13 @@ u8 GetBasicConfiguration(ServerFrameStruct_S *server_frame_struct)
 				memcpy(resp_server_frame_struct->para[i].value,ConcentratorBasicConfig.manufacturer_website,resp_server_frame_struct->para[i].len + 1);
 			}
 			i ++;
+			
+			ret = ConvertFrameStructToFrame(resp_server_frame_struct);
 		}
-
-		ret = ConvertFrameStructToFrame(resp_server_frame_struct);
+		else
+		{
+			DeleteServerFrameStruct(resp_server_frame_struct);
+		}
 	}
 
 	return ret;
@@ -1930,9 +1964,13 @@ u8 GetLocationConfiguration(ServerFrameStruct_S *server_frame_struct)
 				}
 				i ++;
 			}
+			
+			ret = ConvertFrameStructToFrame(resp_server_frame_struct);
 		}
-
-		ret = ConvertFrameStructToFrame(resp_server_frame_struct);
+		else
+		{
+			DeleteServerFrameStruct(resp_server_frame_struct);
+		}
 	}
 
 	return ret;
@@ -2310,9 +2348,13 @@ u8 GetAlarmReportHistory(ServerFrameStruct_S *server_frame_struct)
 				memcpy(resp_server_frame_struct->para[i].value,buf,resp_server_frame_struct->para[i].len + 1);
 			}
 			i ++;
+			
+			ret = ConvertFrameStructToFrame(resp_server_frame_struct);
 		}
-
-		ret = ConvertFrameStructToFrame(resp_server_frame_struct);
+		else
+		{
+			DeleteServerFrameStruct(resp_server_frame_struct);
+		}
 	}
 
 	return ret;

@@ -246,8 +246,8 @@ void ReadRelayStrategyGroups(void);
 void ReadRelayStrategyGroupSwitch(void);
 void WriteRelayStrategyGroupSwitch(u8 reset,u8 write_enable);
 
-void RefreshRelayStrategyActionTime(pRelayStrategy strategy);
-void RefreshRelayStrategyGroupActionTime(u8 group_id);
+void RefreshRelayStrategyActionTime(pRelayStrategy strategy,u32 illuminance_value);
+void RefreshRelayStrategyGroupActionTime(u8 group_id,u32 illuminance_value);
 void RelayStrategyAdd(pRelayStrategy strategy);
 void RelayStrategyGroupDelete(u8 group_id);
 void RelayAllStrategyGroupDelete(void);

@@ -202,7 +202,7 @@ void InputCollectorD_QuantityAbnormal(void)
 							{
 								cnt[i][j] = (0 - InputCollectorConfig[i].d_alarm_thre[j].confirm_time);
 
-								occur[i][j] = 1;
+								occur[i][j] = 0;
 
 								record[i] = 1;
 								
@@ -270,7 +270,7 @@ void InputCollectorD_QuantityAbnormal(void)
 							}
 							
 							memset(buf,0,25);
-							sprintf(buf, "%04x",InputCollectorState[i].d_abnormal_loop);
+							sprintf(buf, "%04X",InputCollectorState[i].d_abnormal_loop);
 							para_len = strlen(buf);
 							alarm_report->current_value = (u8 *)pvPortMalloc((para_len + 1) * sizeof(u8));
 							if(alarm_report->current_value != NULL)
@@ -285,7 +285,7 @@ void InputCollectorD_QuantityAbnormal(void)
 								  (InputCollectorState[i].d_abnormal_loop & (1 << k)) != 0)
 								{
 									memset(tmp,0,10);
-									sprintf(tmp, "%x",InputCollectorConfig[i].address);
+									sprintf(tmp, "%X",InputCollectorConfig[i].address);
 									strcat(buf,tmp);
 									strcat(buf,",");
 
@@ -338,7 +338,7 @@ void InputCollectorD_QuantityAbnormal(void)
 							}
 							
 							memset(buf,0,25);
-							sprintf(buf, "%04x",InputCollectorState[i].d_current_state);
+							sprintf(buf, "%04X",InputCollectorState[i].d_current_state);
 							para_len = strlen(buf);
 							alarm_report->reference_value = (u8 *)pvPortMalloc((para_len + 1) * sizeof(u8));
 							if(alarm_report->reference_value != NULL)
@@ -441,7 +441,7 @@ void InputCollectorA_OverQuantityAbnormal(void)
 								{
 									cnt[i][j] = (0 - InputCollectorConfig[i].a_alarm_thre[j].confirm_time);
 
-									occur[i][j] = 1;
+									occur[i][j] = 0;
 
 									record[i] = 1;
 									
@@ -510,7 +510,7 @@ void InputCollectorA_OverQuantityAbnormal(void)
 							}
 							
 							memset(buf,0,25);
-							sprintf(buf, "%04x",InputCollectorState[i].a_abnormal_loop);
+							sprintf(buf, "%04X",InputCollectorState[i].a_abnormal_loop);
 							para_len = strlen(buf);
 							alarm_report->current_value = (u8 *)pvPortMalloc((para_len + 1) * sizeof(u8));
 							if(alarm_report->current_value != NULL)
@@ -525,7 +525,7 @@ void InputCollectorA_OverQuantityAbnormal(void)
 								  (InputCollectorState[i].d_abnormal_loop & (1 << k)) != 0)
 								{
 									memset(tmp,0,10);
-									sprintf(tmp, "%x",InputCollectorConfig[i].address);
+									sprintf(tmp, "%X",InputCollectorConfig[i].address);
 									strcat(buf,tmp);
 									strcat(buf,",");
 
@@ -709,7 +709,7 @@ void InputCollectorA_UnderQuantityAbnormal(void)
 								{
 									cnt[i][j] = (0 - InputCollectorConfig[i].a_alarm_thre[j].confirm_time);
 
-									occur[i][j] = 1;
+									occur[i][j] = 0;
 
 									record[i] = 1;
 									
@@ -778,7 +778,7 @@ void InputCollectorA_UnderQuantityAbnormal(void)
 							}
 							
 							memset(buf,0,25);
-							sprintf(buf, "%04x",InputCollectorState[i].a_abnormal_loop);
+							sprintf(buf, "%04X",InputCollectorState[i].a_abnormal_loop);
 							para_len = strlen(buf);
 							alarm_report->current_value = (u8 *)pvPortMalloc((para_len + 1) * sizeof(u8));
 							if(alarm_report->current_value != NULL)
@@ -793,7 +793,7 @@ void InputCollectorA_UnderQuantityAbnormal(void)
 								  (InputCollectorState[i].a_abnormal_loop & (1 << k)) != 0)
 								{
 									memset(tmp,0,10);
-									sprintf(tmp, "%x",InputCollectorConfig[i].address);
+									sprintf(tmp, "%X",InputCollectorConfig[i].address);
 									strcat(buf,tmp);
 									strcat(buf,",");
 

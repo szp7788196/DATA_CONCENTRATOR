@@ -18,6 +18,8 @@
 #include "plc.h"
 #include "concentrator_comm.h"
 #include "task_tcp_client.h"
+#include "task_plc.h"
+#include "cpu_utils.h"
 
 
 
@@ -25,6 +27,7 @@ TaskHandle_t xHandleTaskLED = NULL;
 unsigned portBASE_TYPE SatckLED;
 
 u32 FreeHeapSize = 0;
+//u16 CPU_Usage = 0;
 
 
 void vTaskLED(void *pvParameters)
@@ -82,13 +85,6 @@ void vTaskLED(void *pvParameters)
 			                            ConcentratorLocationConfig.latitude);
 		}
 
-		FreeHeapSize = xPortGetFreeHeapSize();
-
-		if(cnt % 50 == 0)
-		{
-			printf("FreeHeapSize:%d\r\n",FreeHeapSize);
-		}
-
 		if(cnt % 10 == 0)								//每1秒喂一次看门狗
 		{
 			IWDG_Feed_Thread();
@@ -108,6 +104,20 @@ void vTaskLED(void *pvParameters)
 		else
 		{
 			LED_RUN = 1;
+		}
+		
+		if(cnt % 20 == 0)
+		{
+			FreeHeapSize = xPortGetFreeHeapSize();
+//			CPU_Usage = osGetCPUUsage();
+
+#ifdef DEBUG_LOG
+			printf("FreeHeapSize:%d\r\n",FreeHeapSize);
+#endif
+			
+//#ifdef DEBUG_LOG
+//			printf("CPU_Usage   :%d\r\n",CPU_Usage);
+//#endif
 		}
 
 		cnt = (cnt + 1) & 0xFFFFFFFF;
@@ -546,20 +556,84 @@ u8 SetLamp_State(u8 cmd_code,u8 *data,u8 data_len,u8 *outbuf)
 {
 	u8 ret = 0;
 	u8 err_code = 0;
+	u8 *_data = NULL;
+	u32 add = 0;
+	LampPlcExecuteTask_S *task = NULL;
 
-	if(*(data + 0) == 0)			//广播
+	if(data_len == 7)
 	{
-
+		if(*(data + 0) <= 2)
+		{
+			_data = (u8 *)pvPortMalloc(4 * sizeof(u8));
+			
+			if(_data != NULL)
+			{
+				task = (LampPlcExecuteTask_S *)pvPortMalloc(sizeof(LampPlcExecuteTask_S));
+				
+				if(task != NULL)
+				{
+					memset(task,0,sizeof(LampPlcExecuteTask_S));
+					
+					task->cmd_code = 0x0103;
+					task->broadcast_type = *(data + 0);
+					
+					if(LampBasicConfig.auto_report_plc_state & (1 << 3))
+					{
+						task->notify_enable = 1;
+					}
+					
+					*(_data + 0) = 0x03;
+					*(_data + 1) = *(data + 1);
+					*(_data + 2) = *(data + 2);
+					*(_data + 3) = 0;
+					
+					task->data = _data;
+					task->data_len = 4;
+					
+					add = ((((u32)(*(data + 3))) << 24) & 0xFF000000) + 
+						  ((((u32)(*(data + 4))) << 16) & 0x00FF0000) + 
+						  ((((u32)(*(data + 5))) <<  8) & 0x0000FF00) +
+						  ((((u32)(*(data + 6))) <<  0) & 0x000000FF);
+					
+					task->group_dev_id[0] = add;
+					
+					switch(task->broadcast_type)
+					{
+						case 0:
+							task->execute_type = 0;
+							task->dev_num = LampNumList.number;
+							task->execute_total_num = 1;
+						break;
+						
+						case 1:
+							task->execute_type = 0;
+							task->group_num = 1;
+							task->dev_num = LampGroupListNum.list[task->group_dev_id[0]];
+							task->execute_total_num = 1;	
+						break;
+						
+						case 2:
+							task->execute_type = 1;
+							task->dev_num = 1;
+							task->execute_total_num = 1;
+						break;
+						
+						default:
+						break;
+					}
+					
+					if(xQueueSend(xQueue_LampPlcExecuteTaskToPlc,(void *)&task,(TickType_t)10) != pdPASS)
+					{
+#ifdef DEBUG_LOG
+						printf("send xQueue_LampPlcFrame fail.\r\n");
+#endif
+						DeleteLampPlcExecuteTask(task);
+					}
+				}
+			}
+		}
 	}
-	else if(*(data + 0) == 1)		//单播
-	{
-
-	}
-	else if(*(data + 0) == 2)		//组播
-	{
-
-	}
-
+	
 	ret = CombineMMI_Frame(cmd_code,&err_code,1,outbuf);
 
 	return ret;

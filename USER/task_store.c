@@ -20,7 +20,7 @@ void vTaskSTORE(void *pvParameters)
 		RecvAndStoreAlarmReport();
 		RecvAndSendEventHistoryToServer();
 
-		delay_ms(500);
+		delay_ms(100);
 		
 		SatckSTORE = uxTaskGetStackHighWaterMark(NULL);
 	}

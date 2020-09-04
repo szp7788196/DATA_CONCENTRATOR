@@ -20,6 +20,7 @@
 #define LAMP_FIRMWARE_BAG_SIZE				258
 #define LAMP_FIRMWARE_BUCKUP_FLASH_BASE_ADD	0x08020000	//扇区5
 #define LAMP_FIRMWARE_SIZE					131072		//128K
+#define LAMP_FIRMWARE_BAG_SEND_SIZE			128
 
 
 #define MAX_LAMP_AUTO_SYNC_TIME_CYCLE		604800	//单灯自动同步时间周期 最大一周
@@ -29,7 +30,7 @@
 #define MAX_LAMP_GROUP_NUM					10		//最多组数
 #define MAX_LAMP_ALARM_E_PARA_NUM			3		//可配置告警的电参数种类
 
-#define MAX_LAMP_STRATEGY_GROUP_NUM			256
+#define MAX_LAMP_STRATEGY_NUM				512
 #define MAX_LAMP_APPOINTMENT_NUM			10
 #define MAX_LAMP_APPOINTMENT_TIME_RANGE_NUM	10		//每个预约控制最多10个时间段
 
@@ -53,13 +54,6 @@ typedef struct	LampGroupListNum					//用于统计每组单灯配置个数
 	
 }__attribute__((packed))LampGroupListNum_S;
 
-typedef struct	LampNodeLossAlarmConfig
-{
-	u8 enable;										//告警使能
-
-	u16 crc16;										//校验码 存储用
-}__attribute__((packed))LampNodeLossAlarmConfig_S;
-
 typedef struct	ElectriccalParaAlarm
 {
 	u8 channel;									//灯头通道
@@ -71,7 +65,7 @@ typedef struct	ElectriccalParaAlarm
 	u16 duration_time;							//持续确认时长
 }__attribute__((packed))ElectriccalParaAlarm_S;
 
-typedef struct	LampAlarm
+typedef struct	LampAlarmConf
 {	
 	u8 lamp_fault_alarm_enable;						//灯具故障告警使能
 	u8 power_module_fault_alarm_enable;				//电源故障告警使能
@@ -115,8 +109,10 @@ typedef struct	LampAlarm
 	u16 light_on_fault_alarm_duration[MAX_LAMP_CH_NUM];		//亮灯异常告警检测时长
 	
 	u8 task_light_state_fault_alarm_enhable;		//任务亮灯状态异常告警使能
+	
+	u16 crc16;												//校验码 存储用
 
-}__attribute__((packed))LampAlarm_S;
+}__attribute__((packed))LampAlarmConf_S;
 
 typedef struct	LampBasicConfig
 {
@@ -136,7 +132,7 @@ typedef struct	LampBasicConfig
 
 typedef struct	LampConfig
 {
-	u16 address;											//设备地址
+	u32 address;											//设备地址
 	s8 advance_time;										//光控提前亮灯分钟数
 	s8 delay_time;											//光控延后亮灯分钟数
 	float longitude;										//经度
@@ -161,7 +157,7 @@ typedef struct	LampTask									//单灯任务内容
 	u8 time_option;											//时间选项
 	u8 brightness[MAX_LAMP_CH_NUM];							//灯头亮度
 	u8 ctrl_mode;											//配置模式 0配置所有 1配置指定组 2配置指定地址
-	u16 group_add[MAX_LAMP_GROUP_NUM];						//组号或地址
+	u32 group_add[MAX_LAMP_GROUP_NUM];						//组号或地址
 	
 	u16 crc16;												//校验码 存储用
 	
@@ -181,9 +177,11 @@ typedef struct	LampSenceConfig									//单灯场景模式配置
 typedef struct	LampStrategyGroupSwitch							//模式切换配置
 {
 	u8 group_num;												//策略组数量
-	u8 group_id[MAX_LAMP_STRATEGY_GROUP_NUM];					//策略组号
+	u8 group_id[MAX_LAMP_GROUP_NUM];							//策略组号
 	u8 type;													//切换方式
 	u8 time[15];												//切换时间
+	
+	u16 crc16;													//校验码 存储用
 
 }__attribute__((packed))LampStrategyGroupSwitch_S;
 
@@ -193,11 +191,11 @@ typedef struct	LampStrategyGroupSwitch							//模式切换配置
 extern LampBasicConfig_S LampBasicConfig;				//单灯自动对时周期
 
 extern LampGroupListNum_S LampGroupListNum;						//每组单灯数量
+extern LampListNum_S LampStrategyNumList;						//已配置的任务数量
 extern LampListNum_S LampNumList;								//已配置的单灯数量
 extern Uint32TypeNumber_S LampAppointmentNum;					//单灯预约控制数量
 extern Uint32TypeNumber_S LampStrategyNum;						//单灯策略配置数量
 extern FrameWareState_S LampFrameWareState;						//固件升级状态
-extern LampNodeLossAlarmConfig_S LampNodeLossAlarmConfig;		//节点丢失告警配置
 
 
 
@@ -207,6 +205,11 @@ void WriteLampBasicConfig(u8 reset,u8 write_enable);
 void ReadLampNumList(void);
 void WriteLampNumList(u8 reset,u8 write_enable);
 u8 ReadSpecifyLampNumList(u16 i);
+void WriteSpecifyLampNumList(u16 i,u8 mode);
+void ReadLampStrategyNumList(void);
+void WriteLampStrategyNumList(u8 reset,u8 write_enable);
+u8 ReadSpecifyLampStrategyNumList(u16 i);
+void WriteSpecifyLampStrategyNumList(u16 i,u8 mode);
 void ReadLampAppointmentNum(void);
 void WriteLampAppointmentNum(u8 reset,u8 write_enable);
 u8 ReadLampAppointment(u8 i,LampSenceConfig_S *appointment);
@@ -218,12 +221,8 @@ u8 ReadLampConfig(u16 i,LampConfig_S *config);
 void WriteLampConfig(u8 i,u8 reset,LampConfig_S config);
 u8 ReadLampTaskConfig(u16 i,LampTask_S *task);
 void WriteLampTaskConfig(u8 i,u8 reset,LampTask_S task);
-u8 ReadLampSenceConfig(u16 i,LampSenceConfig_S *sence);
-void WriteLampSenceConfig(u8 i,u8 reset,LampSenceConfig_S sence);
 u8 ReadLampFrameWareState(void);
 void WriteLampFrameWareState(u8 reset,u8 write_enable);
-void ReadLampNodeLossAlarmConfig(void);
-void WriteLampNodeLossAlarmConfig(u8 reset,u8 write_enable);
 
 
 

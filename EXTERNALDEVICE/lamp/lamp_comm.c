@@ -27,11 +27,12 @@ void LampSendExecuteLampPlcExecuteTaskFrameToServer(LampPlcExecuteTask_S *recv_t
 		server_frame_struct->msg_type 	= (u8)DEVICE_REQUEST_UP;	//响应服务器类型
 		server_frame_struct->msg_len 	= 10;
 		server_frame_struct->err_code 	= (u8)NO_ERR;
-		server_frame_struct->msg_id		= recv_task->cmd_code;
 
 		if(recv_task->state == STATE_START)		//开始执行
 		{
-			server_frame_struct->para_num = 3;
+			server_frame_struct->msg_id		= 0x0173;
+			
+			server_frame_struct->para_num = 4;
 
 			server_frame_struct->para = (Parameter_S *)pvPortMalloc(server_frame_struct->para_num * sizeof(Parameter_S));
 
@@ -39,7 +40,7 @@ void LampSendExecuteLampPlcExecuteTaskFrameToServer(LampPlcExecuteTask_S *recv_t
 			{
 				server_frame_struct->para[i].type = 0x4001;
 				memset(buf,0,10);
-				sprintf(buf, "%04x",recv_task->cmd_code);
+				sprintf(buf, "%04X",recv_task->cmd_code);
 				server_frame_struct->para[i].len = strlen(buf);
 				server_frame_struct->para[i].value = (u8 *)pvPortMalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
 				if(server_frame_struct->para[i].value != NULL)
@@ -86,11 +87,19 @@ void LampSendExecuteLampPlcExecuteTaskFrameToServer(LampPlcExecuteTask_S *recv_t
 					memcpy(server_frame_struct->para[i].value,buf,server_frame_struct->para[i].len + 1);
 				}
 				i ++;
+				
+				ConvertFrameStructToFrame(server_frame_struct);
+			}
+			else
+			{
+				DeleteServerFrameStruct(server_frame_struct);
 			}
 		}
 		else if(recv_task->state == STATE_FINISHED)		//执行结束
 		{
-			server_frame_struct->para_num = 3;
+			server_frame_struct->msg_id		= 0x0174;
+			
+			server_frame_struct->para_num = 5;
 
 			server_frame_struct->para = (Parameter_S *)pvPortMalloc(server_frame_struct->para_num * sizeof(Parameter_S));
 
@@ -98,7 +107,7 @@ void LampSendExecuteLampPlcExecuteTaskFrameToServer(LampPlcExecuteTask_S *recv_t
 			{
 				server_frame_struct->para[i].type = 0x4001;
 				memset(buf,0,10);
-				sprintf(buf, "%04x",recv_task->cmd_code);
+				sprintf(buf, "%04X",recv_task->cmd_code);
 				server_frame_struct->para[i].len = strlen(buf);
 				server_frame_struct->para[i].value = (u8 *)pvPortMalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
 				if(server_frame_struct->para[i].value != NULL)
@@ -150,10 +159,14 @@ void LampSendExecuteLampPlcExecuteTaskFrameToServer(LampPlcExecuteTask_S *recv_t
 					memcpy(server_frame_struct->para[i].value,buf,server_frame_struct->para[i].len + 1);
 				}
 				i ++;
+				
+				ConvertFrameStructToFrame(server_frame_struct);
+			}
+			else
+			{
+				DeleteServerFrameStruct(server_frame_struct);
 			}
 		}
-
-		ConvertFrameStructToFrame(server_frame_struct);
 	}
 }
 
@@ -181,8 +194,17 @@ void LampRecvLampStateAndSendToServer(void)
 			server_frame_struct->msg_type 	= (u8)DEVICE_REQUEST_UP;	//响应服务器类型
 			server_frame_struct->msg_len 	= 10;
 			server_frame_struct->err_code 	= (u8)NO_ERR;
-			server_frame_struct->msg_id		= 0x0170;
-			server_frame_struct->para_num 	= 5;
+//			server_frame_struct->msg_id		= 0x0170;
+			server_frame_struct->para_num 	= 6;
+			
+			if(state->report_type == 0)
+			{
+				server_frame_struct->msg_id	= 0x0171;
+			}
+			else if(state->report_type == 1)
+			{
+				server_frame_struct->msg_id	= 0x0172;
+			}
 
 			server_frame_struct->para = (Parameter_S *)pvPortMalloc(server_frame_struct->para_num * sizeof(Parameter_S));
 
@@ -190,7 +212,7 @@ void LampRecvLampStateAndSendToServer(void)
 			{
 				server_frame_struct->para[i].type = 0x4001;
 				memset(buf,0,10);
-				sprintf(buf, "%04x",state->address);
+				sprintf(buf, "%08X",state->address);
 				server_frame_struct->para[i].len = strlen(buf);
 				server_frame_struct->para[i].value = (u8 *)pvPortMalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
 				if(server_frame_struct->para[i].value != NULL)
@@ -198,131 +220,10 @@ void LampRecvLampStateAndSendToServer(void)
 					memcpy(server_frame_struct->para[i].value,buf,server_frame_struct->para[i].len + 1);
 				}
 				i ++;
-
-				server_frame_struct->para[i].type = 0x4002;
-				memset(buf,0,200);
-				memset(tmp,0,16);
-				sprintf(tmp, "%d",state->lamp_paras[0].brightness);
-				strcat(buf,tmp);
-				strcat(buf,",");
-
-				memset(tmp,0,16);
-				sprintf(tmp, "%d",state->lamp_paras[0].light_up_day);
-				strcat(buf,tmp);
-				strcat(buf,":");
-
-				memset(tmp,0,16);
-				sprintf(tmp, "%d",state->lamp_paras[0].light_up_total);
-				strcat(buf,tmp);
-				strcat(buf,",");
-
-				memset(tmp,0,16);
-				sprintf(tmp, "%03f",state->lamp_paras[0].active_energy_day);
-				strcat(buf,tmp);
-				strcat(buf,":");
-
-				memset(tmp,0,16);
-				sprintf(tmp, "%03f",state->lamp_paras[0].active_energy_total);
-				strcat(buf,tmp);
-				strcat(buf,",");
-
-				memset(tmp,0,16);
-				sprintf(tmp, "%03f",state->lamp_paras[0].reactive_energy_day);
-				strcat(buf,tmp);
-				strcat(buf,":");
-
-				memset(tmp,0,16);
-				sprintf(tmp, "%03f",state->lamp_paras[0].reactive_energy_total);
-				strcat(buf,tmp);
-				strcat(buf,",");
-
-				memset(tmp,0,16);
-				sprintf(tmp, "%02f",state->lamp_paras[0].voltage);
-				strcat(buf,tmp);
-				strcat(buf,",");
-
-				memset(tmp,0,16);
-				sprintf(tmp, "%03f",state->lamp_paras[0].current);
-				strcat(buf,tmp);
-				strcat(buf,",");
-
-				memset(tmp,0,16);
-				sprintf(tmp, "%03f",state->lamp_paras[0].active_power);
-				strcat(buf,tmp);
-				strcat(buf,",");
-
-				memset(tmp,0,16);
-				sprintf(tmp, "%02f",state->lamp_paras[0].power_factor);
-				strcat(buf,tmp);
-				strcat(buf,",");
-
-				memset(tmp,0,16);
-				sprintf(tmp, "%02f",state->lamp_paras[0].frequency);
-				strcat(buf,tmp);
-
-				if(state->lamp_num == 2)
-				{
-					strcat(buf,"|");
-
-					memset(tmp,0,16);
-					sprintf(tmp, "%d",state->lamp_paras[1].brightness);
-					strcat(buf,tmp);
-					strcat(buf,",");
-
-					memset(tmp,0,16);
-					sprintf(tmp, "%d",state->lamp_paras[1].light_up_day);
-					strcat(buf,tmp);
-					strcat(buf,":");
-
-					memset(tmp,0,16);
-					sprintf(tmp, "%d",state->lamp_paras[1].light_up_total);
-					strcat(buf,tmp);
-					strcat(buf,",");
-
-					memset(tmp,0,16);
-					sprintf(tmp, "%03f",state->lamp_paras[1].active_energy_day);
-					strcat(buf,tmp);
-					strcat(buf,":");
-
-					memset(tmp,0,16);
-					sprintf(tmp, "%03f",state->lamp_paras[1].active_energy_total);
-					strcat(buf,tmp);
-					strcat(buf,",");
-
-					memset(tmp,0,16);
-					sprintf(tmp, "%03f",state->lamp_paras[1].reactive_energy_day);
-					strcat(buf,tmp);
-					strcat(buf,":");
-
-					memset(tmp,0,16);
-					sprintf(tmp, "%03f",state->lamp_paras[1].reactive_energy_total);
-					strcat(buf,tmp);
-					strcat(buf,",");
-
-					memset(tmp,0,16);
-					sprintf(tmp, "%02f",state->lamp_paras[1].voltage);
-					strcat(buf,tmp);
-					strcat(buf,",");
-
-					memset(tmp,0,16);
-					sprintf(tmp, "%03f",state->lamp_paras[1].current);
-					strcat(buf,tmp);
-					strcat(buf,",");
-
-					memset(tmp,0,16);
-					sprintf(tmp, "%03f",state->lamp_paras[1].active_power);
-					strcat(buf,tmp);
-					strcat(buf,",");
-
-					memset(tmp,0,16);
-					sprintf(tmp, "%02f",state->lamp_paras[1].power_factor);
-					strcat(buf,tmp);
-					strcat(buf,",");
-
-					memset(tmp,0,16);
-					sprintf(tmp, "%02f",state->lamp_paras[1].frequency);
-					strcat(buf,tmp);
-				}
+				
+				server_frame_struct->para[i].type = 0x3002;
+				memset(buf,0,10);
+				sprintf(buf, "%02X",state->channel);
 				server_frame_struct->para[i].len = strlen(buf);
 				server_frame_struct->para[i].value = (u8 *)pvPortMalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
 				if(server_frame_struct->para[i].value != NULL)
@@ -332,6 +233,158 @@ void LampRecvLampStateAndSendToServer(void)
 				i ++;
 
 				server_frame_struct->para[i].type = 0x4003;
+				memset(buf,0,200);
+				if(state->channel & 0x01)
+				{
+					memset(tmp,0,16);
+					sprintf(tmp, "%d",state->lamp_paras[0].brightness);
+					strcat(buf,tmp);
+					strcat(buf,",");
+
+					memset(tmp,0,16);
+					sprintf(tmp, "%d",state->lamp_paras[0].light_up_day / 60);
+					strcat(buf,tmp);
+					strcat(buf,":");
+					memset(tmp,0,16);
+					sprintf(tmp, "%d",state->lamp_paras[0].light_up_day % 60);
+					strcat(buf,tmp);
+					strcat(buf,",");
+
+					memset(tmp,0,16);
+					sprintf(tmp, "%d",state->lamp_paras[0].light_up_total / 60);
+					strcat(buf,tmp);
+					strcat(buf,":");
+					memset(tmp,0,16);
+					sprintf(tmp, "%d",state->lamp_paras[0].light_up_total % 60);
+					strcat(buf,tmp);
+					strcat(buf,",");
+
+					memset(tmp,0,16);
+					sprintf(tmp, "%03f",(float)state->lamp_paras[0].active_energy_day / 1000.0f);
+					strcat(buf,tmp);
+					strcat(buf,",");
+
+					memset(tmp,0,16);
+					sprintf(tmp, "%03f",(float)state->lamp_paras[0].active_energy_total / 1000.0f);
+					strcat(buf,tmp);
+					strcat(buf,",");
+
+					memset(tmp,0,16);
+					sprintf(tmp, "%03f",(float)state->lamp_paras[0].reactive_energy_day / 1000.0f);
+					strcat(buf,tmp);
+					strcat(buf,",");
+
+					memset(tmp,0,16);
+					sprintf(tmp, "%03f",(float)state->lamp_paras[0].reactive_energy_total / 1000.0f);
+					strcat(buf,tmp);
+					strcat(buf,",");
+
+					memset(tmp,0,16);
+					sprintf(tmp, "%f",(float)state->lamp_paras[0].voltage);
+					strcat(buf,tmp);
+					strcat(buf,",");
+
+					memset(tmp,0,16);
+					sprintf(tmp, "%03f",(float)state->lamp_paras[0].current / 1000.0f);
+					strcat(buf,tmp);
+					strcat(buf,",");
+
+					memset(tmp,0,16);
+					sprintf(tmp, "%03f",(float)state->lamp_paras[1].active_power / 1000.0f);
+					strcat(buf,tmp);
+					strcat(buf,",");
+
+					memset(tmp,0,16);
+					sprintf(tmp, "%02f",(float)state->lamp_paras[1].power_factor / 100.0f);
+					strcat(buf,tmp);
+					strcat(buf,",");
+
+					memset(tmp,0,16);
+					sprintf(tmp, "%02f",(float)state->lamp_paras[1].frequency / 100.0f);
+					strcat(buf,tmp);
+				}
+				if(state->channel == 0x02)
+				{
+					if(state->channel & 0x01)
+					{
+						strcat(buf,"|");
+					}
+					memset(tmp,0,16);
+					sprintf(tmp, "%d",state->lamp_paras[1].brightness);
+					strcat(buf,tmp);
+					strcat(buf,",");
+
+					memset(tmp,0,16);
+					sprintf(tmp, "%d",state->lamp_paras[1].light_up_day / 60);
+					strcat(buf,tmp);
+					strcat(buf,":");
+					memset(tmp,0,16);
+					sprintf(tmp, "%d",state->lamp_paras[1].light_up_day % 60);
+					strcat(buf,tmp);
+					strcat(buf,",");
+
+					memset(tmp,0,16);
+					sprintf(tmp, "%d",state->lamp_paras[1].light_up_total / 60);
+					strcat(buf,tmp);
+					strcat(buf,":");
+					memset(tmp,0,16);
+					sprintf(tmp, "%d",state->lamp_paras[1].light_up_total % 60);
+					strcat(buf,tmp);
+					strcat(buf,",");
+
+					memset(tmp,0,16);
+					sprintf(tmp, "%03f",(float)state->lamp_paras[1].active_energy_day / 1000.0f);
+					strcat(buf,tmp);
+					strcat(buf,",");
+
+					memset(tmp,0,16);
+					sprintf(tmp, "%03f",(float)state->lamp_paras[1].active_energy_total / 1000.0f);
+					strcat(buf,tmp);
+					strcat(buf,",");
+
+					memset(tmp,0,16);
+					sprintf(tmp, "%03f",(float)state->lamp_paras[1].reactive_energy_day / 1000.0f);
+					strcat(buf,tmp);
+					strcat(buf,",");
+
+					memset(tmp,0,16);
+					sprintf(tmp, "%03f",(float)state->lamp_paras[1].reactive_energy_total / 1000.0f);
+					strcat(buf,tmp);
+					strcat(buf,",");
+
+					memset(tmp,0,16);
+					sprintf(tmp, "%f",(float)state->lamp_paras[1].voltage);
+					strcat(buf,tmp);
+					strcat(buf,",");
+
+					memset(tmp,0,16);
+					sprintf(tmp, "%03f",(float)state->lamp_paras[1].current / 1000.0f);
+					strcat(buf,tmp);
+					strcat(buf,",");
+
+					memset(tmp,0,16);
+					sprintf(tmp, "%03f",(float)state->lamp_paras[1].active_power / 1000.0f);
+					strcat(buf,tmp);
+					strcat(buf,",");
+
+					memset(tmp,0,16);
+					sprintf(tmp, "%02f",(float)state->lamp_paras[1].power_factor / 100.0f);
+					strcat(buf,tmp);
+					strcat(buf,",");
+
+					memset(tmp,0,16);
+					sprintf(tmp, "%02f",(float)state->lamp_paras[1].frequency / 100.0f);
+					strcat(buf,tmp);
+				}
+				server_frame_struct->para[i].len = strlen(buf);
+				server_frame_struct->para[i].value = (u8 *)pvPortMalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
+				if(server_frame_struct->para[i].value != NULL)
+				{
+					memcpy(server_frame_struct->para[i].value,buf,server_frame_struct->para[i].len + 1);
+				}
+				i ++;
+
+				server_frame_struct->para[i].type = 0x4004;
 				memset(buf,0,30);
 				memset(tmp,0,16);
 				sprintf(tmp, "%d",(u8)state->run_mode);
@@ -343,7 +396,12 @@ void LampRecvLampStateAndSendToServer(void)
 				strcat(buf,tmp);
 				strcat(buf,",");
 
-				strcat(buf,(char *)state->control_time);
+				sprintf(tmp, "%d",state->control_time[0]);
+				strcat(buf,tmp);
+				sprintf(tmp, "%d",state->control_time[1]);
+				strcat(buf,tmp);
+				sprintf(tmp, "%d",state->control_time[2]);
+				strcat(buf,tmp);
 				strcat(buf,",");
 
 				memset(tmp,0,16);
@@ -355,16 +413,6 @@ void LampRecvLampStateAndSendToServer(void)
 				sprintf(tmp, "%d",state->tilt_angle);
 				strcat(buf,tmp);
 				server_frame_struct->para[i].len = strlen(buf);
-				server_frame_struct->para[i].value = (u8 *)pvPortMalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
-				if(server_frame_struct->para[i].value != NULL)
-				{
-					memcpy(server_frame_struct->para[i].value,buf,server_frame_struct->para[i].len + 1);
-				}
-				i ++;
-
-				server_frame_struct->para[i].type = 0x4004;
-				memset(buf,0,1);
-				server_frame_struct->para[i].len = 0;
 				server_frame_struct->para[i].value = (u8 *)pvPortMalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
 				if(server_frame_struct->para[i].value != NULL)
 				{
@@ -384,7 +432,19 @@ void LampRecvLampStateAndSendToServer(void)
 
 				server_frame_struct->para[i].type = 0xA006;
 				memset(buf,0,20);
-				sprintf(buf, "%s",state->dev_time);
+				sprintf(buf, "%d",20);
+				sprintf(tmp, "%d",state->dev_time[0]);
+				strcat(buf,tmp);
+				sprintf(tmp, "%d",state->dev_time[1]);
+				strcat(buf,tmp);
+				sprintf(tmp, "%d",state->dev_time[2]);
+				strcat(buf,tmp);
+				sprintf(tmp, "%d",state->dev_time[3]);
+				strcat(buf,tmp);
+				sprintf(tmp, "%d",state->dev_time[4]);
+				strcat(buf,tmp);
+				sprintf(tmp, "%d",state->dev_time[5]);
+				strcat(buf,tmp);
 				server_frame_struct->para[i].len = strlen(buf);
 				server_frame_struct->para[i].value = (u8 *)pvPortMalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
 				if(server_frame_struct->para[i].value != NULL)
@@ -392,9 +452,13 @@ void LampRecvLampStateAndSendToServer(void)
 					memcpy(server_frame_struct->para[i].value,buf,server_frame_struct->para[i].len + 1);
 				}
 				i ++;
+				
+				ConvertFrameStructToFrame(server_frame_struct);
 			}
-
-			ConvertFrameStructToFrame(server_frame_struct);
+			else
+			{
+				DeleteServerFrameStruct(server_frame_struct);
+			}
 		}
 
 		vPortFree(state);
@@ -424,7 +488,7 @@ void LampSendExecuteLampPlcExecuteTaskToServer(void)
 
 			if(xResult == pdPASS)
 			{
-				LampPlcExecuteTaskReportResponse = 1;
+//				LampPlcExecuteTaskReportResponse = 1;
 
 				time_5 = GetSysTick1s();
 				retry_times5 = 0;
@@ -511,9 +575,13 @@ void LampSendOtaRequestFrameToServer(FrameWareState_S frame_ware_state)
 				memcpy(server_frame_struct->para[i].value,buf,server_frame_struct->para[i].len + 1);
 			}
 			i ++;
+			
+			ConvertFrameStructToFrame(server_frame_struct);
 		}
-
-		ConvertFrameStructToFrame(server_frame_struct);
+		else
+		{
+			DeleteServerFrameStruct(server_frame_struct);
+		}
 	}
 }
 
@@ -579,9 +647,13 @@ void LampSendOtaCompleteFrameToServer(void)
 				memcpy(server_frame_struct->para[i].value,buf,server_frame_struct->para[i].len + 1);
 			}
 			i ++;
+			
+			ConvertFrameStructToFrame(server_frame_struct);
 		}
-
-		ConvertFrameStructToFrame(server_frame_struct);
+		else
+		{
+			DeleteServerFrameStruct(server_frame_struct);
+		}
 	}
 }
 
@@ -667,7 +739,7 @@ void LampRecvAndHandleFrameStruct(void)
 		switch(server_frame_struct->msg_id)
 		{
 			case 0x0100:	//数据透传
-
+				LampTransparentTransmission(server_frame_struct);
 			break;
 
 			case 0x0101:	//校时
@@ -760,15 +832,15 @@ void LampRecvAndHandleFrameStruct(void)
 			break;
 
 			case 0x01D5:	//任务配置
-
+				LampSetLampStrategy(server_frame_struct);
 			break;
 
 			case 0x01D6:	//查询任务配置
-
+				LampGetLampStrategy(server_frame_struct);
 			break;
 
 			case 0x01D7:	//配置同步
-
+				LampSynchronizeConfig(server_frame_struct);
 			break;
 
 			case 0x01D8:	//节点搜索
@@ -841,7 +913,7 @@ void LampGetLampPlcExecuteTaskInfo(LampPlcExecuteTask_S *task)
 		case 1:
 			for(m = 0; m < task->group_num; m ++)
 			{
-				task->dev_num += LampGroupListNum.list[task->group_dev_id[m]];
+				task->dev_num += LampGroupListNum.list[(u8)task->group_dev_id[m] - 1];
 			}
 			
 			if(task->execute_type == 0)
@@ -865,17 +937,143 @@ void LampGetLampPlcExecuteTaskInfo(LampPlcExecuteTask_S *task)
 	}
 }
 
+void LampGetLampPlcExecuteTaskInfo1(LampPlcExecuteTask_S *task)
+{
+	u8 m = 0;
+	
+	for(task->group_num = 0; task->group_num < MAX_LAMP_GROUP_NUM; task->group_num ++)
+	{
+		if(task->group_dev_id[task->group_num] == 0)
+		{
+			break;
+		}
+	}
+	
+	switch(task->broadcast_type)
+	{
+		case 0:
+			task->dev_num = LampNumList.number;
+			
+			if(task->execute_type == 0)
+			{
+				task->execute_total_num = LampAppointmentNum.number;
+			}
+			else
+			{
+				task->execute_total_num = task->dev_num * LampAppointmentNum.number;
+			}
+		break;
+
+		case 1:
+			for(m = 0; m < task->group_num; m ++)
+			{
+				task->dev_num += LampGroupListNum.list[task->group_dev_id[m]];
+			}
+			
+			if(task->execute_type == 0)
+			{
+				task->execute_total_num = LampAppointmentNum.number;
+			}
+			else
+			{
+				task->execute_total_num = task->dev_num * LampAppointmentNum.number;
+			}
+		break;
+
+		case 2:
+			task->dev_num = task->group_num;
+			task->execute_total_num = task->group_num * LampAppointmentNum.number;
+		break;
+
+		default:
+
+		break;
+	}
+}
+
+u8 LampTransparentTransmission(ServerFrameStruct_S *server_frame_struct)
+{
+	u8 ret = 0;
+	u8 j = 0;
+	u8 *data = NULL;
+	u16 data_len = 0;
+
+	LampPlcExecuteTask_S *task = NULL;
+
+	ServerFrameStruct_S *resp_server_frame_struct = NULL;		//用于响应服务器
+
+	task = (LampPlcExecuteTask_S *)pvPortMalloc(sizeof(LampPlcExecuteTask_S));
+
+	if(task != NULL)
+	{
+		memset(task,0,sizeof(LampPlcExecuteTask_S));
+
+		for(j = 0; j < server_frame_struct->para_num; j ++)
+		{
+			switch(server_frame_struct->para[j].type)
+			{
+				case 0x4001:
+					data_len = server_frame_struct->para[j].len / 2;
+
+					data = (u8 *)pvPortMalloc(data_len * sizeof(u8));
+
+					if(data != NULL)
+					{
+						StrToHex(data, (char *)server_frame_struct->para[j].value, data_len);
+					}
+				break;
+
+				default:
+				break;
+			}
+		}
+
+		task->broadcast_type = 0;
+		task->data = data;
+		task->data_len = data_len;
+		task->notify_enable = 1;
+		task->cmd_code = 0x0100;
+
+		LampGetLampPlcExecuteTaskInfo(task);
+
+		if(xQueueSend(xQueue_LampPlcExecuteTaskToPlc,(void *)&task,(TickType_t)10) != pdPASS)
+		{
+#ifdef DEBUG_LOG
+			printf("send xQueue_LampPlcFrame fail.\r\n");
+#endif
+			DeleteLampPlcExecuteTask(task);
+		}
+	}
+
+	resp_server_frame_struct = (ServerFrameStruct_S *)pvPortMalloc(sizeof(ServerFrameStruct_S));
+
+	if(resp_server_frame_struct != NULL)
+	{
+		CopyServerFrameStruct(server_frame_struct,resp_server_frame_struct,0);
+
+		resp_server_frame_struct->msg_type 	= (u8)DEVICE_RESPONSE_UP;	//响应服务器类型
+		resp_server_frame_struct->msg_len 	= 10;
+		resp_server_frame_struct->err_code 	= (u8)NO_ERR;
+
+		ret = ConvertFrameStructToFrame(resp_server_frame_struct);
+	}
+
+	return ret;
+}
+
 u8 LampSynchronizeTime(ServerFrameStruct_S *server_frame_struct)
 {
 	u8 ret = 0;
 	u8 i = 0;
 	u8 j = 0;
 	u8 k = 0;
-	u8 tmp_h = 0;
-	u8 tmp_l = 0;
-	u16 add = 0;
+	u8 tmp_1 = 0;
+	u8 tmp_2 = 0;
+	u8 tmp_3 = 0;
+	u8 tmp_4 = 0;
+	u32 add = 0;
 	u8 *data = NULL;
-	char tmp[5];
+	char tmp[10];
 	char *msg = NULL;
 
 	LampPlcExecuteTask_S *task = NULL;
@@ -903,34 +1101,24 @@ u8 LampSynchronizeTime(ServerFrameStruct_S *server_frame_struct)
 					{
 						while(*msg != '\0')
 						{
-							while(*msg != ',')
+							while(*msg != ',' && *msg != '\0')
 							tmp[i ++] = *(msg ++);
 							tmp[i] = '\0';
-							msg = msg + 1;
-							if(i == 1 || i == 2)
+							if(*msg != '\0')
 							{
-								if(i == 1)
-								{
-									tmp[1] = tmp[0];
-									tmp[0] = '0';
-								}
-
-								StrToHex((u8 *)&add,tmp,1);
+								msg = msg + 1;
 							}
-							else if(i == 3 || i == 4)
+							if(i == 8)
 							{
-								if(i == 3)
-								{
-									tmp[3] = tmp[2];
-									tmp[2] = tmp[1];
-									tmp[1] = tmp[0];
-									tmp[0] = '0';
-								}
+								StrToHex(&tmp_1,tmp + 0,1);
+								StrToHex(&tmp_2,tmp + 2,1);
+								StrToHex(&tmp_3,tmp + 4,1);
+								StrToHex(&tmp_4,tmp + 6,1);
 
-								StrToHex(&tmp_h,tmp + 0,1);
-								StrToHex(&tmp_l,tmp + 2,1);
-
-								add = ((((u16)tmp_h) << 8) & 0xFF00) + (u16)tmp_l;
+								add = ((((u32)tmp_1) << 24) & 0xFF000000) + 
+									  ((((u32)tmp_2) << 16) & 0x00FF0000) + 
+									  ((((u32)tmp_3) <<  8) & 0x0000FF00) +
+									  ((((u32)tmp_4) <<  0) & 0x000000FF);
 							}
 
 							task->group_dev_id[k ++] = add;
@@ -951,7 +1139,10 @@ u8 LampSynchronizeTime(ServerFrameStruct_S *server_frame_struct)
 							tmp[i ++] = *(msg ++);
 							tmp[i] = '\0';
 							i = 0;
-							msg = msg + 1;
+							if(*msg != '\0')
+							{
+								msg = msg + 1;
+							}
 							task->group_dev_id[k ++] = myatoi(tmp);
 
 							if(*msg == '\0')
@@ -963,17 +1154,20 @@ u8 LampSynchronizeTime(ServerFrameStruct_S *server_frame_struct)
 				break;
 
 				case 0xA003:
-					if(server_frame_struct->para[j].len == 6)
+					if(server_frame_struct->para[j].len == 14)
 					{
 						msg = (char *)server_frame_struct->para[j].value;
 
-						data = (u8 *)pvPortMalloc(3 * sizeof(u8));
+						data = (u8 *)pvPortMalloc(6 * sizeof(u8));
 
 						if(data != NULL)
 						{
-							*(data + 0) = (*(msg + 0) - 0x30) * 10 + (*(msg + 1) - 0x30);
-							*(data + 1) = (*(msg + 2) - 0x30) * 10 + (*(msg + 3) - 0x30);
-							*(data + 2) = (*(msg + 4) - 0x30) * 10 + (*(msg + 5) - 0x30);
+							*(data + 0) = (*(msg + 2) - 0x30) * 10 + (*(msg + 3) - 0x30);
+							*(data + 1) = (*(msg + 4) - 0x30) * 10 + (*(msg + 5) - 0x30);
+							*(data + 2) = (*(msg + 6) - 0x30) * 10 + (*(msg + 7) - 0x30);
+							*(data + 3) = (*(msg + 8) - 0x30) * 10 + (*(msg + 9) - 0x30);
+							*(data + 4) = (*(msg + 10) - 0x30) * 10 + (*(msg + 11) - 0x30);
+							*(data + 5) = (*(msg + 12) - 0x30) * 10 + (*(msg + 13) - 0x30);
 						}
 					}
 				break;
@@ -988,7 +1182,7 @@ u8 LampSynchronizeTime(ServerFrameStruct_S *server_frame_struct)
 		}
 
 		task->data = data;
-		task->data_len = 3;
+		task->data_len = 6;
 		task->notify_enable = 1;
 		task->cmd_code = 0x0101;
 
@@ -1025,11 +1219,13 @@ u8 LampResetConfigParameters(ServerFrameStruct_S *server_frame_struct)
 	u8 i = 0;
 	u8 j = 0;
 	u8 k = 0;
-	u8 tmp_h = 0;
-	u8 tmp_l = 0;
-	u16 add = 0;
+	u8 tmp_1 = 0;
+	u8 tmp_2 = 0;
+	u8 tmp_3 = 0;
+	u8 tmp_4 = 0;
+	u32 add = 0;
 	u8 *data = NULL;
-	char tmp[5];
+	char tmp[10];
 	char *msg = NULL;
 
 	LampPlcExecuteTask_S *task = NULL;
@@ -1061,34 +1257,24 @@ u8 LampResetConfigParameters(ServerFrameStruct_S *server_frame_struct)
 						{
 							while(*msg != '\0')
 							{
-								while(*msg != ',')
+								while(*msg != ',' && *msg != '\0')
 								tmp[i ++] = *(msg ++);
 								tmp[i] = '\0';
-								msg = msg + 1;
-								if(i == 1 || i == 2)
+								if(*msg != '\0')
 								{
-									if(i == 1)
-									{
-										tmp[1] = tmp[0];
-										tmp[0] = '0';
-									}
-
-									StrToHex((u8 *)&add,tmp,1);
+									msg = msg + 1;
 								}
-								else if(i == 3 || i == 4)
+								if(i == 8)
 								{
-									if(i == 3)
-									{
-										tmp[3] = tmp[2];
-										tmp[2] = tmp[1];
-										tmp[1] = tmp[0];
-										tmp[0] = '0';
-									}
+									StrToHex(&tmp_1,tmp + 0,1);
+									StrToHex(&tmp_2,tmp + 2,1);
+									StrToHex(&tmp_3,tmp + 4,1);
+									StrToHex(&tmp_4,tmp + 6,1);
 
-									StrToHex(&tmp_h,tmp + 0,1);
-									StrToHex(&tmp_l,tmp + 2,1);
-
-									add = ((((u16)tmp_h) << 8) & 0xFF00) + (u16)tmp_l;
+									add = ((((u32)tmp_1) << 24) & 0xFF000000) + 
+										  ((((u32)tmp_2) << 16) & 0x00FF0000) + 
+										  ((((u32)tmp_3) <<  8) & 0x0000FF00) +
+										  ((((u32)tmp_4) <<  0) & 0x000000FF);
 								}
 
 								task->group_dev_id[k ++] = add;
@@ -1109,7 +1295,10 @@ u8 LampResetConfigParameters(ServerFrameStruct_S *server_frame_struct)
 								tmp[i ++] = *(msg ++);
 								tmp[i] = '\0';
 								i = 0;
-								msg = msg + 1;
+								if(*msg != '\0')
+								{
+									msg = msg + 1;
+								}
 								task->group_dev_id[k ++] = myatoi(tmp);
 
 								if(*msg == '\0')
@@ -1122,6 +1311,23 @@ u8 LampResetConfigParameters(ServerFrameStruct_S *server_frame_struct)
 
 					case 0x8003:
 						*(data + 0) = myatoi((char *)server_frame_struct->para[j].value);
+						
+						switch(*(data + 0))
+						{
+							case 3:
+								WriteLampAppointmentNum(1,1);
+								WriteLampStrategyNumList(1,1);
+							break;
+							
+							case 7:
+								WriteLampNumList(1,1);
+								WriteLampGroupListNum(1,1);
+							break;
+							
+							default:
+							break;
+						}
+					
 					break;
 
 					case 0x8004:
@@ -1188,11 +1394,13 @@ u8 LampAdjustBrightness(ServerFrameStruct_S *server_frame_struct)
 	u8 k = 0;
 	u8 n = 0;
 	u8 ch = 0;
-	u8 tmp_h = 0;
-	u8 tmp_l = 0;
-	u16 add = 0;
+	u8 tmp_1 = 0;
+	u8 tmp_2 = 0;
+	u8 tmp_3 = 0;
+	u8 tmp_4 = 0;
+	u32 add = 0;
 	u8 *data = NULL;
-	char tmp[5];
+	char tmp[10];
 	char *msg = NULL;
 
 	LampPlcExecuteTask_S *task = NULL;
@@ -1205,7 +1413,7 @@ u8 LampAdjustBrightness(ServerFrameStruct_S *server_frame_struct)
 	{
 		memset(task,0,sizeof(LampPlcExecuteTask_S));
 
-		data = (u8 *)pvPortMalloc(3 * sizeof(u8));
+		data = (u8 *)pvPortMalloc(4 * sizeof(u8));
 
 		if(data != NULL)
 		{
@@ -1224,34 +1432,24 @@ u8 LampAdjustBrightness(ServerFrameStruct_S *server_frame_struct)
 						{
 							while(*msg != '\0')
 							{
-								while(*msg != ',')
+								while(*msg != ',' && *msg != '\0')
 								tmp[i ++] = *(msg ++);
 								tmp[i] = '\0';
-								msg = msg + 1;
-								if(i == 1 || i == 2)
+								if(*msg != '\0')
 								{
-									if(i == 1)
-									{
-										tmp[1] = tmp[0];
-										tmp[0] = '0';
-									}
-
-									StrToHex((u8 *)&add,tmp,1);
+									msg = msg + 1;
 								}
-								else if(i == 3 || i == 4)
+								if(i == 8)
 								{
-									if(i == 3)
-									{
-										tmp[3] = tmp[2];
-										tmp[2] = tmp[1];
-										tmp[1] = tmp[0];
-										tmp[0] = '0';
-									}
+									StrToHex(&tmp_1,tmp + 0,1);
+									StrToHex(&tmp_2,tmp + 2,1);
+									StrToHex(&tmp_3,tmp + 4,1);
+									StrToHex(&tmp_4,tmp + 6,1);
 
-									StrToHex(&tmp_h,tmp + 0,1);
-									StrToHex(&tmp_l,tmp + 2,1);
-
-									add = ((((u16)tmp_h) << 8) & 0xFF00) + (u16)tmp_l;
+									add = ((((u32)tmp_1) << 24) & 0xFF000000) + 
+										  ((((u32)tmp_2) << 16) & 0x00FF0000) + 
+										  ((((u32)tmp_3) <<  8) & 0x0000FF00) +
+										  ((((u32)tmp_4) <<  0) & 0x000000FF);
 								}
 
 								task->group_dev_id[k ++] = add;
@@ -1272,7 +1470,10 @@ u8 LampAdjustBrightness(ServerFrameStruct_S *server_frame_struct)
 								tmp[i ++] = *(msg ++);
 								tmp[i] = '\0';
 								i = 0;
-								msg = msg + 1;
+								if(*msg != '\0')
+								{
+									msg = msg + 1;
+								}
 								task->group_dev_id[k ++] = myatoi(tmp);
 
 								if(*msg == '\0')
@@ -1316,7 +1517,10 @@ u8 LampAdjustBrightness(ServerFrameStruct_S *server_frame_struct)
 							tmp[i ++] = *(msg ++);
 							tmp[i] = '\0';
 							i = 0;
-							msg = msg + 1;
+							if(*msg != '\0')
+							{
+								msg = msg + 1;
+							}
 							*(data + (n ++)) = myatoi(tmp);
 
 							if(*msg == '\0')
@@ -1328,6 +1532,16 @@ u8 LampAdjustBrightness(ServerFrameStruct_S *server_frame_struct)
 
 					case 0x8005:
 						task->execute_type = myatoi((char *)server_frame_struct->para[j].value);
+						
+						if(task->execute_type >= 1)
+						{
+							*(data + 3) = task->execute_type - 1;
+						}
+						else
+						{
+							*(data + 3) = task->execute_type;
+						}
+						
 					break;
 
 					default:
@@ -1336,7 +1550,7 @@ u8 LampAdjustBrightness(ServerFrameStruct_S *server_frame_struct)
 			}
 
 			task->data = data;
-			task->data_len = 3;
+			task->data_len = 4;
 			task->notify_enable = 1;
 			task->cmd_code = 0x0103;
 
@@ -1380,11 +1594,13 @@ u8 LampFlashTest(ServerFrameStruct_S *server_frame_struct)
 	u8 k = 0;
 	u8 n = 0;
 	u8 ch = 0;
-	u8 tmp_h = 0;
-	u8 tmp_l = 0;
-	u16 add = 0;
+	u8 tmp_1 = 0;
+	u8 tmp_2 = 0;
+	u8 tmp_3 = 0;
+	u8 tmp_4 = 0;
+	u32 add = 0;
 	u8 *data = NULL;
-	char tmp[5];
+	char tmp[10];
 	char *msg = NULL;
 
 	LampPlcExecuteTask_S *task = NULL;
@@ -1416,34 +1632,24 @@ u8 LampFlashTest(ServerFrameStruct_S *server_frame_struct)
 						{
 							while(*msg != '\0')
 							{
-								while(*msg != ',')
+								while(*msg != ',' && *msg != '\0')
 								tmp[i ++] = *(msg ++);
 								tmp[i] = '\0';
-								msg = msg + 1;
-								if(i == 1 || i == 2)
+								if(*msg != '\0')
 								{
-									if(i == 1)
-									{
-										tmp[1] = tmp[0];
-										tmp[0] = '0';
-									}
-
-									StrToHex((u8 *)&add,tmp,1);
+									msg = msg + 1;
 								}
-								else if(i == 3 || i == 4)
+								if(i == 8)
 								{
-									if(i == 3)
-									{
-										tmp[3] = tmp[2];
-										tmp[2] = tmp[1];
-										tmp[1] = tmp[0];
-										tmp[0] = '0';
-									}
+									StrToHex(&tmp_1,tmp + 0,1);
+									StrToHex(&tmp_2,tmp + 2,1);
+									StrToHex(&tmp_3,tmp + 4,1);
+									StrToHex(&tmp_4,tmp + 6,1);
 
-									StrToHex(&tmp_h,tmp + 0,1);
-									StrToHex(&tmp_l,tmp + 2,1);
-
-									add = ((((u16)tmp_h) << 8) & 0xFF00) + (u16)tmp_l;
+									add = ((((u32)tmp_1) << 24) & 0xFF000000) + 
+										  ((((u32)tmp_2) << 16) & 0x00FF0000) + 
+										  ((((u32)tmp_3) <<  8) & 0x0000FF00) +
+										  ((((u32)tmp_4) <<  0) & 0x000000FF);
 								}
 
 								task->group_dev_id[k ++] = add;
@@ -1464,7 +1670,10 @@ u8 LampFlashTest(ServerFrameStruct_S *server_frame_struct)
 								tmp[i ++] = *(msg ++);
 								tmp[i] = '\0';
 								i = 0;
-								msg = msg + 1;
+								if(*msg != '\0')
+								{
+									msg = msg + 1;
+								}
 								task->group_dev_id[k ++] = myatoi(tmp);
 
 								if(*msg == '\0')
@@ -1508,7 +1717,10 @@ u8 LampFlashTest(ServerFrameStruct_S *server_frame_struct)
 							tmp[i ++] = *(msg ++);
 							tmp[i] = '\0';
 							i = 0;
-							msg = msg + 1;
+							if(*msg != '\0')
+							{
+								msg = msg + 1;
+							}
 							*(data + (n ++)) = myatoi(tmp);
 
 							if(*msg == '\0')
@@ -1570,11 +1782,13 @@ u8 LampSetStrategyGroupSwitch(ServerFrameStruct_S *server_frame_struct)
 	u8 i = 0;
 	u8 j = 0;
 	u8 k = 0;
-	u8 tmp_h = 0;
-	u8 tmp_l = 0;
-	u16 add = 0;
+	u8 tmp_1 = 0;
+	u8 tmp_2 = 0;
+	u8 tmp_3 = 0;
+	u8 tmp_4 = 0;
+	u32 add = 0;
 	LampStrategyGroupSwitch_S *data = NULL;
-	char tmp[5];
+	char tmp[10];
 	char *msg = NULL;
 
 	LampPlcExecuteTask_S *task = NULL;
@@ -1608,34 +1822,24 @@ u8 LampSetStrategyGroupSwitch(ServerFrameStruct_S *server_frame_struct)
 						{
 							while(*msg != '\0')
 							{
-								while(*msg != ',')
+								while(*msg != ',' && *msg != '\0')
 								tmp[i ++] = *(msg ++);
 								tmp[i] = '\0';
-								msg = msg + 1;
-								if(i == 1 || i == 2)
+								if(*msg != '\0')
 								{
-									if(i == 1)
-									{
-										tmp[1] = tmp[0];
-										tmp[0] = '0';
-									}
-
-									StrToHex((u8 *)&add,tmp,1);
+									msg = msg + 1;
 								}
-								else if(i == 3 || i == 4)
+								if(i == 8)
 								{
-									if(i == 3)
-									{
-										tmp[3] = tmp[2];
-										tmp[2] = tmp[1];
-										tmp[1] = tmp[0];
-										tmp[0] = '0';
-									}
+									StrToHex(&tmp_1,tmp + 0,1);
+									StrToHex(&tmp_2,tmp + 2,1);
+									StrToHex(&tmp_3,tmp + 4,1);
+									StrToHex(&tmp_4,tmp + 6,1);
 
-									StrToHex(&tmp_h,tmp + 0,1);
-									StrToHex(&tmp_l,tmp + 2,1);
-
-									add = ((((u16)tmp_h) << 8) & 0xFF00) + (u16)tmp_l;
+									add = ((((u32)tmp_1) << 24) & 0xFF000000) + 
+										  ((((u32)tmp_2) << 16) & 0x00FF0000) + 
+										  ((((u32)tmp_3) <<  8) & 0x0000FF00) +
+										  ((((u32)tmp_4) <<  0) & 0x000000FF);
 								}
 
 								task->group_dev_id[k ++] = add;
@@ -1656,7 +1860,10 @@ u8 LampSetStrategyGroupSwitch(ServerFrameStruct_S *server_frame_struct)
 								tmp[i ++] = *(msg ++);
 								tmp[i] = '\0';
 								i = 0;
-								msg = msg + 1;
+								if(*msg != '\0')
+								{
+									msg = msg + 1;
+								}
 								task->group_dev_id[k ++] = myatoi(tmp);
 
 								if(*msg == '\0')
@@ -1676,7 +1883,10 @@ u8 LampSetStrategyGroupSwitch(ServerFrameStruct_S *server_frame_struct)
 							tmp[i ++] = *(msg ++);
 							tmp[i] = '\0';
 							i = 0;
-							msg = msg + 1;
+							if(*msg != '\0')
+							{
+								msg = msg + 1;
+							}
 							data->group_id[data->group_num ++] = myatoi(tmp);
 
 							if(*msg == '\0')
@@ -1707,7 +1917,7 @@ u8 LampSetStrategyGroupSwitch(ServerFrameStruct_S *server_frame_struct)
 			}
 
 			task->data = data;
-
+			task->data_len = (u8)sizeof(LampStrategyGroupSwitch_S);
 			task->notify_enable = 1;
 			task->cmd_code = 0x0105;
 
@@ -1749,11 +1959,13 @@ u8 LampSetRunMode(ServerFrameStruct_S *server_frame_struct)
 	u8 i = 0;
 	u8 j = 0;
 	u8 k = 0;
-	u8 tmp_h = 0;
-	u8 tmp_l = 0;
-	u16 add = 0;
+	u8 tmp_1 = 0;
+	u8 tmp_2 = 0;
+	u8 tmp_3 = 0;
+	u8 tmp_4 = 0;
+	u32 add = 0;
 	u8 *data = NULL;
-	char tmp[5];
+	char tmp[10];
 	char *msg = NULL;
 
 	LampPlcExecuteTask_S *task = NULL;
@@ -1785,34 +1997,24 @@ u8 LampSetRunMode(ServerFrameStruct_S *server_frame_struct)
 						{
 							while(*msg != '\0')
 							{
-								while(*msg != ',')
+								while(*msg != ',' && *msg != '\0')
 								tmp[i ++] = *(msg ++);
 								tmp[i] = '\0';
-								msg = msg + 1;
-								if(i == 1 || i == 2)
+								if(*msg != '\0')
 								{
-									if(i == 1)
-									{
-										tmp[1] = tmp[0];
-										tmp[0] = '0';
-									}
-
-									StrToHex((u8 *)&add,tmp,1);
+									msg = msg + 1;
 								}
-								else if(i == 3 || i == 4)
+								if(i == 8)
 								{
-									if(i == 3)
-									{
-										tmp[3] = tmp[2];
-										tmp[2] = tmp[1];
-										tmp[1] = tmp[0];
-										tmp[0] = '0';
-									}
+									StrToHex(&tmp_1,tmp + 0,1);
+									StrToHex(&tmp_2,tmp + 2,1);
+									StrToHex(&tmp_3,tmp + 4,1);
+									StrToHex(&tmp_4,tmp + 6,1);
 
-									StrToHex(&tmp_h,tmp + 0,1);
-									StrToHex(&tmp_l,tmp + 2,1);
-
-									add = ((((u16)tmp_h) << 8) & 0xFF00) + (u16)tmp_l;
+									add = ((((u32)tmp_1) << 24) & 0xFF000000) + 
+										  ((((u32)tmp_2) << 16) & 0x00FF0000) + 
+										  ((((u32)tmp_3) <<  8) & 0x0000FF00) +
+										  ((((u32)tmp_4) <<  0) & 0x000000FF);
 								}
 
 								task->group_dev_id[k ++] = add;
@@ -1833,7 +2035,10 @@ u8 LampSetRunMode(ServerFrameStruct_S *server_frame_struct)
 								tmp[i ++] = *(msg ++);
 								tmp[i] = '\0';
 								i = 0;
-								msg = msg + 1;
+								if(*msg != '\0')
+								{
+									msg = msg + 1;
+								}
 								task->group_dev_id[k ++] = myatoi(tmp);
 
 								if(*msg == '\0')
@@ -1934,10 +2139,12 @@ u8 LampGetCurrentState(ServerFrameStruct_S *server_frame_struct)
 	u8 i = 0;
 	u8 j = 0;
 	u8 k = 0;
-	u8 tmp_h = 0;
-	u8 tmp_l = 0;
-	u16 add = 0;
-	char tmp[5];
+	u8 tmp_1 = 0;
+	u8 tmp_2 = 0;
+	u8 tmp_3 = 0;
+	u8 tmp_4 = 0;
+	u32 add = 0;
+	char tmp[10];
 	char *msg = NULL;
 
 	LampPlcExecuteTask_S *task = NULL;
@@ -1965,34 +2172,24 @@ u8 LampGetCurrentState(ServerFrameStruct_S *server_frame_struct)
 					{
 						while(*msg != '\0')
 						{
-							while(*msg != ',')
+							while(*msg != ',' && *msg != '\0')
 							tmp[i ++] = *(msg ++);
 							tmp[i] = '\0';
-							msg = msg + 1;
-							if(i == 1 || i == 2)
+							if(*msg != '\0')
 							{
-								if(i == 1)
-								{
-									tmp[1] = tmp[0];
-									tmp[0] = '0';
-								}
-
-								StrToHex((u8 *)&add,tmp,1);
+								msg = msg + 1;
 							}
-							else if(i == 3 || i == 4)
+							if(i == 8)
 							{
-								if(i == 3)
-								{
-									tmp[3] = tmp[2];
-									tmp[2] = tmp[1];
-									tmp[1] = tmp[0];
-									tmp[0] = '0';
-								}
+								StrToHex(&tmp_1,tmp + 0,1);
+								StrToHex(&tmp_2,tmp + 2,1);
+								StrToHex(&tmp_3,tmp + 4,1);
+								StrToHex(&tmp_4,tmp + 6,1);
 
-								StrToHex(&tmp_h,tmp + 0,1);
-								StrToHex(&tmp_l,tmp + 2,1);
-
-								add = ((((u16)tmp_h) << 8) & 0xFF00) + (u16)tmp_l;
+								add = ((((u32)tmp_1) << 24) & 0xFF000000) + 
+									  ((((u32)tmp_2) << 16) & 0x00FF0000) + 
+									  ((((u32)tmp_3) <<  8) & 0x0000FF00) +
+									  ((((u32)tmp_4) <<  0) & 0x000000FF);
 							}
 
 							task->group_dev_id[k ++] = add;
@@ -2013,7 +2210,10 @@ u8 LampGetCurrentState(ServerFrameStruct_S *server_frame_struct)
 							tmp[i ++] = *(msg ++);
 							tmp[i] = '\0';
 							i = 0;
-							msg = msg + 1;
+							if(*msg != '\0')
+							{
+								msg = msg + 1;
+							}
 							task->group_dev_id[k ++] = myatoi(tmp);
 
 							if(*msg == '\0')
@@ -2068,24 +2268,28 @@ u8 LampSetAlarmConfiguration(ServerFrameStruct_S *server_frame_struct)
 	u8 j = 0;
 	u8 k = 0;
 	u8 n = 0;
-	u8 tmp_h = 0;
-	u8 tmp_l = 0;
-	u16 add = 0;
+	u8 tmp_1 = 0;
+	u8 tmp_2 = 0;
+	u8 tmp_3 = 0;
+	u8 tmp_4 = 0;
+	u32 add = 0;
 	u8 para_id = 0;
 	u8 loop_ch = 0;
 	u8 seg_num = 0;
 	char tmp[10];
 	char *msg = NULL;
-	LampAlarm_S *lamp_alarm = NULL;
+	LampAlarmConf_S *lamp_alarm_conf = NULL;
 	LampPlcExecuteTask_S *task = NULL;
 
 	ServerFrameStruct_S *resp_server_frame_struct = NULL;		//用于响应服务器
 	
-	lamp_alarm = (LampAlarm_S *)pvPortMalloc(sizeof(LampAlarm_S));
+	lamp_alarm_conf = (LampAlarmConf_S *)pvPortMalloc(sizeof(LampAlarmConf_S));
 	task = (LampPlcExecuteTask_S *)pvPortMalloc(sizeof(LampPlcExecuteTask_S));
 	
-	if(lamp_alarm != NULL && task != NULL)
+	if(lamp_alarm_conf != NULL && task != NULL)
 	{
+		memset(task,0,sizeof(LampPlcExecuteTask_S));
+		
 		for(j = 0; j < server_frame_struct->para_num; j ++)
 		{
 			switch(server_frame_struct->para[j].type)
@@ -2101,34 +2305,24 @@ u8 LampSetAlarmConfiguration(ServerFrameStruct_S *server_frame_struct)
 					{
 						while(*msg != '\0')
 						{
-							while(*msg != ',')
+							while(*msg != ',' && *msg != '\0')
 							tmp[i ++] = *(msg ++);
 							tmp[i] = '\0';
-							msg = msg + 1;
-							if(i == 1 || i == 2)
+							if(*msg != '\0')
 							{
-								if(i == 1)
-								{
-									tmp[1] = tmp[0];
-									tmp[0] = '0';
-								}
-
-								StrToHex((u8 *)&add,tmp,1);
+								msg = msg + 1;
 							}
-							else if(i == 3 || i == 4)
+							if(i == 8)
 							{
-								if(i == 3)
-								{
-									tmp[3] = tmp[2];
-									tmp[2] = tmp[1];
-									tmp[1] = tmp[0];
-									tmp[0] = '0';
-								}
+								StrToHex(&tmp_1,tmp + 0,1);
+								StrToHex(&tmp_2,tmp + 2,1);
+								StrToHex(&tmp_3,tmp + 4,1);
+								StrToHex(&tmp_4,tmp + 6,1);
 
-								StrToHex(&tmp_h,tmp + 0,1);
-								StrToHex(&tmp_l,tmp + 2,1);
-
-								add = ((((u16)tmp_h) << 8) & 0xFF00) + (u16)tmp_l;
+								add = ((((u32)tmp_1) << 24) & 0xFF000000) + 
+									  ((((u32)tmp_2) << 16) & 0x00FF0000) + 
+									  ((((u32)tmp_3) <<  8) & 0x0000FF00) +
+									  ((((u32)tmp_4) <<  0) & 0x000000FF);
 							}
 
 							task->group_dev_id[k ++] = add;
@@ -2149,7 +2343,10 @@ u8 LampSetAlarmConfiguration(ServerFrameStruct_S *server_frame_struct)
 							tmp[i ++] = *(msg ++);
 							tmp[i] = '\0';
 							i = 0;
-							msg = msg + 1;
+							if(*msg != '\0')
+							{
+								msg = msg + 1;
+							}
 							task->group_dev_id[k ++] = myatoi(tmp);
 
 							if(*msg == '\0')
@@ -2159,34 +2356,28 @@ u8 LampSetAlarmConfiguration(ServerFrameStruct_S *server_frame_struct)
 						}
 					}
 				break;
-				
-				case 0x8003:
-					LampNodeLossAlarmConfig.enable = myatoi((char *)server_frame_struct->para[i].value);
-					
-					WriteLampNodeLossAlarmConfig(0,1);
-				break;
 
+				case 0x8003:
+					lamp_alarm_conf->lamp_fault_alarm_enable = myatoi((char *)server_frame_struct->para[i].value);
+				break;
+				
 				case 0x8004:
-					lamp_alarm->lamp_fault_alarm_enable = myatoi((char *)server_frame_struct->para[i].value);
+					lamp_alarm_conf->power_module_fault_alarm_enable = myatoi((char *)server_frame_struct->para[i].value);
 				break;
 				
 				case 0x8005:
-					lamp_alarm->power_module_fault_alarm_enable = myatoi((char *)server_frame_struct->para[i].value);
+					lamp_alarm_conf->capacitor_fault_alarm_enable = myatoi((char *)server_frame_struct->para[i].value);
 				break;
 				
 				case 0x8006:
-					lamp_alarm->capacitor_fault_alarm_enable = myatoi((char *)server_frame_struct->para[i].value);
+					lamp_alarm_conf->relay_fault_alarm_enable = myatoi((char *)server_frame_struct->para[i].value);
 				break;
 				
 				case 0x8007:
-					lamp_alarm->relay_fault_alarm_enable = myatoi((char *)server_frame_struct->para[i].value);
+					lamp_alarm_conf->temperature_alarm_duration = myatoi((char *)server_frame_struct->para[i].value);
 				break;
 				
-				case 0x8008:
-					lamp_alarm->temperature_alarm_duration = myatoi((char *)server_frame_struct->para[i].value);
-				break;
-				
-				case 0x4009:
+				case 0x4008:
 					msg = (char *)server_frame_struct->para[j].value;
 				
 					while(*msg != ',')
@@ -2194,28 +2385,28 @@ u8 LampSetAlarmConfiguration(ServerFrameStruct_S *server_frame_struct)
 					tmp[i] = '\0';
 					i = 0;
 					msg = msg + 1;
-					lamp_alarm->temperature_alarm_low_thre = myatoi(tmp);
+					lamp_alarm_conf->temperature_alarm_low_thre = myatoi(tmp);
 
 					while(*msg != ',')
 					tmp[i ++] = *(msg ++);
 					tmp[i] = '\0';
 					i = 0;
 					msg = msg + 1;
-					lamp_alarm->temperature_alarm_high_thre = myatoi(tmp);
+					lamp_alarm_conf->temperature_alarm_high_thre = myatoi(tmp);
 
 					while(*msg != '\0')
 					tmp[i ++] = *(msg ++);
 					tmp[i] = '\0';
 					i = 0;
 					msg = msg + 1;
-					lamp_alarm->temperature_alarm_duration = atof(tmp);
+					lamp_alarm_conf->temperature_alarm_duration = atof(tmp);
 				break;
 					
-				case 0x800A:
-					lamp_alarm->leakage_alarm_enable = myatoi((char *)server_frame_struct->para[i].value);
+				case 0x8009:
+					lamp_alarm_conf->leakage_alarm_enable = myatoi((char *)server_frame_struct->para[i].value);
 				break;
 				
-				case 0x400B:
+				case 0x400A:
 					msg = (char *)server_frame_struct->para[j].value;
 				
 					while(*msg != ',')
@@ -2223,36 +2414,36 @@ u8 LampSetAlarmConfiguration(ServerFrameStruct_S *server_frame_struct)
 					tmp[i] = '\0';
 					i = 0;
 					msg = msg + 1;
-					lamp_alarm->leakage_alarm_c_thre = myatoi(tmp);
+					lamp_alarm_conf->leakage_alarm_c_thre = myatoi(tmp);
 
 					while(*msg != ',')
 					tmp[i ++] = *(msg ++);
 					tmp[i] = '\0';
 					i = 0;
 					msg = msg + 1;
-					lamp_alarm->leakage_alarm_v_thre = myatoi(tmp);
+					lamp_alarm_conf->leakage_alarm_v_thre = myatoi(tmp);
 
 					while(*msg != '\0')
 					tmp[i ++] = *(msg ++);
 					tmp[i] = '\0';
 					i = 0;
 					msg = msg + 1;
-					lamp_alarm->leakage_alarm_duration = atof(tmp);
+					lamp_alarm_conf->leakage_alarm_duration = atof(tmp);
 				break;
 					
+				case 0x800B:
+					lamp_alarm_conf->gate_magnetism_alarm_enable = myatoi((char *)server_frame_struct->para[i].value);
+				break;
+				
 				case 0x800C:
-					lamp_alarm->gate_magnetism_alarm_enable = myatoi((char *)server_frame_struct->para[i].value);
+					lamp_alarm_conf->gate_magnetism_alarm_type = myatoi((char *)server_frame_struct->para[i].value);
 				break;
 				
 				case 0x800D:
-					lamp_alarm->gate_magnetism_alarm_type = myatoi((char *)server_frame_struct->para[i].value);
+					lamp_alarm_conf->post_tilt_alarm_enable = myatoi((char *)server_frame_struct->para[i].value);
 				break;
 				
-				case 0x800E:
-					lamp_alarm->post_tilt_alarm_enable = myatoi((char *)server_frame_struct->para[i].value);
-				break;
-				
-				case 0x400F:
+				case 0x400E:
 					msg = (char *)server_frame_struct->para[j].value;
 
 					while(*msg != ',')
@@ -2260,21 +2451,21 @@ u8 LampSetAlarmConfiguration(ServerFrameStruct_S *server_frame_struct)
 					tmp[i] = '\0';
 					i = 0;
 					msg = msg + 1;
-					lamp_alarm->post_tilt_alarm_thre = myatoi(tmp);
+					lamp_alarm_conf->post_tilt_alarm_thre = myatoi(tmp);
 
 					while(*msg != '\0')
 					tmp[i ++] = *(msg ++);
 					tmp[i] = '\0';
 					i = 0;
 					msg = msg + 1;
-					lamp_alarm->post_tilt_alarm_duration = atof(tmp);
+					lamp_alarm_conf->post_tilt_alarm_duration = atof(tmp);
 				break;
 					
-				case 0x8010:
-					lamp_alarm->electrical_para_alarm_enable = myatoi((char *)server_frame_struct->para[i].value);
+				case 0x800F:
+					lamp_alarm_conf->electrical_para_alarm_enable = myatoi((char *)server_frame_struct->para[i].value);
 				break;
 				
-				case 0x4011:
+				case 0x4010:
 					msg = (char *)server_frame_struct->para[j].value;
 				
 					seg_num = 0;
@@ -2321,53 +2512,53 @@ u8 LampSetAlarmConfiguration(ServerFrameStruct_S *server_frame_struct)
 									para_id = 1;
 								}
 								
-								lamp_alarm->electrical_para_alarm_thre[loop_ch - 1][para_id - 1].channel = loop_ch;
-								lamp_alarm->electrical_para_alarm_thre[loop_ch - 1][para_id - 1].para_id = para_id;
+								lamp_alarm_conf->electrical_para_alarm_thre[loop_ch - 1][para_id - 1].channel = loop_ch;
+								lamp_alarm_conf->electrical_para_alarm_thre[loop_ch - 1][para_id - 1].para_id = para_id;
 								
 								while(*msg != ',')
 								tmp[i ++] = *(msg ++);
 								tmp[i] = '\0';
 								i = 0;
 								msg = msg + 1;
-								lamp_alarm->electrical_para_alarm_thre[loop_ch - 1][para_id - 1].min_value = myatoi(tmp);
+								lamp_alarm_conf->electrical_para_alarm_thre[loop_ch - 1][para_id - 1].min_value = myatoi(tmp);
 								
 								while(*msg != ',')
 								tmp[i ++] = *(msg ++);
 								tmp[i] = '\0';
 								i = 0;
 								msg = msg + 1;
-								lamp_alarm->electrical_para_alarm_thre[loop_ch - 1][para_id - 1].min_range = myatoi(tmp);
+								lamp_alarm_conf->electrical_para_alarm_thre[loop_ch - 1][para_id - 1].min_range = myatoi(tmp);
 								
 								while(*msg != ',')
 								tmp[i ++] = *(msg ++);
 								tmp[i] = '\0';
 								i = 0;
 								msg = msg + 1;
-								lamp_alarm->electrical_para_alarm_thre[loop_ch - 1][para_id - 1].max_value = myatoi(tmp);
+								lamp_alarm_conf->electrical_para_alarm_thre[loop_ch - 1][para_id - 1].max_value = myatoi(tmp);
 								
 								while(*msg != ',')
 								tmp[i ++] = *(msg ++);
 								tmp[i] = '\0';
 								i = 0;
 								msg = msg + 1;
-								lamp_alarm->electrical_para_alarm_thre[loop_ch - 1][para_id - 1].max_range = myatoi(tmp);
+								lamp_alarm_conf->electrical_para_alarm_thre[loop_ch - 1][para_id - 1].max_range = myatoi(tmp);
 								
 								while(*msg != '|' && *msg != '\0')
 								tmp[i ++] = *(msg ++);
 								tmp[i] = '\0';
 								i = 0;
 								msg = msg + 1;
-								lamp_alarm->electrical_para_alarm_thre[loop_ch - 1][para_id - 1].duration_time = myatoi(tmp);
+								lamp_alarm_conf->electrical_para_alarm_thre[loop_ch - 1][para_id - 1].duration_time = myatoi(tmp);
 							}
 						}
 					}
 				break;
 					
-				case 0x8012:
-					lamp_alarm->abnormal_light_on_alarm_enable = myatoi((char *)server_frame_struct->para[i].value);
+				case 0x8011:
+					lamp_alarm_conf->abnormal_light_on_alarm_enable = myatoi((char *)server_frame_struct->para[i].value);
 				break;
 				
-				case 0x4013:
+				case 0x4012:
 					msg = (char *)server_frame_struct->para[j].value;
 				
 					while(*msg != ',')
@@ -2375,28 +2566,28 @@ u8 LampSetAlarmConfiguration(ServerFrameStruct_S *server_frame_struct)
 					tmp[i] = '\0';
 					i = 0;
 					msg = msg + 1;
-					lamp_alarm->abnormal_light_on_alarm_p_thre = myatoi(tmp);
+					lamp_alarm_conf->abnormal_light_on_alarm_c_thre = myatoi(tmp);
 
 					while(*msg != ',')
 					tmp[i ++] = *(msg ++);
 					tmp[i] = '\0';
 					i = 0;
 					msg = msg + 1;
-					lamp_alarm->abnormal_light_on_alarm_c_thre = myatoi(tmp);
+					lamp_alarm_conf->abnormal_light_on_alarm_p_thre = myatoi(tmp);
 
 					while(*msg != '\0')
 					tmp[i ++] = *(msg ++);
 					tmp[i] = '\0';
 					i = 0;
 					msg = msg + 1;
-					lamp_alarm->abnormal_light_on_alarm_duration = atof(tmp);
+					lamp_alarm_conf->abnormal_light_on_alarm_duration = atof(tmp);
 				break;
 					
-				case 0x8014:
-					lamp_alarm->abnormal_light_off_alarm_enable = myatoi((char *)server_frame_struct->para[i].value);
+				case 0x8013:
+					lamp_alarm_conf->abnormal_light_off_alarm_enable = myatoi((char *)server_frame_struct->para[i].value);
 				break;
 				
-				case 0x4015:
+				case 0x4014:
 					msg = (char *)server_frame_struct->para[j].value;
 				
 					while(*msg != ',')
@@ -2404,28 +2595,28 @@ u8 LampSetAlarmConfiguration(ServerFrameStruct_S *server_frame_struct)
 					tmp[i] = '\0';
 					i = 0;
 					msg = msg + 1;
-					lamp_alarm->abnormal_light_off_alarm_p_thre = myatoi(tmp);
+					lamp_alarm_conf->abnormal_light_off_alarm_c_thre = myatoi(tmp);
 
 					while(*msg != ',')
 					tmp[i ++] = *(msg ++);
 					tmp[i] = '\0';
 					i = 0;
 					msg = msg + 1;
-					lamp_alarm->abnormal_light_off_alarm_c_thre = myatoi(tmp);
+					lamp_alarm_conf->abnormal_light_off_alarm_p_thre = myatoi(tmp);
 
 					while(*msg != '\0')
 					tmp[i ++] = *(msg ++);
 					tmp[i] = '\0';
 					i = 0;
 					msg = msg + 1;
-					lamp_alarm->abnormal_light_off_alarm_duration = atof(tmp);
+					lamp_alarm_conf->abnormal_light_off_alarm_duration = atof(tmp);
 				break;
 					
-				case 0x8016:
-					lamp_alarm->light_on_fault_alarm_enable = myatoi((char *)server_frame_struct->para[i].value);
+				case 0x8015:
+					lamp_alarm_conf->light_on_fault_alarm_enable = myatoi((char *)server_frame_struct->para[i].value);
 				break;
 				
-				case 0x4017:
+				case 0x4016:
 					msg = (char *)server_frame_struct->para[j].value;
 				
 					seg_num = 0;
@@ -2449,36 +2640,36 @@ u8 LampSetAlarmConfiguration(ServerFrameStruct_S *server_frame_struct)
 						tmp[i] = '\0';
 						i = 0;
 						msg = msg + 1;
-						lamp_alarm->light_on_fault_alarm_rated_power[n] = myatoi(tmp);
+						lamp_alarm_conf->light_on_fault_alarm_rated_power[n] = myatoi(tmp);
 						
 						while(*msg != ',')
 						tmp[i ++] = *(msg ++);
 						tmp[i] = '\0';
 						i = 0;
 						msg = msg + 1;
-						lamp_alarm->light_on_fault_alarm_low_thre[n] = myatoi(tmp);
+						lamp_alarm_conf->light_on_fault_alarm_low_thre[n] = myatoi(tmp);
 						
 						while(*msg != ',')
 						tmp[i ++] = *(msg ++);
 						tmp[i] = '\0';
 						i = 0;
 						msg = msg + 1;
-						lamp_alarm->light_on_fault_alarm_high_thre[n] = myatoi(tmp);
+						lamp_alarm_conf->light_on_fault_alarm_high_thre[n] = myatoi(tmp);
 						
 						while(*msg != '|' && *msg != '\0')
 						tmp[i ++] = *(msg ++);
 						tmp[i] = '\0';
 						i = 0;
 						msg = msg + 1;
-						lamp_alarm->light_on_fault_alarm_duration[n] = myatoi(tmp);
+						lamp_alarm_conf->light_on_fault_alarm_duration[n] = myatoi(tmp);
 					}
 				break;
 					
-				case 0x8018:
-					lamp_alarm->task_light_state_fault_alarm_enhable = myatoi((char *)server_frame_struct->para[i].value);
+				case 0x8017:
+					lamp_alarm_conf->task_light_state_fault_alarm_enhable = myatoi((char *)server_frame_struct->para[i].value);
 				break;
 				
-				case 0x8019:
+				case 0x8018:
 					task->execute_type = myatoi((char *)server_frame_struct->para[j].value);
 				break;
 
@@ -2487,8 +2678,8 @@ u8 LampSetAlarmConfiguration(ServerFrameStruct_S *server_frame_struct)
 			}
 		}
 		
-		task->data = lamp_alarm;
-		task->data_len = sizeof(LampAlarm_S);
+		task->data = lamp_alarm_conf;
+		task->data_len = sizeof(LampAlarmConf_S);
 		task->notify_enable = 1;
 		task->cmd_code = 0x01A3;
 
@@ -2504,9 +2695,9 @@ u8 LampSetAlarmConfiguration(ServerFrameStruct_S *server_frame_struct)
 	}
 	else
 	{
-		if(lamp_alarm != NULL)
+		if(lamp_alarm_conf != NULL)
 		{
-			vPortFree(lamp_alarm);
+			vPortFree(lamp_alarm_conf);
 		}
 		
 		if(task != NULL)
@@ -2537,10 +2728,12 @@ u8 LampGetAlarmConfiguration(ServerFrameStruct_S *server_frame_struct)
 	u8 i = 0;
 	u8 j = 0;
 	u8 k = 0;
-	u8 tmp_h = 0;
-	u8 tmp_l = 0;
-	u16 add = 0;
-	char tmp[5];
+	u8 tmp_1 = 0;
+	u8 tmp_2 = 0;
+	u8 tmp_3 = 0;
+	u8 tmp_4 = 0;
+	u32 add = 0;
+	char tmp[10];
 	char *msg = NULL;
 
 	LampPlcExecuteTask_S *task = NULL;
@@ -2568,34 +2761,24 @@ u8 LampGetAlarmConfiguration(ServerFrameStruct_S *server_frame_struct)
 					{
 						while(*msg != '\0')
 						{
-							while(*msg != ',')
+							while(*msg != ',' && *msg != '\0')
 							tmp[i ++] = *(msg ++);
 							tmp[i] = '\0';
-							msg = msg + 1;
-							if(i == 1 || i == 2)
+							if(*msg != '\0')
 							{
-								if(i == 1)
-								{
-									tmp[1] = tmp[0];
-									tmp[0] = '0';
-								}
-
-								StrToHex((u8 *)&add,tmp,1);
+								msg = msg + 1;
 							}
-							else if(i == 3 || i == 4)
+							if(i == 8)
 							{
-								if(i == 3)
-								{
-									tmp[3] = tmp[2];
-									tmp[2] = tmp[1];
-									tmp[1] = tmp[0];
-									tmp[0] = '0';
-								}
+								StrToHex(&tmp_1,tmp + 0,1);
+								StrToHex(&tmp_2,tmp + 2,1);
+								StrToHex(&tmp_3,tmp + 4,1);
+								StrToHex(&tmp_4,tmp + 6,1);
 
-								StrToHex(&tmp_h,tmp + 0,1);
-								StrToHex(&tmp_l,tmp + 2,1);
-
-								add = ((((u16)tmp_h) << 8) & 0xFF00) + (u16)tmp_l;
+								add = ((((u32)tmp_1) << 24) & 0xFF000000) + 
+									  ((((u32)tmp_2) << 16) & 0x00FF0000) + 
+									  ((((u32)tmp_3) <<  8) & 0x0000FF00) +
+									  ((((u32)tmp_4) <<  0) & 0x000000FF);
 							}
 
 							task->group_dev_id[k ++] = add;
@@ -2616,7 +2799,10 @@ u8 LampGetAlarmConfiguration(ServerFrameStruct_S *server_frame_struct)
 							tmp[i ++] = *(msg ++);
 							tmp[i] = '\0';
 							i = 0;
-							msg = msg + 1;
+							if(*msg != '\0')
+							{
+								msg = msg + 1;
+							}
 							task->group_dev_id[k ++] = myatoi(tmp);
 
 							if(*msg == '\0')
@@ -2671,9 +2857,12 @@ u8 LampSetBasicConfiguration(ServerFrameStruct_S *server_frame_struct)
 	u8 i = 0;
 	u8 j = 0;
 	u8 k = 0;
-	u8 tmp_h = 0;
-	u8 tmp_l = 0;
-	u16 add = 0;
+	u8 tmp_1 = 0;
+	u8 tmp_2 = 0;
+	u8 tmp_3 = 0;
+	u8 tmp_4 = 0;
+	u32 add = 0;
+	u8 ch = 0;
 	u8 brightness = 0;
 	u8 group_id = 0;
 	char tmp[17];
@@ -2688,9 +2877,29 @@ u8 LampSetBasicConfiguration(ServerFrameStruct_S *server_frame_struct)
 		{
 			LampBasicConfig.auto_sync_time_cycle = myatoi((char *)server_frame_struct->para[j].value);
 		}
-		else if(server_frame_struct->para[j].type == 0x8002)
+		else if(server_frame_struct->para[j].type == 0x3002)
 		{
 			LampBasicConfig.auto_report_plc_state = myatoi((char *)server_frame_struct->para[j].value);
+			
+			msg = (char *)server_frame_struct->para[j].value;
+
+			while(*msg != '\0')
+			tmp[i ++] = *(msg ++);
+			tmp[i] = '\0';
+			msg = msg + 1;
+			if(i == 1 || i == 2)
+			{
+				if(i == 1)
+				{
+					tmp[1] = tmp[0];
+					tmp[0] = '0';
+				}
+
+				StrToHex((u8 *)&ch,tmp,1);
+			}
+			i = 0;
+
+			LampBasicConfig.auto_report_plc_state = ch;
 		}
 		else if(server_frame_struct->para[j].type == 0x8003)
 		{
@@ -2734,31 +2943,19 @@ u8 LampSetBasicConfiguration(ServerFrameStruct_S *server_frame_struct)
 			tmp[i ++] = *(msg ++);
 			tmp[i] = '\0';
 			msg = msg + 1;
-			if(i == 1 || i == 2)
+			if(i == 8)
 			{
-				if(i == 1)
-				{
-					tmp[1] = tmp[0];
-					tmp[0] = '0';
-				}
+				StrToHex(&tmp_1,tmp + 0,1);
+				StrToHex(&tmp_2,tmp + 2,1);
+				StrToHex(&tmp_3,tmp + 4,1);
+				StrToHex(&tmp_4,tmp + 6,1);
 
-				StrToHex((u8 *)&add,tmp,1);
+				add = ((((u32)tmp_1) << 24) & 0xFF000000) + 
+				      ((((u32)tmp_2) << 16) & 0x00FF0000) + 
+				      ((((u32)tmp_3) <<  8) & 0x0000FF00) +
+				      ((((u32)tmp_4) <<  0) & 0x000000FF);
 			}
-			else if(i == 3 || i == 4)
-			{
-				if(i == 3)
-				{
-					tmp[3] = tmp[2];
-					tmp[2] = tmp[1];
-					tmp[1] = tmp[0];
-					tmp[0] = '0';
-				}
 
-				StrToHex(&tmp_h,tmp + 0,1);
-				StrToHex(&tmp_l,tmp + 2,1);
-
-				add = ((((u16)tmp_h) << 8) & 0xFF00) + (u16)tmp_l;
-			}
 			lamp_conf.address = add;
 			i = 0;
 
@@ -2825,7 +3022,7 @@ u8 LampSetBasicConfiguration(ServerFrameStruct_S *server_frame_struct)
 			msg = msg + 1;
 			brightness = 0;
 			brightness = myatoi(tmp);
-			lamp_conf.default_brightness = (brightness << 4) & 0xF0;
+			lamp_conf.default_brightness = ((brightness / 10) << 4) & 0xF0;
 
 			while(*msg != '|')
 			tmp[i ++] = *(msg ++);
@@ -2834,7 +3031,7 @@ u8 LampSetBasicConfiguration(ServerFrameStruct_S *server_frame_struct)
 			msg = msg + 1;
 			brightness = 0;
 			brightness = myatoi(tmp);
-			lamp_conf.default_brightness += brightness;
+			lamp_conf.default_brightness += ((brightness / 10) & 0x0F);
 
 			while(*msg != '\0')
 			{
@@ -2842,7 +3039,10 @@ u8 LampSetBasicConfiguration(ServerFrameStruct_S *server_frame_struct)
 				tmp[i ++] = *(msg ++);
 				tmp[i] = '\0';
 				i = 0;
-				msg = msg + 1;
+				if(*msg != '\0')
+				{
+					msg = msg + 1;
+				}
 				group_id = myatoi(tmp);
 				lamp_conf.group[k ++] = group_id;
 
@@ -2907,7 +3107,7 @@ u8 LampGetBasicConfiguration(ServerFrameStruct_S *server_frame_struct)
 		resp_server_frame_struct->msg_type 	= (u8)DEVICE_RESPONSE_UP;	//响应服务器类型
 		resp_server_frame_struct->msg_len 	= 10;
 		resp_server_frame_struct->err_code 	= (u8)NO_ERR;
-		resp_server_frame_struct->para_num 	= 2;
+		resp_server_frame_struct->para_num 	= 9;
 
 		resp_server_frame_struct->para = (Parameter_S *)pvPortMalloc(resp_server_frame_struct->para_num * sizeof(Parameter_S));
 
@@ -2924,9 +3124,9 @@ u8 LampGetBasicConfiguration(ServerFrameStruct_S *server_frame_struct)
 			}
 			i ++;
 
-			resp_server_frame_struct->para[i].type = 0x8102;
+			resp_server_frame_struct->para[i].type = 0x3102;
 			memset(buf,0,25);
-			sprintf(buf, "%d",LampBasicConfig.auto_report_plc_state);
+			sprintf(buf, "%02X",LampBasicConfig.auto_report_plc_state);
 			resp_server_frame_struct->para[i].len = strlen(buf);
 			resp_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
 			if(resp_server_frame_struct->para[i].value != NULL)
@@ -3011,25 +3211,34 @@ u8 LampGetBasicConfiguration(ServerFrameStruct_S *server_frame_struct)
 				memcpy(resp_server_frame_struct->para[i].value,buf,resp_server_frame_struct->para[i].len + 1);
 			}
 			i ++;
+			
+			ret = ConvertFrameStructToFrame(resp_server_frame_struct);
 		}
-
-		ret = ConvertFrameStructToFrame(resp_server_frame_struct);
+		else
+		{
+			DeleteServerFrameStruct(resp_server_frame_struct);
+		}
 	}
 
 	for(j = 0; j < MAX_LAMP_CONF_NUM; j ++)
 	{
-		ret = ReadLampConfig(j,&conf);
-
+		ret = ReadSpecifyLampNumList(j);
+		
 		if(ret == 1)
 		{
-			memcpy(&lamp_conf[k],&conf,sizeof(LampConfig_S));
+			ret = ReadLampConfig(j,&conf);
 
-			index[k] = j;
+			if(ret == 1)
+			{
+				memcpy(&lamp_conf[k],&conf,sizeof(LampConfig_S));
 
-			k ++;
+				index[k] = j;
+
+				k ++;
+			}
 		}
-
-		if(k == 10 || (k >= 1 && j == MAX_LAMP_CONF_NUM -1))
+		
+		if(k == 10 || (k >= 1 && (j == MAX_LAMP_CONF_NUM - 1)))
 		{
 			ServerFrameStruct_S *resp_server_frame_struct1 = NULL;		//用于响应服务器
 
@@ -3052,9 +3261,9 @@ u8 LampGetBasicConfiguration(ServerFrameStruct_S *server_frame_struct)
 
 					for(m = 0; m < k; m ++)
 					{
-						resp_server_frame_struct->para[i].type = 0x4103 + index[m];
+						resp_server_frame_struct1->para[i].type = 0x410A + index[m];
 						memset(buf,0,80);
-						sprintf(buf, "%d",lamp_conf[m].address);
+						sprintf(buf, "%08X",lamp_conf[m].address);
 
 						memset(tmp,0,16);
 						sprintf(tmp, "%d",lamp_conf[m].advance_time);
@@ -3097,12 +3306,12 @@ u8 LampGetBasicConfiguration(ServerFrameStruct_S *server_frame_struct)
 						strcat(buf,"|");
 
 						memset(tmp,0,16);
-						sprintf(tmp, "%d",((lamp_conf[m].default_brightness) >> 4) & 0x0F);
+						sprintf(tmp, "%d",(((lamp_conf[m].default_brightness) >> 4) & 0x0F) * 10);
 						strcat(buf,tmp);
 						strcat(buf,",");
 
 						memset(tmp,0,16);
-						sprintf(tmp, "%d",lamp_conf[m].default_brightness & 0x0F);
+						sprintf(tmp, "%d",(lamp_conf[m].default_brightness & 0x0F) * 10);
 						strcat(buf,tmp);
 						strcat(buf,"|");
 
@@ -3116,14 +3325,12 @@ u8 LampGetBasicConfiguration(ServerFrameStruct_S *server_frame_struct)
 								strcat(buf,",");
 							}
 						}
-
-						resp_server_frame_struct->para[i].len = strlen(buf);
-						buf[resp_server_frame_struct->para[i].len - 1] = '\0';
-						resp_server_frame_struct->para[i].len -= 1;
-						resp_server_frame_struct->para[i].value = (u8 *)pvPortMalloc((resp_server_frame_struct->para[i].len + 1) * sizeof(u8));
-						if(resp_server_frame_struct->para[i].value != NULL)
+						buf[strlen(buf) -1] = 0;
+						resp_server_frame_struct1->para[i].len = strlen(buf);
+						resp_server_frame_struct1->para[i].value = (u8 *)pvPortMalloc((resp_server_frame_struct1->para[i].len + 1) * sizeof(u8));
+						if(resp_server_frame_struct1->para[i].value != NULL)
 						{
-							memcpy(resp_server_frame_struct->para[i].value,buf,resp_server_frame_struct->para[i].len + 1);
+							memcpy(resp_server_frame_struct1->para[i].value,buf,resp_server_frame_struct1->para[i].len + 1);
 						}
 						i ++;
 					}
@@ -3144,11 +3351,13 @@ u8 LampReSetDeviceAddress(ServerFrameStruct_S *server_frame_struct)
 	u8 ret = 0;
 	u8 i = 0;
 	u8 j = 0;
-	u8 tmp_h = 0;
-	u8 tmp_l = 0;
-	u16 add = 0;
-	u16 *data = NULL;
-	char tmp[5];
+	u8 tmp_1 = 0;
+	u8 tmp_2 = 0;
+	u8 tmp_3 = 0;
+	u8 tmp_4 = 0;
+	u32 add = 0;
+	u32 *data = NULL;
+	char tmp[10];
 	char *msg = NULL;
 
 	LampPlcExecuteTask_S *task = NULL;
@@ -3161,7 +3370,7 @@ u8 LampReSetDeviceAddress(ServerFrameStruct_S *server_frame_struct)
 	{
 		memset(task,0,sizeof(LampPlcExecuteTask_S));
 
-		data = (u16 *)pvPortMalloc(2 * sizeof(u16));
+		data = (u32 *)pvPortMalloc(1 * sizeof(u32));
 
 		if(data != NULL)
 		{
@@ -3173,92 +3382,56 @@ u8 LampReSetDeviceAddress(ServerFrameStruct_S *server_frame_struct)
 						msg = (char *)server_frame_struct->para[j].value;
 
 						while(*msg != '\0')
+						tmp[i ++] = *(msg ++);
+						tmp[i] = '\0';
+						if(*msg != '\0')
 						{
-							while(*msg != ',')
-							tmp[i ++] = *(msg ++);
-							tmp[i] = '\0';
 							msg = msg + 1;
-							if(i == 1 || i == 2)
-							{
-								if(i == 1)
-								{
-									tmp[1] = tmp[0];
-									tmp[0] = '0';
-								}
-
-								StrToHex((u8 *)&add,tmp,1);
-							}
-							else if(i == 3 || i == 4)
-							{
-								if(i == 3)
-								{
-									tmp[3] = tmp[2];
-									tmp[2] = tmp[1];
-									tmp[1] = tmp[0];
-									tmp[0] = '0';
-								}
-
-								StrToHex(&tmp_h,tmp + 0,1);
-								StrToHex(&tmp_l,tmp + 2,1);
-
-								add = ((((u16)tmp_h) << 8) & 0xFF00) + (u16)tmp_l;
-							}
-
-							*(data + 0) = add;
-
-							i = 0;
-
-							if(*msg == '\0')
-							{
-								break;
-							}
 						}
+						if(i == 8)
+						{
+							StrToHex(&tmp_1,tmp + 0,1);
+							StrToHex(&tmp_2,tmp + 2,1);
+							StrToHex(&tmp_3,tmp + 4,1);
+							StrToHex(&tmp_4,tmp + 6,1);
+
+							add = ((((u32)tmp_1) << 24) & 0xFF000000) + 
+								  ((((u32)tmp_2) << 16) & 0x00FF0000) + 
+								  ((((u32)tmp_3) <<  8) & 0x0000FF00) +
+								  ((((u32)tmp_4) <<  0) & 0x000000FF);
+						}
+
+						task->group_dev_id[0] = add;
+
+						i = 0;
 					break;
 
 					case 0x3002:
 						msg = (char *)server_frame_struct->para[j].value;
 
 						while(*msg != '\0')
+						tmp[i ++] = *(msg ++);
+						tmp[i] = '\0';
+						if(*msg != '\0')
 						{
-							while(*msg != ',')
-							tmp[i ++] = *(msg ++);
-							tmp[i] = '\0';
 							msg = msg + 1;
-							if(i == 1 || i == 2)
-							{
-								if(i == 1)
-								{
-									tmp[1] = tmp[0];
-									tmp[0] = '0';
-								}
-
-								StrToHex((u8 *)&add,tmp,1);
-							}
-							else if(i == 3 || i == 4)
-							{
-								if(i == 3)
-								{
-									tmp[3] = tmp[2];
-									tmp[2] = tmp[1];
-									tmp[1] = tmp[0];
-									tmp[0] = '0';
-								}
-
-								StrToHex(&tmp_h,tmp + 0,1);
-								StrToHex(&tmp_l,tmp + 2,1);
-
-								add = ((((u16)tmp_h) << 8) & 0xFF00) + (u16)tmp_l;
-							}
-
-							*(data + 1) = add;
-
-							i = 0;
-
-							if(*msg == '\0')
-							{
-								break;
-							}
 						}
+						if(i == 8)
+						{
+							StrToHex(&tmp_1,tmp + 0,1);
+							StrToHex(&tmp_2,tmp + 2,1);
+							StrToHex(&tmp_3,tmp + 4,1);
+							StrToHex(&tmp_4,tmp + 6,1);
+
+							add = ((((u32)tmp_1) << 24) & 0xFF000000) + 
+								  ((((u32)tmp_2) << 16) & 0x00FF0000) + 
+								  ((((u32)tmp_3) <<  8) & 0x0000FF00) +
+								  ((((u32)tmp_4) <<  0) & 0x000000FF);
+						}
+
+						*(data + 0) = add;
+
+						i = 0;
 					break;
 
 					default:
@@ -3267,7 +3440,7 @@ u8 LampReSetDeviceAddress(ServerFrameStruct_S *server_frame_struct)
 			}
 
 			task->data = data;
-
+			task->data_len = 4;
 			task->notify_enable = 1;
 			task->cmd_code = 0x01D2;
 			task->execute_type = 1;
@@ -3275,7 +3448,6 @@ u8 LampReSetDeviceAddress(ServerFrameStruct_S *server_frame_struct)
 			task->dev_num = 1;
 			task->execute_total_num = 1;
 			
-
 			if(xQueueSend(xQueue_LampPlcExecuteTaskToPlc,(void *)&task,(TickType_t)10) != pdPASS)
 			{
 #ifdef DEBUG_LOG
@@ -3528,7 +3700,7 @@ u8 LampGetLampAppointment(ServerFrameStruct_S *server_frame_struct)
 						}
 						strcat(buf,",");
 						memset(tmp,0,10);
-						sprintf(tmp, "%02x",appointment.range[j].week_enable);
+						sprintf(tmp, "%02X",appointment.range[j].week_enable);
 						strcat(buf,tmp);
 						if(j < appointment.time_range_num - 1)
 						{
@@ -3544,7 +3716,464 @@ u8 LampGetLampAppointment(ServerFrameStruct_S *server_frame_struct)
 					memcpy(resp_server_frame_struct->para[i].value,buf,resp_server_frame_struct->para[i].len + 1);
 				}
 			}
+			
+			ret = ConvertFrameStructToFrame(resp_server_frame_struct);
 		}
+		else
+		{
+			DeleteServerFrameStruct(resp_server_frame_struct);
+		}
+	}
+
+	return ret;
+}
+
+u8 LampSetLampStrategy(ServerFrameStruct_S *server_frame_struct)
+{
+	u8 ret = 0;
+	u16 task_num = 0;
+	u8 i = 0;
+	u8 j = 0;
+	u8 k = 0;
+	u8 tmp_1 = 0;
+	u8 tmp_2 = 0;
+	u8 tmp_3 = 0;
+	u8 tmp_4 = 0;
+	u32 add = 0;
+	char tmp[17];
+	char *msg = NULL;
+	LampTask_S lamp_task;
+
+	ServerFrameStruct_S *resp_server_frame_struct = NULL;		//用于响应服务器
+
+	for(j = 0; j < server_frame_struct->para_num; j ++)
+	{
+		memset(&lamp_task,0,sizeof(LampTask_S));
+
+		task_num = server_frame_struct->para[j].type - 0x4001;
+
+		msg = (char *)server_frame_struct->para[j].value;
+		
+		while(*msg != ',')
+		tmp[i ++] = *(msg ++);
+		tmp[i] = '\0';
+		i = 0;
+		msg = msg + 1;
+		lamp_task.group_id = myatoi(tmp);
+		
+		while(*msg != ',')
+		tmp[i ++] = *(msg ++);
+		tmp[i] = '\0';
+		i = 0;
+		msg = msg + 1;
+		lamp_task.type = myatoi(tmp);
+		
+		while(*msg != ',')
+		tmp[i ++] = *(msg ++);
+		tmp[i] = '\0';
+		i = 0;
+		msg = msg + 1;
+		lamp_task.executor = myatoi(tmp);
+		
+		while(*msg != ',')
+		tmp[i ++] = *(msg ++);
+		tmp[i] = '\0';
+		i = 0;
+		msg = msg + 1;
+		lamp_task.time = myatoi(tmp);
+		
+		while(*msg != '|')
+		tmp[i ++] = *(msg ++);
+		tmp[i] = '\0';
+		i = 0;
+		msg = msg + 1;
+		lamp_task.time_option = myatoi(tmp);
+		
+		while(*msg != ',')
+		tmp[i ++] = *(msg ++);
+		tmp[i] = '\0';
+		i = 0;
+		msg = msg + 1;
+		lamp_task.brightness[0] = myatoi(tmp);
+		
+		while(*msg != ',')
+		tmp[i ++] = *(msg ++);
+		tmp[i] = '\0';
+		i = 0;
+		msg = msg + 1;
+		lamp_task.brightness[1] = myatoi(tmp);
+		
+		while(*msg != ',' && *msg != '\0')
+		tmp[i ++] = *(msg ++);
+		tmp[i] = '\0';
+		i = 0;
+		if(*msg != '\0')
+		{
+			msg = msg + 1;
+		}
+		lamp_task.ctrl_mode = myatoi(tmp);
+		
+		k = 0;
+		
+		if(lamp_task.ctrl_mode == 2)
+		{
+			while(*msg != '\0')
+			{
+				while(*msg != ',' && *msg != '\0')
+				tmp[i ++] = *(msg ++);
+				tmp[i] = '\0';
+				if(*msg != '\0')
+				{
+					msg = msg + 1;
+				}
+				if(i == 8)
+				{
+					StrToHex(&tmp_1,tmp + 0,1);
+					StrToHex(&tmp_2,tmp + 2,1);
+					StrToHex(&tmp_3,tmp + 4,1);
+					StrToHex(&tmp_4,tmp + 6,1);
+
+					add = ((((u32)tmp_1) << 24) & 0xFF000000) + 
+						  ((((u32)tmp_2) << 16) & 0x00FF0000) + 
+						  ((((u32)tmp_3) <<  8) & 0x0000FF00) +
+						  ((((u32)tmp_4) <<  0) & 0x000000FF);
+				}
+
+				lamp_task.group_add[k ++] = add;
+
+				i = 0;
+
+				if(*msg == '\0')
+				{
+					break;
+				}
+			}
+		}
+		else
+		{
+			while(*msg != '\0')
+			{
+				while(*msg != ',' && *msg != '\0')
+				tmp[i ++] = *(msg ++);
+				tmp[i] = '\0';
+				i = 0;
+				if(*msg != '\0')
+				{
+					msg = msg + 1;
+				}
+				lamp_task.group_add[k ++] = myatoi(tmp);
+
+				if(*msg == '\0')
+				{
+					break;
+				}
+			}
+		}
+
+		if(task_num < MAX_LAMP_STRATEGY_NUM)
+		{
+			WriteLampTaskConfig(task_num,0,lamp_task);
+
+			WriteSpecifyLampStrategyNumList(task_num,1);
+		}
+	}
+
+	WriteLampStrategyNumList(0,1);
+
+	resp_server_frame_struct = (ServerFrameStruct_S *)pvPortMalloc(sizeof(ServerFrameStruct_S));
+
+	if(resp_server_frame_struct != NULL)
+	{
+		CopyServerFrameStruct(server_frame_struct,resp_server_frame_struct,0);
+
+		resp_server_frame_struct->msg_type 	= (u8)DEVICE_RESPONSE_UP;	//响应服务器类型
+		resp_server_frame_struct->msg_len 	= 10;
+		resp_server_frame_struct->err_code 	= (u8)NO_ERR;
+
+		ret = ConvertFrameStructToFrame(resp_server_frame_struct);
+	}
+
+	return ret;
+}
+
+u8 LampGetLampStrategy(ServerFrameStruct_S *server_frame_struct)
+{
+	u16 i = 0;
+	u16 j = 0;
+	u8 k = 0;
+	u8 m = 0;
+	u8 n = 0;
+	u8 ret = 0;
+	char tmp[16] = {0};
+	char buf[80] = {0};
+	LampTask_S task;
+	LampTask_S lamp_task[10];
+	u16 index[10] = {0};
+
+	for(j = 0; j < MAX_LAMP_STRATEGY_NUM; j ++)
+	{
+		ret = ReadLampTaskConfig(j,&task);
+
+		if(ret == 1)
+		{
+			memcpy(&lamp_task[k],&task,sizeof(LampTask_S));
+
+			index[k] = j;
+
+			k ++;
+		}
+
+		if(k == 10 || (k >= 1 && j == MAX_LAMP_STRATEGY_NUM - 1))
+		{
+			ServerFrameStruct_S *resp_server_frame_struct1 = NULL;		//用于响应服务器
+
+			resp_server_frame_struct1 = (ServerFrameStruct_S *)pvPortMalloc(sizeof(ServerFrameStruct_S));
+
+			if(resp_server_frame_struct1 != NULL)
+			{
+				CopyServerFrameStruct(server_frame_struct,resp_server_frame_struct1,0);
+
+				resp_server_frame_struct1->msg_type 	= (u8)DEVICE_RESPONSE_UP;	//响应服务器类型
+				resp_server_frame_struct1->msg_len 		= 10;
+				resp_server_frame_struct1->err_code 	= (u8)NO_ERR;
+				resp_server_frame_struct1->para_num 	= k;
+
+				resp_server_frame_struct1->para = (Parameter_S *)pvPortMalloc(resp_server_frame_struct1->para_num * sizeof(Parameter_S));
+
+				if(resp_server_frame_struct1->para != NULL)
+				{
+					i = 0;
+
+					for(m = 0; m < k; m ++)
+					{
+						resp_server_frame_struct1->para[i].type = 0x4101 + index[m];
+						memset(buf,0,80);
+						
+						sprintf(buf, "%d",lamp_task[m].group_id);
+						strcat(buf,",");
+						
+						memset(tmp,0,16);
+						sprintf(tmp, "%d",lamp_task[m].type);
+						strcat(buf,tmp);
+						strcat(buf,",");
+						
+						memset(tmp,0,16);
+						sprintf(tmp, "%d",lamp_task[m].executor);
+						strcat(buf,tmp);
+						strcat(buf,",");
+						
+						memset(tmp,0,16);
+						sprintf(tmp, "%d",lamp_task[m].time);
+						strcat(buf,tmp);
+						strcat(buf,",");
+						
+						memset(tmp,0,16);
+						sprintf(tmp, "%d",lamp_task[m].time_option);
+						strcat(buf,tmp);
+						strcat(buf,"|");
+						
+						memset(tmp,0,16);
+						sprintf(tmp, "%d",lamp_task[m].brightness[0]);
+						strcat(buf,tmp);
+						strcat(buf,",");
+						
+						memset(tmp,0,16);
+						sprintf(tmp, "%d",lamp_task[m].brightness[1]);
+						strcat(buf,tmp);
+						strcat(buf,",");
+						
+						memset(tmp,0,16);
+						sprintf(tmp, "%d",lamp_task[m].ctrl_mode);
+						strcat(buf,tmp);
+						strcat(buf,",");
+
+						for(n = 0; n < MAX_LAMP_GROUP_NUM; n ++)
+						{
+							if(lamp_task[m].ctrl_mode == 2)
+							{
+								if(lamp_task[m].group_add[n] != 0)
+								{
+									memset(tmp,0,16);
+									sprintf(tmp, "%08X",lamp_task[m].group_add[n]);
+									strcat(buf,tmp);
+									strcat(buf,",");
+								}
+							}
+							else
+							{
+								if(lamp_task[m].group_add[n] != 0)
+								{
+									memset(tmp,0,16);
+									sprintf(tmp, "%d",lamp_task[m].group_add[n]);
+									strcat(buf,tmp);
+									strcat(buf,",");
+								}
+							}
+						}
+
+						buf[strlen(buf) -1] = 0;
+						resp_server_frame_struct1->para[i].len = strlen(buf);
+						resp_server_frame_struct1->para[i].value = (u8 *)pvPortMalloc((resp_server_frame_struct1->para[i].len + 1) * sizeof(u8));
+						if(resp_server_frame_struct1->para[i].value != NULL)
+						{
+							memcpy(resp_server_frame_struct1->para[i].value,buf,resp_server_frame_struct1->para[i].len + 1);
+						}
+						i ++;
+					}
+				}
+
+				ret = ConvertFrameStructToFrame(resp_server_frame_struct1);
+			}
+
+			k = 0;
+		}
+	}
+
+	return ret;
+}
+
+u8 LampSynchronizeConfig(ServerFrameStruct_S *server_frame_struct)
+{
+	u8 ret = 0;
+	u8 i = 0;
+	u8 j = 0;
+	u8 k = 0;
+	u8 tmp_1 = 0;
+	u8 tmp_2 = 0;
+	u8 tmp_3 = 0;
+	u8 tmp_4 = 0;
+	u32 add = 0;
+	u8 type = 0;
+	char tmp[10];
+	char *msg = NULL;
+
+	LampPlcExecuteTask_S *task = NULL;
+
+	ServerFrameStruct_S *resp_server_frame_struct = NULL;		//用于响应服务器
+
+	task = (LampPlcExecuteTask_S *)pvPortMalloc(sizeof(LampPlcExecuteTask_S));
+
+	if(task != NULL)
+	{
+		memset(task,0,sizeof(LampPlcExecuteTask_S));
+
+		for(j = 0; j < server_frame_struct->para_num; j ++)
+		{
+			switch(server_frame_struct->para[j].type)
+			{
+				case 0x8001:
+					task->broadcast_type = myatoi((char *)server_frame_struct->para[j].value);
+				break;
+
+				case 0x4002:
+					msg = (char *)server_frame_struct->para[j].value;
+
+					if(task->broadcast_type == 2)
+					{
+						while(*msg != '\0')
+						{
+							while(*msg != ',' && *msg != '\0')
+							tmp[i ++] = *(msg ++);
+							tmp[i] = '\0';
+							if(*msg != '\0')
+							{
+								msg = msg + 1;
+							}
+							if(i == 8)
+							{
+								StrToHex(&tmp_1,tmp + 0,1);
+								StrToHex(&tmp_2,tmp + 2,1);
+								StrToHex(&tmp_3,tmp + 4,1);
+								StrToHex(&tmp_4,tmp + 6,1);
+
+								add = ((((u32)tmp_1) << 24) & 0xFF000000) + 
+									  ((((u32)tmp_2) << 16) & 0x00FF0000) + 
+									  ((((u32)tmp_3) <<  8) & 0x0000FF00) +
+									  ((((u32)tmp_4) <<  0) & 0x000000FF);
+							}
+
+							task->group_dev_id[k ++] = add;
+
+							i = 0;
+
+							if(*msg == '\0')
+							{
+								break;
+							}
+						}
+					}
+					else
+					{
+						while(*msg != '\0')
+						{
+							while(*msg != ',' && *msg != '\0')
+							tmp[i ++] = *(msg ++);
+							tmp[i] = '\0';
+							i = 0;
+							if(*msg != '\0')
+							{
+								msg = msg + 1;
+							}
+							task->group_dev_id[k ++] = myatoi(tmp);
+
+							if(*msg == '\0')
+							{
+								break;
+							}
+						}
+					}
+				break;
+
+				case 0x8003:
+					type = myatoi((char *)server_frame_struct->para[j].value);
+				break;
+
+				default:
+				break;
+			}
+		}
+		
+		switch(type)
+		{
+			case 0:
+				task->cmd_code = 0x01D0;
+				task->execute_type = 1;
+				LampGetLampPlcExecuteTaskInfo(task);
+			break;
+			
+			case 1:
+				task->cmd_code = 0x01D3;
+				
+				LampGetLampPlcExecuteTaskInfo1(task);
+			break;
+			
+			case 2:
+				task->cmd_code = 0x01D5;
+				task->dev_num = LampNumList.number;
+				task->execute_total_num = LampStrategyNumList.number;
+			break;
+		}
+
+		task->notify_enable = 1;
+
+		if(xQueueSend(xQueue_LampPlcExecuteTaskToPlc,(void *)&task,(TickType_t)10) != pdPASS)
+		{
+#ifdef DEBUG_LOG
+			printf("send xQueue_LampPlcFrame fail.\r\n");
+#endif
+			DeleteLampPlcExecuteTask(task);
+		}
+	}
+
+	resp_server_frame_struct = (ServerFrameStruct_S *)pvPortMalloc(sizeof(ServerFrameStruct_S));
+
+	if(resp_server_frame_struct != NULL)
+	{
+		CopyServerFrameStruct(server_frame_struct,resp_server_frame_struct,0);
+
+		resp_server_frame_struct->msg_type 	= (u8)DEVICE_RESPONSE_UP;	//响应服务器类型
+		resp_server_frame_struct->msg_len 	= 10;
+		resp_server_frame_struct->err_code 	= (u8)NO_ERR;
 
 		ret = ConvertFrameStructToFrame(resp_server_frame_struct);
 	}
@@ -3568,8 +4197,8 @@ u8 LampNodeSearch(ServerFrameStruct_S *server_frame_struct)
 
 		task->broadcast_type = 0;
 		task->notify_enable = 1;
-		task->cmd_code = 0x01A4;
-		task->execute_type = 2;
+		task->cmd_code = 0x01D8;
+		task->execute_type = 0;
 		task->dev_num = 0;
 		task->execute_total_num = 1;
 
@@ -3820,12 +4449,14 @@ u8 LampStartFirmWareUpdate(ServerFrameStruct_S *server_frame_struct)
 	u8 j = 0;
 	u8 k = 0;
 	u8 m = 0;
-	u8 tmp_h = 0;
-	u8 tmp_l = 0;
-	u16 add = 0;
+	u8 tmp_1 = 0;
+	u8 tmp_2 = 0;
+	u8 tmp_3 = 0;
+	u8 tmp_4 = 0;
+	u32 add = 0;
 	u8 state = 0;
 	u8 md5[33] = {0};
-	char tmp[5];
+	char tmp[10];
 	char buf[4] = {0};
 	char *msg = NULL;
 
@@ -3854,34 +4485,24 @@ u8 LampStartFirmWareUpdate(ServerFrameStruct_S *server_frame_struct)
 					{
 						while(*msg != '\0')
 						{
-							while(*msg != ',')
+							while(*msg != ',' && *msg != '\0')
 							tmp[i ++] = *(msg ++);
 							tmp[i] = '\0';
-							msg = msg + 1;
-							if(i == 1 || i == 2)
+							if(*msg != '\0')
 							{
-								if(i == 1)
-								{
-									tmp[1] = tmp[0];
-									tmp[0] = '0';
-								}
-
-								StrToHex((u8 *)&add,tmp,1);
+								msg = msg + 1;
 							}
-							else if(i == 3 || i == 4)
+							if(i == 8)
 							{
-								if(i == 3)
-								{
-									tmp[3] = tmp[2];
-									tmp[2] = tmp[1];
-									tmp[1] = tmp[0];
-									tmp[0] = '0';
-								}
+								StrToHex(&tmp_1,tmp + 0,1);
+								StrToHex(&tmp_2,tmp + 2,1);
+								StrToHex(&tmp_3,tmp + 4,1);
+								StrToHex(&tmp_4,tmp + 6,1);
 
-								StrToHex(&tmp_h,tmp + 0,1);
-								StrToHex(&tmp_l,tmp + 2,1);
-
-								add = ((((u16)tmp_h) << 8) & 0xFF00) + (u16)tmp_l;
+								add = ((((u32)tmp_1) << 24) & 0xFF000000) + 
+									  ((((u32)tmp_2) << 16) & 0x00FF0000) + 
+									  ((((u32)tmp_3) <<  8) & 0x0000FF00) +
+									  ((((u32)tmp_4) <<  0) & 0x000000FF);
 							}
 
 							task->group_dev_id[k ++] = add;
@@ -3902,7 +4523,10 @@ u8 LampStartFirmWareUpdate(ServerFrameStruct_S *server_frame_struct)
 							tmp[i ++] = *(msg ++);
 							tmp[i] = '\0';
 							i = 0;
-							msg = msg + 1;
+							if(*msg != '\0')
+							{
+								msg = msg + 1;
+							}
 							task->group_dev_id[k ++] = myatoi(tmp);
 
 							if(*msg == '\0')
@@ -4003,9 +4627,13 @@ u8 LampStartFirmWareUpdate(ServerFrameStruct_S *server_frame_struct)
 				memcpy(resp_server_frame_struct->para[i].value,buf,resp_server_frame_struct->para[i].len + 1);
 			}
 			i ++;
+			
+			ret = ConvertFrameStructToFrame(resp_server_frame_struct);
 		}
-
-		ret = ConvertFrameStructToFrame(resp_server_frame_struct);
+		else
+		{
+			DeleteServerFrameStruct(resp_server_frame_struct);
+		}
 	}
 
 	return ret;
@@ -4087,10 +4715,12 @@ u8 LampGetFirmWareVersion(ServerFrameStruct_S *server_frame_struct)
 	u8 i = 0;
 	u8 j = 0;
 	u8 k = 0;
-	u8 tmp_h = 0;
-	u8 tmp_l = 0;
-	u16 add = 0;
-	char tmp[5];
+	u8 tmp_1 = 0;
+	u8 tmp_2 = 0;
+	u8 tmp_3 = 0;
+	u8 tmp_4 = 0;
+	u32 add = 0;
+	char tmp[10];
 	char *msg = NULL;
 
 	LampPlcExecuteTask_S *task = NULL;
@@ -4118,34 +4748,24 @@ u8 LampGetFirmWareVersion(ServerFrameStruct_S *server_frame_struct)
 					{
 						while(*msg != '\0')
 						{
-							while(*msg != ',')
+							while(*msg != ',' && *msg != '\0')
 							tmp[i ++] = *(msg ++);
 							tmp[i] = '\0';
-							msg = msg + 1;
-							if(i == 1 || i == 2)
+							if(*msg != '\0')
 							{
-								if(i == 1)
-								{
-									tmp[1] = tmp[0];
-									tmp[0] = '0';
-								}
-
-								StrToHex((u8 *)&add,tmp,1);
+								msg = msg + 1;
 							}
-							else if(i == 3 || i == 4)
+							if(i == 8)
 							{
-								if(i == 3)
-								{
-									tmp[3] = tmp[2];
-									tmp[2] = tmp[1];
-									tmp[1] = tmp[0];
-									tmp[0] = '0';
-								}
+								StrToHex(&tmp_1,tmp + 0,1);
+								StrToHex(&tmp_2,tmp + 2,1);
+								StrToHex(&tmp_3,tmp + 4,1);
+								StrToHex(&tmp_4,tmp + 6,1);
 
-								StrToHex(&tmp_h,tmp + 0,1);
-								StrToHex(&tmp_l,tmp + 2,1);
-
-								add = ((((u16)tmp_h) << 8) & 0xFF00) + (u16)tmp_l;
+								add = ((((u32)tmp_1) << 24) & 0xFF000000) + 
+									  ((((u32)tmp_2) << 16) & 0x00FF0000) + 
+									  ((((u32)tmp_3) <<  8) & 0x0000FF00) +
+									  ((((u32)tmp_4) <<  0) & 0x000000FF);
 							}
 
 							task->group_dev_id[k ++] = add;
@@ -4166,7 +4786,10 @@ u8 LampGetFirmWareVersion(ServerFrameStruct_S *server_frame_struct)
 							tmp[i ++] = *(msg ++);
 							tmp[i] = '\0';
 							i = 0;
-							msg = msg + 1;
+							if(*msg != '\0')
+							{
+								msg = msg + 1;
+							}
 							task->group_dev_id[k ++] = myatoi(tmp);
 
 							if(*msg == '\0')

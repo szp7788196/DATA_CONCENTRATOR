@@ -31,10 +31,10 @@ void vTask4G(void *pvParameters)
 
 	while(1)
 	{
-//		while(ConcentratorBasicConfig.connection_mode != (u8)MODE_4G)
-//		{
-//			delay_ms(10000);
-//		}
+		while(ConcentratorBasicConfig.connection_mode == (u8)MODE_ETH)
+		{
+			delay_ms(1000);
+		}
 		
 		if(FlagReConnectToServer == 2)
 		{

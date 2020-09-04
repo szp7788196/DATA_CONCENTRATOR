@@ -16,7 +16,8 @@ extern TaskHandle_t xHandleTaskLAMP;
 void vTaskLAMP(void *pvParameters);
 
 
-
+void LampAutoSynchronizeTime(void);
+void LampAutoGetCurrentState(void);
 
 
 

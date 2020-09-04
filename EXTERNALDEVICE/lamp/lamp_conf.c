@@ -7,11 +7,11 @@ LampBasicConfig_S LampBasicConfig;						//单灯基础配置
 
 
 LampListNum_S LampNumList;								//已配置的单灯数量
+LampListNum_S LampStrategyNumList;						//已配置的任务数量
 LampGroupListNum_S LampGroupListNum;					//每组单灯数量
 Uint32TypeNumber_S LampAppointmentNum;					//单灯预约控制数量
 Uint32TypeNumber_S LampStrategyNum;						//单灯策略配置数量
 FrameWareState_S LampFrameWareState;					//固件升级状态
-LampNodeLossAlarmConfig_S LampNodeLossAlarmConfig;		//节点丢失告警配置
 
 
 
@@ -22,7 +22,7 @@ void ReadLampBasicConfig(void)
 
 	CAT25X_Read((u8 *)&LampBasicConfig,
 	            LAMP_BASIC_CONG_ADD,
-	            sizeof(Uint32TypeNumber_S));
+	            sizeof(LampBasicConfig_S));
 
 	crc16_cal = CRC16((u8 *)&LampBasicConfig,LAMP_BASIC_CONG_LEN - 2);
 
@@ -44,7 +44,7 @@ void WriteLampBasicConfig(u8 reset,u8 write_enable)
 		LampBasicConfig.response_timeout = 30;
 		LampBasicConfig.retransmission_times = 1;
 		LampBasicConfig.broadcast_times = 10;
-		LampBasicConfig.broadcast_interval_time = 3000;
+		LampBasicConfig.broadcast_interval_time = 500;
 
 		LampBasicConfig.crc16 = 0;
 	}
@@ -101,7 +101,7 @@ u8 ReadSpecifyLampNumList(u16 i)
 	u8 divisor = 0;
 	u8 remainder = 0;
 	
-	if(i >= LampNumList.number)
+	if(i >= MAX_LAMP_CONF_NUM)
 	{
 		return 0;
 	}
@@ -109,7 +109,7 @@ u8 ReadSpecifyLampNumList(u16 i)
 	divisor = i / 8;
 	remainder = i % 8;
 	
-	if(LampNumList.list[divisor] & (1 << remainder))
+	if((LampNumList.list[divisor] & (1 << remainder)) != 0)
 	{
 		ret = 1;
 	}
@@ -124,7 +124,7 @@ void WriteSpecifyLampNumList(u16 i,u8 mode)
 	u8 divisor = 0;
 	u8 remainder = 0;
 	
-	if(i >= LampNumList.number)
+	if(i >= MAX_LAMP_CONF_NUM)
 	{
 		return;
 	}
@@ -134,7 +134,7 @@ void WriteSpecifyLampNumList(u16 i,u8 mode)
 	
 	if(mode == 0)
 	{
-		if(LampNumList.list[divisor] & (1 << remainder))
+		if((LampNumList.list[divisor] & (1 << remainder)) != 0)
 		{
 			LampNumList.number --;
 		}
@@ -143,12 +143,105 @@ void WriteSpecifyLampNumList(u16 i,u8 mode)
 	}
 	else
 	{
-		if((LampNumList.list[divisor] & (1 << remainder)) == 0)
+		if(((LampNumList.list[divisor] & (1 << remainder))) == 0)
 		{
 			LampNumList.number ++;
 		}
 		
 		LampNumList.list[divisor] |= (1 << remainder);
+	}
+}
+
+//读取配置单灯任务数量表
+void ReadLampStrategyNumList(void)
+{
+	u16 crc16_cal = 0;
+
+	CAT25X_Read((u8 *)&LampStrategyNumList,
+	            LAMP_STRATEGY_LIST_NUM_ADD,
+	            sizeof(LampListNum_S));
+
+	crc16_cal = CRC16((u8 *)&LampStrategyNumList,LAMP_STRATEGY_LIST_NUM_LEN - 2);
+
+	if(crc16_cal != LampStrategyNumList.crc16 ||
+	   LampStrategyNumList.number > MAX_LAMP_STRATEGY_NUM)
+	{
+		WriteLampStrategyNumList(1,0);
+	}
+}
+
+void WriteLampStrategyNumList(u8 reset,u8 write_enable)
+{
+	if(reset == 1)
+	{
+		memset(&LampStrategyNumList,0,sizeof(LampListNum_S));
+	}
+
+	if(write_enable == 1)
+	{
+		LampStrategyNumList.crc16 = CRC16((u8 *)&LampStrategyNumList,LAMP_STRATEGY_LIST_NUM_LEN - 2);
+
+		CAT25X_Write((u8 *)&LampStrategyNumList,
+		             LAMP_STRATEGY_LIST_NUM_ADD,
+		             LAMP_STRATEGY_LIST_NUM_LEN);
+	}
+}
+
+//判断指定号码的单灯是否被配置
+u8 ReadSpecifyLampStrategyNumList(u16 i)
+{
+	u8 ret = 0;
+	u8 divisor = 0;
+	u8 remainder = 0;
+	
+	if(i >= MAX_LAMP_STRATEGY_NUM)
+	{
+		return 0;
+	}
+	
+	divisor = i / 8;
+	remainder = i % 8;
+	
+	if((LampStrategyNumList.list[divisor] & (1 << remainder)) != 0)
+	{
+		ret = 1;
+	}
+	
+	return ret;
+}
+
+//向单灯配置数量列表的指定位置写入数据
+//mode 0删除 1添加
+void WriteSpecifyLampStrategyNumList(u16 i,u8 mode)
+{
+	u8 divisor = 0;
+	u8 remainder = 0;
+	
+	if(i >= MAX_LAMP_STRATEGY_NUM)
+	{
+		return;
+	}
+	
+	divisor = i / 8;
+	remainder = i % 8;
+	
+	if(mode == 0)
+	{
+		if((LampStrategyNumList.list[divisor] & (1 << remainder)) != 0)
+		{
+			LampStrategyNumList.number --;
+		}
+		
+		LampStrategyNumList.list[divisor] &= ~(1 << remainder);
+	}
+	else
+	{
+		if(((LampStrategyNumList.list[divisor] & (1 << remainder))) == 0)
+		{
+			LampStrategyNumList.number ++;
+		}
+		
+		LampStrategyNumList.list[divisor] |= (1 << remainder);
 	}
 }
 
@@ -335,42 +428,6 @@ void WriteLampTaskConfig(u8 i,u8 reset,LampTask_S task)
 		         LAMP_STRATEGY_LEN);
 }
 
-//读取单灯场景配置
-u8 ReadLampSenceConfig(u16 i,LampSenceConfig_S *sence)
-{
-	u8 ret = 1;
-	u16 crc16_cal = 0;
-
-	CAT25X_Read((u8 *)sence,
-	            LAMP_APPOINTMENT_ADD + i * LAMP_APPOINTMENT_LEN,
-	            sizeof(LampSenceConfig_S));
-
-	crc16_cal = CRC16((u8 *)sence,LAMP_APPOINTMENT_LEN - 2);
-
-	if(crc16_cal != sence->crc16)
-	{
-		ret = 0;
-	}
-	
-	return ret;
-}
-
-void WriteLampSenceConfig(u8 i,u8 reset,LampSenceConfig_S sence)
-{
-	if(reset == 1)
-	{
-		sence.crc16 = 0;
-	}
-	else
-	{
-		sence.crc16 = CRC16((u8 *)&sence,LAMP_APPOINTMENT_LEN - 2);
-	}
-	
-	CAT25X_Write((u8 *)&sence,
-		         LAMP_APPOINTMENT_ADD + i * LAMP_APPOINTMENT_LEN,
-		         LAMP_APPOINTMENT_LEN);
-}
-
 //读取固件升级状态
 u8 ReadLampFrameWareState(void)
 {
@@ -441,41 +498,6 @@ void WriteLampFrameWareState(u8 reset,u8 write_enable)
 		LampFrameWareState.crc16 = CRC16((u8 *)&LampFrameWareState,LAMP_FW_STATE_LEN - 2);
 
 		CAT25X_Write((u8 *)&LampFrameWareState,LAMP_FW_STATE_ADD,LAMP_FW_STATE_LEN);
-	}
-}
-
-void ReadLampNodeLossAlarmConfig(void)
-{
-	u16 crc16_cal = 0;
-
-	CAT25X_Read((u8 *)&LampNodeLossAlarmConfig,
-	            LAMP_NODE_LOSS_ALARM_CONF_ADD,
-	            sizeof(LampNodeLossAlarmConfig_S));
-
-	crc16_cal = CRC16((u8 *)&LampNodeLossAlarmConfig,LAMP_NODE_LOSS_ALARM_CONF_LEN - 2);
-
-	if(crc16_cal != LampNodeLossAlarmConfig.crc16)
-	{
-		WriteLampNodeLossAlarmConfig(1,0);
-	}
-}
-
-void WriteLampNodeLossAlarmConfig(u8 reset,u8 write_enable)
-{
-	if(reset == 1)
-	{
-		LampNodeLossAlarmConfig.enable = 0;
-
-		LampNodeLossAlarmConfig.crc16 = 0;
-	}
-
-	if(write_enable == 1)
-	{
-		LampNodeLossAlarmConfig.crc16 = CRC16((u8 *)&LampNodeLossAlarmConfig,LAMP_NODE_LOSS_ALARM_CONF_LEN - 2);
-
-		CAT25X_Write((u8 *)&LampNodeLossAlarmConfig,
-		             LAMP_NODE_LOSS_ALARM_CONF_ADD,
-		             LAMP_NODE_LOSS_ALARM_CONF_LEN);
 	}
 }
 

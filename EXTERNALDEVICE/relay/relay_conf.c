@@ -4,6 +4,7 @@
 #include "concentrator_conf.h"
 #include "sun_rise_set.h"
 #include "rx8010s.h"
+#include "lumeter_conf.h"
 
 u8 RelayForceSwitchOffAllRelays = 0;												//强制断开所有继电器
 u8 RelayRefreshStrategyGroup = 1;													//继电器策略刷新标志
@@ -86,11 +87,11 @@ void ReadRelayModuleConfig(void)
 		else
 		{
 			memset(&RelayModuleState[i],0,sizeof(RelayModuleState_S));
-			
+
 			RelayModuleState[i].address = RelayModuleConfig[i].address;
 			RelayModuleState[i].channel = RelayModuleConfig[i].channel;
 			RelayModuleState[i].interval_time = RelayModuleConfig[i].interval_time;
-			
+
 			if(RelayModuleConfig[i].loop_num <= MAX_RELAY_MODULE_LOOP_CH_NUM)
 			{
 				for(j = 0; j < RelayModuleConfig[i].loop_num; j ++)
@@ -103,14 +104,13 @@ void ReadRelayModuleConfig(void)
 				RelayModuleState[i].loop_channel_bit = 0;
 			}
 		}
-		
 	}
 }
 
 void WriteRelayModuleConfig(u8 i,u8 reset,u8 write_enable)
 {
-	u8 j = 0; 
-	
+	u8 j = 0;
+
 	if(reset == 1)
 	{
 		RelayModuleConfig[i].address = 0xFF;
@@ -133,13 +133,13 @@ void WriteRelayModuleConfig(u8 i,u8 reset,u8 write_enable)
 		             RELAY_MODULE_CONF_ADD + i * RELAY_MODULE_CONF_LEN,
 		             RELAY_MODULE_CONF_LEN);
 	}
-	
+
 	memset(&RelayModuleState[i],0,sizeof(RelayModuleState_S));
-	
+
 	RelayModuleState[i].address = RelayModuleConfig[i].address;
 	RelayModuleState[i].channel = RelayModuleConfig[i].channel;
 	RelayModuleState[i].interval_time = RelayModuleConfig[i].interval_time;
-	
+
 	if(RelayModuleConfig[i].loop_num <= MAX_RELAY_MODULE_LOOP_CH_NUM)
 	{
 		for(j = 0; j < RelayModuleConfig[i].loop_num; j ++)
@@ -178,7 +178,7 @@ void WriteRelayModuleBasicConfig(u8 reset,u8 write_enable)
 		RelayModuleBasicConfig.on_minute = 0;
 		RelayModuleBasicConfig.off_hour = 6;
 		RelayModuleBasicConfig.off_minute = 0;
-		
+
 		RelayModuleBasicConfig.state_monitoring_cycle = 30;
 		RelayModuleBasicConfig.state_recording_time = 30;
 
@@ -275,7 +275,7 @@ u8 ReadRelayAppointment(u8 i,RelaySenceConfig_S *appointment)
 {
 	u8 ret = 0;
 	u16 crc16_cal = 0;
-	
+
 	if(appointment == NULL)
 	{
 		return ret;
@@ -291,7 +291,7 @@ u8 ReadRelayAppointment(u8 i,RelaySenceConfig_S *appointment)
 	{
 		ret = 1;
 	}
-	
+
 	return ret;
 }
 
@@ -354,7 +354,7 @@ u8 ReadRelayStrategy(u8 i,RelayTask_S *strategy)
 {
 	u8 ret = 0;
 	u16 crc16_cal = 0;
-	
+
 	if(strategy == NULL)
 	{
 		return ret;
@@ -370,7 +370,7 @@ u8 ReadRelayStrategy(u8 i,RelayTask_S *strategy)
 	{
 		ret = 1;
 	}
-	
+
 	return ret;
 }
 
@@ -406,9 +406,9 @@ void ReadRelayAppointmentGroup(void)
 	{
 		return;
 	}
-	
+
 	memset(RelayAppointmentGroup,0,sizeof(RelayAppointment_S));
-	
+
 	if(RelayAppointmentNum.number == 0)	//无预约控制
 	{
 		return;
@@ -464,11 +464,11 @@ void ReadRelayStrategyGroups(void)
 		if(RelayStrategyGroup[i] != NULL)
 		{
 			memset(RelayStrategyGroup[i],0,sizeof(RelayStrategy_S));
-			
+
 			RelayStrategyGroup[i]->group_id = i + 1;
 		}
 	}
-	
+
 	if(RelayStrategyNum.number == 0)	//无策略
 	{
 		return;
@@ -504,7 +504,7 @@ void ReadRelayStrategyGroups(void)
 				       relay_task.action,
 				       strategy->action_num* sizeof(RelayTaskAction_S));
 
-				RefreshRelayStrategyActionTime(strategy);
+				RefreshRelayStrategyActionTime(strategy,LumeterAppValue);
 
 				RelayStrategyAdd(strategy);
 			}
@@ -547,12 +547,16 @@ void WriteRelayStrategyGroupSwitch(u8 reset,u8 write_enable)
 }
 
 //刷新计算策略动作时间
-void RefreshRelayStrategyActionTime(pRelayStrategy strategy)
+void RefreshRelayStrategyActionTime(pRelayStrategy strategy,u32 illuminance_value)
 {
+	u16 gate_n = 0;
+
 	if(strategy == NULL)
 	{
 		return;
 	}
+
+	gate_n = calendar.hour * 60 + calendar.min;
 
 	switch(strategy->type)
 	{
@@ -562,6 +566,35 @@ void RefreshRelayStrategyActionTime(pRelayStrategy strategy)
 
 		case (u8)TYPE_FIXED_TIME_LIGHT:
 			strategy->action_time = strategy->offset_min;
+			
+			if(strategy->time_option == 1)					//日落时间
+			{
+				if(illuminance_value <= LumeterBasicConfig.light_on_thre)							//计算提前亮灯时间
+				{
+					strategy->action_time -= LumeterBasicConfig.light_on_advance_time;
+				}
+				else
+				{
+					if(gate_n >= strategy->action_time + LumeterBasicConfig.light_on_delay_time)	//计算延后亮灯时间
+					{
+						strategy->action_time += LumeterBasicConfig.light_on_delay_time;
+					}
+				}
+			}
+			else if(strategy->time_option == 2)				//日出时间
+			{
+				if(illuminance_value >= LumeterBasicConfig.light_off_thre)
+				{
+					strategy->action_time -= LumeterBasicConfig.light_off_advance_time;
+				}
+				else
+				{
+					if(gate_n >= strategy->action_time + LumeterBasicConfig.light_off_delay_time)
+					{
+						strategy->action_time += LumeterBasicConfig.light_off_delay_time;
+					}
+				}
+			}
 		break;
 
 		case (u8)TYPE_LOCATION:
@@ -585,12 +618,36 @@ void RefreshRelayStrategyActionTime(pRelayStrategy strategy)
 				strategy->action_time = SunRiseSetTime.set_h * 60 +
 				                        SunRiseSetTime.set_m +
 				                        strategy->offset_min;
+
+				if(illuminance_value <= LumeterBasicConfig.light_on_thre)							//计算提前亮灯时间
+				{
+					strategy->action_time -= LumeterBasicConfig.light_on_advance_time;
+				}
+				else
+				{
+					if(gate_n >= strategy->action_time + LumeterBasicConfig.light_on_delay_time)	//计算延后亮灯时间
+					{
+						strategy->action_time += LumeterBasicConfig.light_on_delay_time;
+					}
+				}
 			}
 			else if(strategy->time_option == 2)				//日出时间
 			{
 				strategy->action_time = SunRiseSetTime.rise_h * 60 +
 				                        SunRiseSetTime.rise_m +
 				                        strategy->offset_min;
+
+				if(illuminance_value >= LumeterBasicConfig.light_off_thre)
+				{
+					strategy->action_time -= LumeterBasicConfig.light_off_advance_time;
+				}
+				else
+				{
+					if(gate_n >= strategy->action_time + LumeterBasicConfig.light_off_delay_time)
+					{
+						strategy->action_time += LumeterBasicConfig.light_off_delay_time;
+					}
+				}
 			}
 		break;
 
@@ -615,12 +672,36 @@ void RefreshRelayStrategyActionTime(pRelayStrategy strategy)
 				strategy->action_time = ConcentratorLocationConfig.switch_time_month_table[calendar.w_month].switch_time[calendar.w_date].off_hour * 60 +
 				                        ConcentratorLocationConfig.switch_time_month_table[calendar.w_month].switch_time[calendar.w_date].off_minute +
 				                        strategy->offset_min;
+
+				if(illuminance_value <= LumeterBasicConfig.light_on_thre)
+				{
+					strategy->action_time -= LumeterBasicConfig.light_on_advance_time;
+				}
+				else
+				{
+					if(gate_n >= strategy->action_time + LumeterBasicConfig.light_on_delay_time)
+					{
+						strategy->action_time += LumeterBasicConfig.light_on_delay_time;
+					}
+				}
 			}
 			else if(strategy->time_option == 2)				//日出时间
 			{
 				strategy->action_time = ConcentratorLocationConfig.switch_time_month_table[calendar.w_month].switch_time[calendar.w_date].on_hour * 60 +
 				                        ConcentratorLocationConfig.switch_time_month_table[calendar.w_month].switch_time[calendar.w_date].on_minute +
 				                        strategy->offset_min;
+
+				if(illuminance_value >= LumeterBasicConfig.light_off_thre)
+				{
+					strategy->action_time -= LumeterBasicConfig.light_off_advance_time;
+				}
+				else
+				{
+					if(gate_n >= strategy->action_time + LumeterBasicConfig.light_off_delay_time)
+					{
+						strategy->action_time += LumeterBasicConfig.light_off_delay_time;
+					}
+				}
 			}
 		break;
 
@@ -630,7 +711,7 @@ void RefreshRelayStrategyActionTime(pRelayStrategy strategy)
 }
 
 //刷新计算策略组动作时间
-void RefreshRelayStrategyGroupActionTime(u8 group_id)
+void RefreshRelayStrategyGroupActionTime(u8 group_id,u32 illuminance_value)
 {
 	u8 i = 0;
 	pRelayStrategy head_strategy = NULL;
@@ -658,7 +739,7 @@ void RefreshRelayStrategyGroupActionTime(u8 group_id)
 	{
 		for(temp_strategy = head_strategy->next; temp_strategy != NULL; temp_strategy = temp_strategy->next)
 		{
-			RefreshRelayStrategyActionTime(temp_strategy);
+			RefreshRelayStrategyActionTime(temp_strategy,illuminance_value);
 		}
 	}
 
@@ -714,7 +795,7 @@ void RelayStrategyAdd(pRelayStrategy strategy)
 
 					strategy->prev = strategy->next->prev;
 					strategy->next->prev = strategy;
-					
+
 					break;
 				}
 			}
@@ -781,13 +862,13 @@ void RelayAllStrategyGroupDelete(void)
 {
 	u8 i = 0;
 	u8 group_id = 0;
-	
+
 	for(i = 0; i < MAX_RELAY_MODULE_STRATEGY_GROUP_NUM; i ++)
 	{
 		if(RelayStrategyGroup[i] != NULL)
 		{
 			group_id = RelayStrategyGroup[i]->group_id;
-		
+
 			RelayStrategyGroupDelete(group_id);
 		}
 	}
@@ -937,16 +1018,16 @@ pRelayStrategy RefreshCurrentRelayStrategyGroup(void)
 										{
 											group_id_priority[k].group_id = temp_appointment->group_id;
 											group_id_priority[k].priority = temp_appointment->priority;
-											
+
 											k ++;
 										}
 										else														//对星期有限制
 										{
-											if(temp_appointment->range[j].week_enable & (1 << (calendar.week - 1)) != 0)
+											if((temp_appointment->range[j].week_enable & (1 << (calendar.week - 1))) != 0)
 											{
 												group_id_priority[k].group_id = temp_appointment->group_id;
 												group_id_priority[k].priority = temp_appointment->priority;
-												
+
 												k ++;
 											}
 										}
@@ -971,16 +1052,16 @@ pRelayStrategy RefreshCurrentRelayStrategyGroup(void)
 												{
 													group_id_priority[k].group_id = temp_appointment->group_id;
 													group_id_priority[k].priority = temp_appointment->priority;
-													
+
 													k ++;
 												}
 												else														//对星期有限制
 												{
-													if(temp_appointment->range[j].week_enable & (1 << (calendar.week - 1)) != 0)
+													if((temp_appointment->range[j].week_enable & (1 << (calendar.week - 1))) != 0)
 													{
 														group_id_priority[k].group_id = temp_appointment->group_id;
 														group_id_priority[k].priority = temp_appointment->priority;
-														
+
 														k ++;
 													}
 												}
@@ -994,16 +1075,16 @@ pRelayStrategy RefreshCurrentRelayStrategyGroup(void)
 												{
 													group_id_priority[k].group_id = temp_appointment->group_id;
 													group_id_priority[k].priority = temp_appointment->priority;
-													
+
 													k ++;
 												}
 												else														//对星期有限制
 												{
-													if(temp_appointment->range[i].week_enable & (1 << (calendar.week - 1)) != 0)
+													if((temp_appointment->range[i].week_enable & (1 << (calendar.week - 1))) != 0)
 													{
 														group_id_priority[k].group_id = temp_appointment->group_id;
 														group_id_priority[k].priority = temp_appointment->priority;
-														
+
 														k ++;
 													}
 												}
@@ -1014,16 +1095,16 @@ pRelayStrategy RefreshCurrentRelayStrategyGroup(void)
 												{
 													group_id_priority[k].group_id = temp_appointment->group_id;
 													group_id_priority[k].priority = temp_appointment->priority;
-													
+
 													k ++;
 												}
 												else														//对星期有限制
 												{
-													if(temp_appointment->range[i].week_enable & (1 << (calendar.week - 1)) != 0)
+													if((temp_appointment->range[i].week_enable & (1 << (calendar.week - 1))) != 0)
 													{
 														group_id_priority[k].group_id = temp_appointment->group_id;
 														group_id_priority[k].priority = temp_appointment->priority;
-														
+
 														k ++;
 													}
 												}
