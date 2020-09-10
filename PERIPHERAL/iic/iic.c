@@ -45,11 +45,14 @@ void IIC_SDA_In(void)
 void IIC_Start(void)
 {
 	IIC_SDA_Out();
+	
 	IIC_SCL_H;
 	IIC_SDA_H;
-	delay_us(10);
+	delay_us(4);
+	
 	IIC_SDA_L;
-	delay_us(10);
+	delay_us(4);
+	
 	IIC_SCL_L;
 	
 }
@@ -59,9 +62,11 @@ void IIC_Stop(void)
 	IIC_SCL_L;
 	IIC_SDA_Out();
 	IIC_SDA_L;
-	delay_us(10);
+	delay_us(4);
+	
 	IIC_SCL_H;
-	delay_us(10);
+	delay_us(4);
+	
 	IIC_SDA_H;
 }
 //等待应答信号到来
@@ -70,23 +75,31 @@ void IIC_Stop(void)
 u8 IIC_Wait_Ack(void)
 {
 	u8 cnt =0;
+	
 	IIC_SCL_L;
-	delay_us(10);
+	delay_us(4);
+	
 	IIC_SDA_In();
 	IIC_SCL_H;
-	delay_us(10);
+	delay_us(4);
+	
 	IIC_SDA_H;
-	delay_us(10);
-	while(IIC_SDA_IN==1)
+	delay_us(4);
+	
+	while(IIC_SDA_IN == 1)
 	{
-		cnt++;
-		if(cnt >200)
+		cnt ++;
+		
+		if(cnt > 200)
 		{
 			IIC_Stop();
+			
 			return 1;
 		}
 	}
+	
 	IIC_SCL_L;
+	
 	return 0;
 }
 	
@@ -94,9 +107,11 @@ void IIC_Ack(void)
 {
 	IIC_SDA_Out();
 	IIC_SCL_H;
-	delay_us(10);
+	delay_us(4);
+	
 	IIC_SDA_L;
-	delay_us(10);
+	delay_us(4);
+	
 	IIC_SCL_L;
 }
 
@@ -104,23 +119,30 @@ void IIC_NAck(void)
 {
 	IIC_SDA_Out();
 	IIC_SCL_H;
-	delay_us(10);
+	delay_us(4);
+	
 	IIC_SDA_H;
-	delay_us(10);
+	delay_us(4);
+	
 	IIC_SCL_L;
 }
 
 u8 IIC_Read_Byte(u8 ACK)
 {
 	u8 i, reseive = 0;
+	
 	IIC_SDA_In();
-	for(i =0; i<8; i++)
+	
+	for(i = 0; i < 8; i ++)
 	{
 		IIC_SCL_L;
-		delay_us(10);
+		delay_us(4);
+		
 		IIC_SCL_H;
-		reseive = reseive<<1;
-		if(IIC_SDA_IN==1)
+		
+		reseive = reseive << 1;
+		
+		if(IIC_SDA_IN == 1)
 		{
 			reseive += 1;
 		}
@@ -141,21 +163,25 @@ u8 IIC_Read_Byte(u8 ACK)
 void IIC_Send_Byte(u8 txd)
 {
 	u8 i;
+	
 	IIC_SDA_Out();
 	
-	for(i =0; i<8; i++)
+	for(i = 0; i < 8; i ++)
 	{
 		IIC_SCL_L;
-		delay_us(10);
-		if((txd&0x80) ==0x80)
+		delay_us(4);
+		
+		if((txd & 0x80) == 0x80)
 			IIC_SDA_H;
 		else
-			IIC_SDA_L;		
+			IIC_SDA_L;
 		
-		delay_us(10);
+		delay_us(4);
+		
 		IIC_SCL_H;
-		delay_us(10);
-		txd= txd<<1;
+		delay_us(4);
+		
+		txd = txd << 1;
 	}
 }
 

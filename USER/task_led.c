@@ -491,7 +491,7 @@ u8 SetDO_State(u8 cmd_code,u8 *data,u8 data_len,u8 *outbuf)
 {
 	u8 i = 0;
 	u8 ret = 0;
-	u16 loop_ch = 0;
+	u16 loop_ch = 0xFFFF;
 	u16 loop_state = 0;
 	u8 err_code = 0;
 
@@ -516,17 +516,23 @@ u8 SetDO_State(u8 cmd_code,u8 *data,u8 data_len,u8 *outbuf)
 				if(RelayModuleState[i].address == *(data + 0) &&
 				   RelayModuleState[i].channel == *(data + 1))
 				{
-					if(*(data + 0) == 0 && *(data + 1) == 0)
-					{
-						loop_ch = 0xFFFF;
-						loop_state = (((u16)(*(data + 2))) << 8) + *(data + 3);
-					}
-					else
-					{
-						loop_ch &= RelayModuleConfig[i].loop_enable;
-						loop_state &= RelayModuleConfig[i].loop_enable;
-					}
-
+//					if(*(data + 0) == 0 && *(data + 1) == 0)
+//					{
+//						loop_ch = 0xFFFF;
+//						loop_state = (((u16)(*(data + 2))) << 8) + *(data + 3);
+//					}
+//					else
+//					{
+//						loop_ch &= RelayModuleConfig[i].loop_enable;
+//						loop_state &= RelayModuleConfig[i].loop_enable;
+//					}
+					
+					loop_ch = 0xFFFF;
+					loop_state = (((u16)(*(data + 2))) << 8) + *(data + 3);
+					
+//					loop_ch &= RelayModuleConfig[i].loop_enable;
+//					loop_state &= RelayModuleConfig[i].loop_enable;
+					
 					RelayModuleState[i].loop_current_channel = loop_ch;
 					RelayModuleState[i].loop_current_state = loop_state;
 					RelayModuleState[i].controller = 4;

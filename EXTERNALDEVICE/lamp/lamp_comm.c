@@ -3024,7 +3024,7 @@ u8 LampSetBasicConfiguration(ServerFrameStruct_S *server_frame_struct)
 			brightness = myatoi(tmp);
 			lamp_conf.default_brightness = ((brightness / 10) << 4) & 0xF0;
 
-			while(*msg != '|')
+			while(*msg != '|' && *msg != '\0')
 			tmp[i ++] = *(msg ++);
 			tmp[i] = '\0';
 			i = 0;
@@ -3033,6 +3033,8 @@ u8 LampSetBasicConfiguration(ServerFrameStruct_S *server_frame_struct)
 			brightness = myatoi(tmp);
 			lamp_conf.default_brightness += ((brightness / 10) & 0x0F);
 
+			k = 0;
+			
 			while(*msg != '\0')
 			{
 				while(*msg != ',' && *msg != '\0')
@@ -3263,7 +3265,11 @@ u8 LampGetBasicConfiguration(ServerFrameStruct_S *server_frame_struct)
 					{
 						resp_server_frame_struct1->para[i].type = 0x410A + index[m];
 						memset(buf,0,80);
-						sprintf(buf, "%08X",lamp_conf[m].address);
+						
+						memset(tmp,0,16);
+						sprintf(tmp, "%08X",lamp_conf[m].address);
+						strcat(buf,tmp);
+						strcat(buf,",");
 
 						memset(tmp,0,16);
 						sprintf(tmp, "%d",lamp_conf[m].advance_time);
@@ -3912,120 +3918,125 @@ u8 LampGetLampStrategy(ServerFrameStruct_S *server_frame_struct)
 
 	for(j = 0; j < MAX_LAMP_STRATEGY_NUM; j ++)
 	{
-		ret = ReadLampTaskConfig(j,&task);
-
+		ret = ReadSpecifyLampStrategyNumList(j);
+		
 		if(ret == 1)
 		{
-			memcpy(&lamp_task[k],&task,sizeof(LampTask_S));
+			ret = ReadLampTaskConfig(j,&task);
 
-			index[k] = j;
-
-			k ++;
-		}
-
-		if(k == 10 || (k >= 1 && j == MAX_LAMP_STRATEGY_NUM - 1))
-		{
-			ServerFrameStruct_S *resp_server_frame_struct1 = NULL;		//用于响应服务器
-
-			resp_server_frame_struct1 = (ServerFrameStruct_S *)pvPortMalloc(sizeof(ServerFrameStruct_S));
-
-			if(resp_server_frame_struct1 != NULL)
+			if(ret == 1)
 			{
-				CopyServerFrameStruct(server_frame_struct,resp_server_frame_struct1,0);
+				memcpy(&lamp_task[k],&task,sizeof(LampTask_S));
 
-				resp_server_frame_struct1->msg_type 	= (u8)DEVICE_RESPONSE_UP;	//响应服务器类型
-				resp_server_frame_struct1->msg_len 		= 10;
-				resp_server_frame_struct1->err_code 	= (u8)NO_ERR;
-				resp_server_frame_struct1->para_num 	= k;
+				index[k] = j;
 
-				resp_server_frame_struct1->para = (Parameter_S *)pvPortMalloc(resp_server_frame_struct1->para_num * sizeof(Parameter_S));
-
-				if(resp_server_frame_struct1->para != NULL)
-				{
-					i = 0;
-
-					for(m = 0; m < k; m ++)
-					{
-						resp_server_frame_struct1->para[i].type = 0x4101 + index[m];
-						memset(buf,0,80);
-						
-						sprintf(buf, "%d",lamp_task[m].group_id);
-						strcat(buf,",");
-						
-						memset(tmp,0,16);
-						sprintf(tmp, "%d",lamp_task[m].type);
-						strcat(buf,tmp);
-						strcat(buf,",");
-						
-						memset(tmp,0,16);
-						sprintf(tmp, "%d",lamp_task[m].executor);
-						strcat(buf,tmp);
-						strcat(buf,",");
-						
-						memset(tmp,0,16);
-						sprintf(tmp, "%d",lamp_task[m].time);
-						strcat(buf,tmp);
-						strcat(buf,",");
-						
-						memset(tmp,0,16);
-						sprintf(tmp, "%d",lamp_task[m].time_option);
-						strcat(buf,tmp);
-						strcat(buf,"|");
-						
-						memset(tmp,0,16);
-						sprintf(tmp, "%d",lamp_task[m].brightness[0]);
-						strcat(buf,tmp);
-						strcat(buf,",");
-						
-						memset(tmp,0,16);
-						sprintf(tmp, "%d",lamp_task[m].brightness[1]);
-						strcat(buf,tmp);
-						strcat(buf,",");
-						
-						memset(tmp,0,16);
-						sprintf(tmp, "%d",lamp_task[m].ctrl_mode);
-						strcat(buf,tmp);
-						strcat(buf,",");
-
-						for(n = 0; n < MAX_LAMP_GROUP_NUM; n ++)
-						{
-							if(lamp_task[m].ctrl_mode == 2)
-							{
-								if(lamp_task[m].group_add[n] != 0)
-								{
-									memset(tmp,0,16);
-									sprintf(tmp, "%08X",lamp_task[m].group_add[n]);
-									strcat(buf,tmp);
-									strcat(buf,",");
-								}
-							}
-							else
-							{
-								if(lamp_task[m].group_add[n] != 0)
-								{
-									memset(tmp,0,16);
-									sprintf(tmp, "%d",lamp_task[m].group_add[n]);
-									strcat(buf,tmp);
-									strcat(buf,",");
-								}
-							}
-						}
-
-						buf[strlen(buf) -1] = 0;
-						resp_server_frame_struct1->para[i].len = strlen(buf);
-						resp_server_frame_struct1->para[i].value = (u8 *)pvPortMalloc((resp_server_frame_struct1->para[i].len + 1) * sizeof(u8));
-						if(resp_server_frame_struct1->para[i].value != NULL)
-						{
-							memcpy(resp_server_frame_struct1->para[i].value,buf,resp_server_frame_struct1->para[i].len + 1);
-						}
-						i ++;
-					}
-				}
-
-				ret = ConvertFrameStructToFrame(resp_server_frame_struct1);
+				k ++;
 			}
 
-			k = 0;
+			if(k == 10 || (k >= 1 && j == MAX_LAMP_STRATEGY_NUM - 1))
+			{
+				ServerFrameStruct_S *resp_server_frame_struct1 = NULL;		//用于响应服务器
+
+				resp_server_frame_struct1 = (ServerFrameStruct_S *)pvPortMalloc(sizeof(ServerFrameStruct_S));
+
+				if(resp_server_frame_struct1 != NULL)
+				{
+					CopyServerFrameStruct(server_frame_struct,resp_server_frame_struct1,0);
+
+					resp_server_frame_struct1->msg_type 	= (u8)DEVICE_RESPONSE_UP;	//响应服务器类型
+					resp_server_frame_struct1->msg_len 		= 10;
+					resp_server_frame_struct1->err_code 	= (u8)NO_ERR;
+					resp_server_frame_struct1->para_num 	= k;
+
+					resp_server_frame_struct1->para = (Parameter_S *)pvPortMalloc(resp_server_frame_struct1->para_num * sizeof(Parameter_S));
+
+					if(resp_server_frame_struct1->para != NULL)
+					{
+						i = 0;
+
+						for(m = 0; m < k; m ++)
+						{
+							resp_server_frame_struct1->para[i].type = 0x4101 + index[m];
+							memset(buf,0,80);
+							
+							sprintf(buf, "%d",lamp_task[m].group_id);
+							strcat(buf,",");
+							
+							memset(tmp,0,16);
+							sprintf(tmp, "%d",lamp_task[m].type);
+							strcat(buf,tmp);
+							strcat(buf,",");
+							
+							memset(tmp,0,16);
+							sprintf(tmp, "%d",lamp_task[m].executor);
+							strcat(buf,tmp);
+							strcat(buf,",");
+							
+							memset(tmp,0,16);
+							sprintf(tmp, "%d",lamp_task[m].time);
+							strcat(buf,tmp);
+							strcat(buf,",");
+							
+							memset(tmp,0,16);
+							sprintf(tmp, "%d",lamp_task[m].time_option);
+							strcat(buf,tmp);
+							strcat(buf,"|");
+							
+							memset(tmp,0,16);
+							sprintf(tmp, "%d",lamp_task[m].brightness[0]);
+							strcat(buf,tmp);
+							strcat(buf,",");
+							
+							memset(tmp,0,16);
+							sprintf(tmp, "%d",lamp_task[m].brightness[1]);
+							strcat(buf,tmp);
+							strcat(buf,",");
+							
+							memset(tmp,0,16);
+							sprintf(tmp, "%d",lamp_task[m].ctrl_mode);
+							strcat(buf,tmp);
+							strcat(buf,",");
+
+							for(n = 0; n < MAX_LAMP_GROUP_NUM; n ++)
+							{
+								if(lamp_task[m].ctrl_mode == 2)
+								{
+									if(lamp_task[m].group_add[n] != 0)
+									{
+										memset(tmp,0,16);
+										sprintf(tmp, "%08X",lamp_task[m].group_add[n]);
+										strcat(buf,tmp);
+										strcat(buf,",");
+									}
+								}
+								else
+								{
+									if(lamp_task[m].group_add[n] != 0)
+									{
+										memset(tmp,0,16);
+										sprintf(tmp, "%d",lamp_task[m].group_add[n]);
+										strcat(buf,tmp);
+										strcat(buf,",");
+									}
+								}
+							}
+
+							buf[strlen(buf) -1] = 0;
+							resp_server_frame_struct1->para[i].len = strlen(buf);
+							resp_server_frame_struct1->para[i].value = (u8 *)pvPortMalloc((resp_server_frame_struct1->para[i].len + 1) * sizeof(u8));
+							if(resp_server_frame_struct1->para[i].value != NULL)
+							{
+								memcpy(resp_server_frame_struct1->para[i].value,buf,resp_server_frame_struct1->para[i].len + 1);
+							}
+							i ++;
+						}
+					}
+
+					ret = ConvertFrameStructToFrame(resp_server_frame_struct1);
+				}
+
+				k = 0;
+			}
 		}
 	}
 

@@ -68,7 +68,7 @@ void HT7038GetParameters(void)
 			break;
 		}
 	}
-	
+
 	if(got_ratio == 0)
 	{
 		voltage_ratio = BulitInMeterRatio.voltage_ratio;
@@ -278,7 +278,7 @@ void HT7038GetParameters(void)
 void ElectricityMeterGetBuiltInParas(ElectricityMeterState_S *state)
 {
 	u8 i = 0;
-	
+
 	for(i = 0; i < 4; i ++)
 	{
 		state->current_para[i].voltage = BulitInMeterParas.voltage[i];
@@ -288,7 +288,7 @@ void ElectricityMeterGetBuiltInParas(ElectricityMeterState_S *state)
 		state->current_para[i].reactive_energy = BulitInMeterParas.reactive_energy[i];
 		state->current_para[i].power_factor = BulitInMeterParas.power_factor[i];
 		state->current_para[i].frequency = BulitInMeterParas.frequency;
-	}	
+	}
 }
 
 //或外置电表或采集模块的参数
@@ -329,11 +329,11 @@ void ElectricityMeterGetBuiltOutParas(ElectricityMeterState_S state)
 			DeleteRs485Frame(frame1);
 		}
 	}
-	
+
 	if(state.address >= 32 && state.address <= 47)
 	{
 		frame2 = (Rs485Frame_S *)pvPortMalloc(sizeof(Rs485Frame_S));
-		
+
 		if(frame2 != NULL)
 		{
 			frame2->device_type = ELECTRICITY_METER;
@@ -371,13 +371,13 @@ u16 PackBuiltOutElectricityMeterFrame(u8 address,u8 mode,u8 *outbuf)
 {
 	u16 len = 0;
 	u16 crc16 = 0;
-	
+
 	*(outbuf + 0) = address;
-	
+
 	if(address >= 32 && address <= 47)				//电表
 	{
 		*(outbuf + 1) = 0x03;
-		
+
 		if(mode == 0)
 		{
 			*(outbuf + 2) = 0x9C;
@@ -403,12 +403,12 @@ u16 PackBuiltOutElectricityMeterFrame(u8 address,u8 mode,u8 *outbuf)
 	}
 
 	crc16 = CRC16(outbuf,6);
-	
+
 	*(outbuf + 6) = (u8)((crc16 >> 8) & 0x00FF);
 	*(outbuf + 7) = (u8)(crc16 & 0x00FF);
 
 	len = 8;
-	
+
 	return len;
 }
 
@@ -420,22 +420,22 @@ void AnalysisBuiltOutElectricityMeterFrame(u8 *buf,u16 len,ElectricityMeterColle
 	u16 crc16_read = 0;
 	u16 crc16_cal = 0;
 	u8 address = 0;
-	u16 value1 = 0; 
-	u32 value2 = 0; 
+	u16 value1 = 0;
+	u32 value2 = 0;
 	u8 tmp[8] = {0};
 	float voltage_ratio = 1.0f;
 	float current_ratio = 1.0f;
 
 	crc16_read = ((((u16)(*(buf + len - 2))) << 8) & 0xFF00) + (((u16)(*(buf + len - 1))) & 0x00FF);
-	
+
 	crc16_cal = CRC16(buf,len - 2);
-	
+
 	if(crc16_read == crc16_cal && *(buf + 1) == 0x03)
 	{
 		address = *(buf + 0);
 		data_len = *(buf + 2);
 		data = buf + 3;
-		
+
 		for(i = 0; i < ElectricityMeterConfigNum.number; i ++)
 		{
 			if(ElectricityMeterConfig[i].address == address &&
@@ -447,86 +447,86 @@ void AnalysisBuiltOutElectricityMeterFrame(u8 *buf,u16 len,ElectricityMeterColle
 				break;
 			}
 		}
-		
+
 		if(address >= 32 && address <= 47)
 		{
 			if(data_len == 116)
 			{
 				meter_state->address = address;
 				meter_state->channel = 1;
-				
+
 				tmp[3] = *(data ++);
 				tmp[2] = *(data ++);
 				tmp[1] = *(data ++);
 				tmp[0] = *(data ++);
 				memcpy((void *)&meter_state->collect_para[1].voltage,tmp,4);
-				
+
 				tmp[3] = *(data ++);
 				tmp[2] = *(data ++);
 				tmp[1] = *(data ++);
 				tmp[0] = *(data ++);
 				memcpy((void *)&meter_state->collect_para[2].voltage,tmp,4);
-				
+
 				tmp[3] = *(data ++);
 				tmp[2] = *(data ++);
 				tmp[1] = *(data ++);
 				tmp[0] = *(data ++);
 				memcpy((void *)&meter_state->collect_para[3].voltage,tmp,4);
-				
+
 				tmp[3] = *(data ++);
 				tmp[2] = *(data ++);
 				tmp[1] = *(data ++);
 				tmp[0] = *(data ++);
 				memcpy((void *)&meter_state->collect_para[0].voltage,tmp,4);
-				
+
 				tmp[3] = *(data ++);
 				tmp[2] = *(data ++);
 				tmp[1] = *(data ++);
 				tmp[0] = *(data ++);
 				memcpy((void *)&meter_state->collect_para[1].line_voltage,tmp,4);
-				
+
 				tmp[3] = *(data ++);
 				tmp[2] = *(data ++);
 				tmp[1] = *(data ++);
 				tmp[0] = *(data ++);
 				memcpy((void *)&meter_state->collect_para[2].line_voltage,tmp,4);
-				
+
 				tmp[3] = *(data ++);
 				tmp[2] = *(data ++);
 				tmp[1] = *(data ++);
 				tmp[0] = *(data ++);
 				memcpy((void *)&meter_state->collect_para[3].line_voltage,tmp,4);
-				
+
 				tmp[3] = *(data ++);
 				tmp[2] = *(data ++);
 				tmp[1] = *(data ++);
 				tmp[0] = *(data ++);
 				memcpy((void *)&meter_state->collect_para[0].line_voltage,tmp,4);
-				
+
 				tmp[3] = *(data ++);
 				tmp[2] = *(data ++);
 				tmp[1] = *(data ++);
 				tmp[0] = *(data ++);
 				memcpy((void *)&meter_state->collect_para[1].current,tmp,4);
-				
+
 				tmp[3] = *(data ++);
 				tmp[2] = *(data ++);
 				tmp[1] = *(data ++);
 				tmp[0] = *(data ++);
 				memcpy((void *)&meter_state->collect_para[2].current,tmp,4);
-				
+
 				tmp[3] = *(data ++);
 				tmp[2] = *(data ++);
 				tmp[1] = *(data ++);
 				tmp[0] = *(data ++);
 				memcpy((void *)&meter_state->collect_para[3].current,tmp,4);
-				
+
 				tmp[3] = *(data ++);
 				tmp[2] = *(data ++);
 				tmp[1] = *(data ++);
 				tmp[0] = *(data ++);
 				memcpy((void *)&meter_state->collect_para[0].current,tmp,4);
-				
+
 				tmp[3] = *(data ++);
 				tmp[2] = *(data ++);
 				tmp[1] = *(data ++);
@@ -535,65 +535,65 @@ void AnalysisBuiltOutElectricityMeterFrame(u8 *buf,u16 len,ElectricityMeterColle
 				memcpy((void *)&meter_state->collect_para[1].frequency,tmp,4);
 				memcpy((void *)&meter_state->collect_para[2].frequency,tmp,4);
 				memcpy((void *)&meter_state->collect_para[3].frequency,tmp,4);
-				
+
 				tmp[3] = *(data ++);
 				tmp[2] = *(data ++);
 				tmp[1] = *(data ++);
 				tmp[0] = *(data ++);
 				memcpy((void *)&meter_state->collect_para[1].active_power,tmp,4);
-				
+
 				tmp[3] = *(data ++);
 				tmp[2] = *(data ++);
 				tmp[1] = *(data ++);
 				tmp[0] = *(data ++);
 				memcpy((void *)&meter_state->collect_para[2].active_power,tmp,4);
-				
+
 				tmp[3] = *(data ++);
 				tmp[2] = *(data ++);
 				tmp[1] = *(data ++);
 				tmp[0] = *(data ++);
 				memcpy((void *)&meter_state->collect_para[3].active_power,tmp,4);
-				
+
 				tmp[3] = *(data ++);
 				tmp[2] = *(data ++);
 				tmp[1] = *(data ++);
 				tmp[0] = *(data ++);
 				memcpy((void *)&meter_state->collect_para[0].active_power,tmp,4);
-				
+
 				data = buf + 3 + 100;
-				
+
 				tmp[3] = *(data ++);
 				tmp[2] = *(data ++);
 				tmp[1] = *(data ++);
 				tmp[0] = *(data ++);
 				memcpy((void *)&meter_state->collect_para[1].power_factor,tmp,4);
-				
+
 				tmp[3] = *(data ++);
 				tmp[2] = *(data ++);
 				tmp[1] = *(data ++);
 				tmp[0] = *(data ++);
 				memcpy((void *)&meter_state->collect_para[2].power_factor,tmp,4);
-				
+
 				tmp[3] = *(data ++);
 				tmp[2] = *(data ++);
 				tmp[1] = *(data ++);
 				tmp[0] = *(data ++);
 				memcpy((void *)&meter_state->collect_para[3].power_factor,tmp,4);
-				
+
 				tmp[3] = *(data ++);
 				tmp[2] = *(data ++);
 				tmp[1] = *(data ++);
 				tmp[0] = *(data ++);
 				memcpy((void *)&meter_state->collect_para[0].power_factor,tmp,4);
-				
+
 //				meter_state->update = 1;
-				
+
 			}
 			else if(data_len == 16)
 			{
 				meter_state->address = address;
 				meter_state->channel = 1;
-				
+
 				tmp[7] = *(data ++);
 				tmp[6] = *(data ++);
 				tmp[5] = *(data ++);
@@ -603,7 +603,7 @@ void AnalysisBuiltOutElectricityMeterFrame(u8 *buf,u16 len,ElectricityMeterColle
 				tmp[1] = *(data ++);
 				tmp[0] = *(data ++);
 				memcpy((void *)&meter_state->collect_para[0].active_energy,tmp,8);
-				
+
 				tmp[7] = *(data ++);
 				tmp[6] = *(data ++);
 				tmp[5] = *(data ++);
@@ -613,7 +613,7 @@ void AnalysisBuiltOutElectricityMeterFrame(u8 *buf,u16 len,ElectricityMeterColle
 				tmp[1] = *(data ++);
 				tmp[0] = *(data ++);
 				memcpy((void *)&meter_state->collect_para[0].reactive_energy,tmp,8);
-				
+
 				meter_state->update = 1;
 			}
 		}
@@ -623,73 +623,73 @@ void AnalysisBuiltOutElectricityMeterFrame(u8 *buf,u16 len,ElectricityMeterColle
 			{
 				meter_state->address = address;
 				meter_state->channel = 1;
-				
+
 				for(i = 0; i < 6; i ++)
 				{
-					value1 = ((((u16)(*(data ++))) << 8) & 0xFF00) + 
+					value1 = ((((u16)(*(data ++))) << 8) & 0xFF00) +
 					         (((u16)(*(data ++))) & 0x00FF);
 					meter_state->collect_para[i + 1].voltage = (((float)value1) / 100.0f) * voltage_ratio;
-					
-					value1 = ((((u16)(*(data ++))) << 8) & 0xFF00) + 
+
+					value1 = ((((u16)(*(data ++))) << 8) & 0xFF00) +
 					         (((u16)(*(data ++))) & 0x00FF);
-					meter_state->collect_para[i + 1].current = (((float)value1) / 1000.0f) * current_ratio;
-					
-					value1 = ((((u16)(*(data ++))) << 8) & 0xFF00) + 
+					meter_state->collect_para[i + 1].current = (((float)value1) / 100.0f) * current_ratio;
+
+					value1 = ((((u16)(*(data ++))) << 8) & 0xFF00) +
 					         (((u16)(*(data ++))) & 0x00FF);
 					meter_state->collect_para[i + 1].active_power = (((float)value1) / 1000.0f);
-					
-					value2 = ((((u32)(*(data ++))) << 24) & 0xFF000000) + 
+
+					value2 = ((((u32)(*(data ++))) << 24) & 0xFF000000) +
 					         ((((u32)(*(data ++))) << 16) & 0x00FF0000) +
 					         ((((u32)(*(data ++))) << 8)  & 0x0000FF00) +
 					         (((u32)(*(data ++))) & 0x000000FF);
 					meter_state->collect_para[i + 1].active_energy = (((double)value2) / 100.0f);
-					
-					value1 = ((((u16)(*(data ++))) << 8) & 0xFF00) + 
+
+					value1 = ((((u16)(*(data ++))) << 8) & 0xFF00) +
 					         (((u16)(*(data ++))) & 0x00FF);
 					meter_state->collect_para[i + 1].power_factor = (((float)value1) / 1000.0f);
-					
-					value1 = ((((u16)(*(data ++))) << 8) & 0xFF00) + 
+
+					value1 = ((((u16)(*(data ++))) << 8) & 0xFF00) +
 					         (((u16)(*(data ++))) & 0x00FF);
 					meter_state->collect_para[i + 1].frequency = (((float)value1) / 100.0f);
 				}
-				
-				meter_state->collect_para[0].voltage = (meter_state->collect_para[1].voltage + 
-				                                          meter_state->collect_para[2].voltage + 
-				                                          meter_state->collect_para[3].voltage + 
+
+				meter_state->collect_para[0].voltage = (meter_state->collect_para[1].voltage +
+				                                          meter_state->collect_para[2].voltage +
+				                                          meter_state->collect_para[3].voltage +
 				                                          meter_state->collect_para[4].voltage +
 				                                          meter_state->collect_para[5].voltage +
 				                                          meter_state->collect_para[6].voltage) / 6.0f;
-				
-				meter_state->collect_para[0].current = (meter_state->collect_para[1].current + 
-				                                          meter_state->collect_para[2].current + 
-				                                          meter_state->collect_para[3].current + 
+
+				meter_state->collect_para[0].current = (meter_state->collect_para[1].current +
+				                                          meter_state->collect_para[2].current +
+				                                          meter_state->collect_para[3].current +
 				                                          meter_state->collect_para[4].current +
 				                                          meter_state->collect_para[5].current +
 				                                          meter_state->collect_para[6].current);
-				
-				meter_state->collect_para[0].active_power = (meter_state->collect_para[1].active_power + 
-				                                               meter_state->collect_para[2].active_power + 
-				                                               meter_state->collect_para[3].active_power + 
+
+				meter_state->collect_para[0].active_power = (meter_state->collect_para[1].active_power +
+				                                               meter_state->collect_para[2].active_power +
+				                                               meter_state->collect_para[3].active_power +
 				                                               meter_state->collect_para[4].active_power +
 				                                               meter_state->collect_para[5].active_power +
 				                                               meter_state->collect_para[6].active_power);
-														  
-				meter_state->collect_para[0].active_energy = (meter_state->collect_para[1].active_energy + 
-				                                                meter_state->collect_para[2].active_energy + 
-				                                                meter_state->collect_para[3].active_energy + 
+
+				meter_state->collect_para[0].active_energy = (meter_state->collect_para[1].active_energy +
+				                                                meter_state->collect_para[2].active_energy +
+				                                                meter_state->collect_para[3].active_energy +
 				                                                meter_state->collect_para[4].active_energy +
 				                                                meter_state->collect_para[5].active_energy +
 				                                                meter_state->collect_para[6].active_energy);
-																
-				meter_state->collect_para[0].power_factor = (meter_state->collect_para[1].power_factor + 
-				                                               meter_state->collect_para[2].power_factor + 
-				                                               meter_state->collect_para[3].power_factor + 
+
+				meter_state->collect_para[0].power_factor = (meter_state->collect_para[1].power_factor +
+				                                               meter_state->collect_para[2].power_factor +
+				                                               meter_state->collect_para[3].power_factor +
 				                                               meter_state->collect_para[4].power_factor +
 				                                               meter_state->collect_para[5].power_factor +
 				                                               meter_state->collect_para[6].power_factor) / 6.0f;
-															   
+
 				meter_state->collect_para[0].frequency = meter_state->collect_para[1].frequency;
-				
+
 				meter_state->update = 1;
 			}
 		}

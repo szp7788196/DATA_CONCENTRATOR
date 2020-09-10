@@ -350,6 +350,8 @@ void RelayCollectCurrentState(void)
 	{
 		if(GetSysTick1s() - time_s >= (RelayModuleBasicConfig.state_monitoring_cycle * 60))
 		{
+			time_s = GetSysTick1s();
+			
 			for(i = 0; i < RelayModuleConfigNum.number; i ++)
 			{
 				if(RelayModuleState[i].address == 0 && RelayModuleState[i].channel == 0)	//集控内部继电器

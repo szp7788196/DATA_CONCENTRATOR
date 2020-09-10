@@ -45,7 +45,7 @@ void RecvRs485FrameQueueAndSendToDeviceAndWaitResponse(void)
 		RE_SEND:
 		UsartSendString(UART5,send_rs485_frame->buf, send_rs485_frame->len);
 
-		time_out = 100;
+		time_out = 400;
 
 		while(time_out)
 		{

@@ -906,7 +906,7 @@ u8 SynchronizeTime(ServerFrameStruct_S *server_frame_struct)
 
 		resp_server_frame_struct->para[0].type = 0xA101;
 
-		RX8010S_Get_Time();
+//		RX8010S_Get_Time();
 
 		TimeToString((u8 *)resp_server_frame_struct->para[0].value,
                      calendar.w_year,

@@ -24,7 +24,7 @@ void vTaskCONCENTRATOR(void *pvParameters)
 		ConcentratorRecvAndHandleFrameStruct();			//报文解析
 
 		AutoSendFrameToServer();						//发送登录/心跳/告警灯信息
-		
+
 		ConcentratorEventCheckPolling();				//告警等事件轮训
 
 		if(FlagSystemReBoot == 1)						//接收到重启的命令
@@ -53,7 +53,7 @@ void vTaskCONCENTRATOR(void *pvParameters)
 		}
 
 		delay_ms(100);
-		
+
 		SatckCONCENTRATOR = uxTaskGetStackHighWaterMark(NULL);
 	}
 }
