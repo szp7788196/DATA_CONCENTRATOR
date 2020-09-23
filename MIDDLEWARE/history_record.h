@@ -52,6 +52,8 @@ typedef struct	EventHistory				//事件历史记录
 
 
 
+extern u32 SysAlarmState;
+
 
 
 u8 StoreAlarmToSpiFlash(AlarmReport_S *alarm_report);

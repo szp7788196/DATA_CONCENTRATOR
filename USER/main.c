@@ -15,6 +15,7 @@
 #include "usart6.h"
 #include "ec20.h"
 #include "plc.h"
+#include "battery.h"
 #include "concentrator_conf.h"
 #include "exfuns.h"
 #include "input_collector_conf.h"
@@ -41,6 +42,8 @@ int main(void)
 	LED_Init();											//LED指示灯初始化
 	KC_Init();											//数字量输出初始化
 	KR_Init();											//数字量输入初始化
+	
+	ADC1_DMA_Init();									//ADC初始化
 
 	TIM2_Init(100);										//定时器2初始化
 
@@ -63,7 +66,7 @@ int main(void)
 	siiize = sizeof(LumeterAlarmConfig_S);
 
 
-	init_mount_flash();									//初始化并挂载flash
+//	init_mount_flash();									//初始化并挂载flash
 
 	ReadTotalConfigurationParameters();					//读取所有配置参数
 

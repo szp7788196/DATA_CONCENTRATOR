@@ -236,7 +236,7 @@ unsigned char ec20_get_AT_CPIN(void)
 {
 	unsigned char ret = 0;
 
-    ret = AT_SendCmd("AT+CPIN?\r\n", "+CPIN: READY", 100,0,TIMEOUT_7S);
+    ret = AT_SendCmd("AT+CPIN?\r\n", "+CPIN: READY", 100,2,TIMEOUT_7S);
 	
 	ringbuf_clear(result_ptr);
 

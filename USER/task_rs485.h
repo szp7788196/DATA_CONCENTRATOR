@@ -23,6 +23,8 @@ typedef struct	Rs485Frame
 
 
 extern TaskHandle_t xHandleTaskRS485;
+extern s16 Rs485RecvCnt;
+extern s16 Rs485SendCnt;
 
 
 

@@ -56,6 +56,8 @@ extern __IO uint8_t DHCP_state;
 //#endif /* LWIP_DHCP */
 xSemaphoreHandle ETH_link_xSemaphore = NULL;
 
+uint8_t NetCableState = 0;
+
 /* Private function prototypes -----------------------------------------------*/
 static void ETH_GPIO_Config(void);
 static void ETH_NVIC_Config(void);
@@ -83,6 +85,8 @@ void ETH_BSP_Config(void)
   if(ETH_ReadPHYRegister(DP83848_PHY_ADDRESS, PHY_SR) & 1)
   {
     EthStatus |= ETH_LINK_FLAG;
+	  
+	NetCableState = 1;
   }
 
   /* Configure the PHY to generate an interrupt on change of link status */
@@ -350,10 +354,12 @@ void Eth_Link_IT_task( void * pvParameters )
       {
         if((ETH_ReadPHYRegister((uint16_t) pcPHYAddress, PHY_SR) & 1))
         {
+			NetCableState = 1;
           netif_set_link_up(&xnetif);
         }
         else
         {
+			NetCableState = 0;
           netif_set_link_down(&xnetif);
         }
       }

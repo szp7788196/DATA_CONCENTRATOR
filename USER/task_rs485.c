@@ -9,6 +9,8 @@
 
 TaskHandle_t xHandleTaskRS485 = NULL;
 unsigned portBASE_TYPE SatckRS485;
+s16 Rs485RecvCnt = 0;
+s16 Rs485SendCnt = 0;
 
 
 void vTaskRS485(void *pvParameters)
@@ -43,6 +45,8 @@ void RecvRs485FrameQueueAndSendToDeviceAndWaitResponse(void)
 		responsed = 0;
 
 		RE_SEND:
+		Rs485SendCnt = send_rs485_frame->len;
+		
 		UsartSendString(UART5,send_rs485_frame->buf, send_rs485_frame->len);
 
 		time_out = 400;
@@ -55,6 +59,8 @@ void RecvRs485FrameQueueAndSendToDeviceAndWaitResponse(void)
 
 			if(Usart5RecvEnd == 0xAA)
 			{
+				Rs485RecvCnt = Usart5FrameLen;
+				
 				Usart5RecvEnd = 0;
 
 				if(Usart5FrameLen >= 6)

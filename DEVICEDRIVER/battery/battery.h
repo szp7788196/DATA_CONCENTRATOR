@@ -4,6 +4,20 @@
 #include "sys.h"
 
 
+#define ADC_CH_NUM		2
+#define ADC_POINT_NUM	64
+
+#define BATTERY_VOLTAGE_SCALE	1.0f
+#define BATTERY_CURRENT_SCALE	1.0f
+
+#define BATTERY_CHARGING		1
+#define BATTERY_DISCHARGING		0
+
+#define BATTERY_LOW_BATTERY		9.5f
+
+
+
+
 typedef struct	BatteryManagement
 {
 	u8 state;							//µç³Ø×´Ì¬
@@ -27,7 +41,11 @@ extern BatteryManagement_S BatteryManagement;
 
 
 
-
+void ADC1_DMA_Init(void);
+u16 ADCGetAverageVal(u8 ch);
+float GetCurrentVal(void);
+float GetVoltageVal(void);
+void BetteryGetParas(void);
 
 
 

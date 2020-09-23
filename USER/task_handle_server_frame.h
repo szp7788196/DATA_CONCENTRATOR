@@ -10,6 +10,9 @@
 
 extern TaskHandle_t xHandleTaskHANDLE_SERVER_FRAME;
 
+extern s16 NetWorkRecvCnt;
+extern s16 NetWorkSendCnt;
+
 
 
 void vTaskHANDLE_SERVER_FRAME(void *pvParameters);

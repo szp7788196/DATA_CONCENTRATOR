@@ -7,6 +7,9 @@
 #include "exfuns.h"
 
 
+u32 SysAlarmState = 0;
+
+
 //将告警历史存入SPIFLASH
 u8 StoreAlarmToSpiFlash(AlarmReport_S *alarm_report)
 {
@@ -85,7 +88,7 @@ u8 StoreAlarmToSpiFlash(AlarmReport_S *alarm_report)
 				   (fileinfo.fname[3] - 0x30) + 2000;
 
 			month = ((fileinfo.fname[4] - 0x30) * 10) +
-				   (fileinfo.fname[5] - 0x30);
+				    (fileinfo.fname[5] - 0x30);
 
 			date = ((fileinfo.fname[6] - 0x30) * 10) +
 				   (fileinfo.fname[7] - 0x30);
@@ -339,7 +342,7 @@ u16 GetAlarmEventNumFromDateSegment(EventHistory_S event_history)
 		case (u8)TYPE_JOURNAL:
 			strcat((char *)base_path,"JOURNAL");
 		break;
-		
+
 		case (u8)TYPE_STATE:
 			strcat((char *)base_path,"STATE");
 		break;
@@ -693,7 +696,7 @@ void GetAlarmEventContentFromDateSegmentAndSendToServer(EventHistory_S event_his
 									ConvertFrameStructToFrame(server_frame_struct);
 
 									server_frame_struct = NULL;
-									
+
 									delay_ms(250);
 								}
 
@@ -841,17 +844,29 @@ void DeleteEventHistory(EventHistory_S *event_history)
 void PushAlarmReportToAlarmQueue(AlarmReport_S *alarm_report)
 {
 	AlarmReport_S *alarm_report_cpy = NULL;
-	
+
 	if(alarm_report != NULL)
 	{
-		alarm_report_cpy = (AlarmReport_S *)pvPortMalloc(sizeof(AlarmReport_S));
+		if(alarm_report->record_type == 1)
+		{
+			SysAlarmState ++;
+		}
+		else
+		{
+			if(SysAlarmState >= 1)
+			{
+				SysAlarmState --;
+			}
+		}
 		
+		alarm_report_cpy = (AlarmReport_S *)pvPortMalloc(sizeof(AlarmReport_S));
+
 		if(alarm_report_cpy != NULL)
 		{
 			CopyAlarmReport(alarm_report,alarm_report_cpy);
-			
+
 			xSemaphoreTake(xMutex_Push_xQueue_AlarmReportStore, portMAX_DELAY);
-		
+
 			if(xQueueSend(xQueue_AlarmReportStore,(void *)&alarm_report_cpy,(TickType_t)10) != pdPASS)
 			{
 #ifdef DEBUG_LOG
@@ -859,12 +874,12 @@ void PushAlarmReportToAlarmQueue(AlarmReport_S *alarm_report)
 #endif
 				DeleteAlarmReport(alarm_report_cpy);
 			}
-			
+
 			xSemaphoreGive(xMutex_Push_xQueue_AlarmReportStore);
 		}
 
 		xSemaphoreTake(xMutex_Push_xQueue_AlarmReportSend, portMAX_DELAY);
-		
+
 		if(xQueueSend(xQueue_AlarmReportSend,(void *)&alarm_report,(TickType_t)10) != pdPASS)
 		{
 #ifdef DEBUG_LOG
@@ -872,7 +887,7 @@ void PushAlarmReportToAlarmQueue(AlarmReport_S *alarm_report)
 #endif
 			DeleteAlarmReport(alarm_report);
 		}
-		
+
 		xSemaphoreGive(xMutex_Push_xQueue_AlarmReportSend);
 	}
 }

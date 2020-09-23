@@ -380,7 +380,7 @@ void SendAlarmReportFrameToServer(AlarmReport_S *alarm_report)
 
 				server_frame_struct->para[i].type = 0x8002;
 				memset(buf,0,25);
-				sprintf(buf, "%d",alarm_report->record_type);
+				sprintf(buf, "%d",alarm_report->alarm_type);
 				server_frame_struct->para[i].len = strlen(buf);
 				server_frame_struct->para[i].value = (u8 *)pvPortMalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
 				if(server_frame_struct->para[i].value != NULL)

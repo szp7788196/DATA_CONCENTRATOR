@@ -10,6 +10,8 @@
 
 TaskHandle_t xHandleTaskHANDLE_SERVER_FRAME = NULL;
 unsigned portBASE_TYPE SatckFRAME;
+s16 NetWorkRecvCnt = 0;
+s16 NetWorkSendCnt = 0;
 
 
 void vTaskHANDLE_SERVER_FRAME(void *pvParameters)
@@ -67,6 +69,8 @@ void PushTheFrameToTxQueue(ServerFrame_S *tx_frame)
 
 		if(xQueue_XxFrameTx != NULL)
 		{
+			NetWorkSendCnt = tx_frame->len;
+			
 			if(xQueueSend(xQueue_XxFrameTx,(void *)&tx_frame,(TickType_t)10) != pdPASS)
 			{
 #ifdef DEBUG_LOG
@@ -103,6 +107,8 @@ void RecvNetFrameAndPushToRxQueue(CONNECTION_MODE_E connection_mode)
 		if(recv_len != 0)
 		{
 			time_r = GetSysTick1s();
+			
+			NetWorkRecvCnt = recv_len;
 
 			recv_pos = recv_pos + recv_len;
 			recv_len = recv_pos;

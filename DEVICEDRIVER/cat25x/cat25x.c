@@ -86,8 +86,9 @@ void CAT25X_Read(u8* Buff,u32 ReadAddr,u16 Num)
 	CAT25X_CS = 0;
 
     SPI2_ReadWriteByte(CAT25X_READ_MMY);
-    SPI2_ReadWriteByte((u8)(ReadAddr>>8));
-    SPI2_ReadWriteByte((u8)ReadAddr);
+    SPI2_ReadWriteByte((u8)((ReadAddr >> 16) & 0x000000FF));
+    SPI2_ReadWriteByte((u8)((ReadAddr >> 8) & 0x000000FF));
+	SPI2_ReadWriteByte((u8)((ReadAddr >> 0) & 0x000000FF));
 
     for(i = 0; i < Num; i ++)
 	{
@@ -100,7 +101,7 @@ void CAT25X_Read(u8* Buff,u32 ReadAddr,u16 Num)
 		xSemaphoreGive(xMutex_SPI2);
 }
 
-//写单页数据数据，Num不超过64byte
+//写单页数据数据，Num不超过256byte
 void CAT25X_Write_Page(u8* Buff,u32 ReadAddr,u16 Num)
 {
  	u16 i;
@@ -117,8 +118,9 @@ void CAT25X_Write_Page(u8* Buff,u32 ReadAddr,u16 Num)
 	CAT25X_CS = 0;
 
 	SPI2_ReadWriteByte(CAT25X_WRITE_MMY);
-	SPI2_ReadWriteByte((u8)(ReadAddr>>8));
-	SPI2_ReadWriteByte((u8)ReadAddr);
+	SPI2_ReadWriteByte((u8)((ReadAddr >> 16) & 0x000000FF));
+    SPI2_ReadWriteByte((u8)((ReadAddr >> 8) & 0x000000FF));
+	SPI2_ReadWriteByte((u8)((ReadAddr >> 0) & 0x000000FF));
 
 	for(i = 0; i < Num; i ++)
 	{
@@ -143,7 +145,7 @@ void CAT25X_Write(u8* Buff,u32 WriteAddr,u16 Num)
 	if(xSchedulerRunning == 1)
 		xSemaphoreTake(xMutex_SPI2, portMAX_DELAY);
 	
-	len = 64 - WriteAddr % 64;
+	len = 256 - WriteAddr % 256;
 
 	if(Num < len)
 	{
@@ -162,8 +164,9 @@ void CAT25X_Write(u8* Buff,u32 WriteAddr,u16 Num)
 		CAT25X_CS = 0;
 
 		SPI2_ReadWriteByte(CAT25X_WRITE_MMY);
-		SPI2_ReadWriteByte((u8)(addr >> 8));
-		SPI2_ReadWriteByte((u8)addr);
+		SPI2_ReadWriteByte((u8)((addr >> 16) & 0x000000FF));
+		SPI2_ReadWriteByte((u8)((addr >> 8) & 0x000000FF));
+		SPI2_ReadWriteByte((u8)((addr >> 0) & 0x000000FF));
 
 		for(i = 0; i < len; i ++)
 		{
@@ -184,9 +187,9 @@ void CAT25X_Write(u8* Buff,u32 WriteAddr,u16 Num)
 
 		addr = WriteAddr + len1;
 
-		if(len > 64)
+		if(len > 256)
 		{
-			len = 64;
+			len = 256;
 		}
 	}
 	

@@ -70,6 +70,8 @@
 #define DP83848_RST_HIGH		GPIO_SetBits(GPIOF,GPIO_Pin_12);
 #define DP83848_RST_LOW			GPIO_ResetBits(GPIOF,GPIO_Pin_12);
 
+extern uint8_t NetCableState;
+
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */
 

@@ -20,6 +20,11 @@
 #include "task_tcp_client.h"
 #include "task_plc.h"
 #include "cpu_utils.h"
+#include "dp83848.h"
+#include "battery.h"
+#include "task_handle_server_frame.h"
+#include "history_record.h"
+
 
 
 
@@ -33,12 +38,18 @@ u32 FreeHeapSize = 0;
 void vTaskLED(void *pvParameters)
 {
 	u32 cnt = 0;
-	u8 led_state = 0;
 	u8 date = 0;
 	u8 mmi_len = 0;
 	u8 mmi_outbuf[256] = {0};
 	u8 hci_len = 0;
 	u8 hci_outbuf[32] = {0};
+	
+	u8 led_run_state = 0;
+	u8 led_eth_state = 0;
+	u8 led_4g_state = 0;
+	u8 led_485_state = 0;
+	u8 led_recv_state = 0;
+	u8 led_send_state = 0;
 
 	while(1)											//循环一次延时约100ms
 	{
@@ -57,7 +68,7 @@ void vTaskLED(void *pvParameters)
 				UsartSendString(UART4,mmi_outbuf, mmi_len);
 			}
 		}
-
+   
 		if(Usart1RecvEnd == 0xAA)						//处理屏幕发过来的数据
 		{
 			Usart1RecvEnd = 0;
@@ -85,44 +96,214 @@ void vTaskLED(void *pvParameters)
 			                            ConcentratorLocationConfig.latitude);
 		}
 
-		if(cnt % 10 == 0)								//每1秒喂一次看门狗
+		if(cnt % 50 == 0)								//每1秒喂一次看门狗
 		{
 			IWDG_Feed_Thread();
 
 			RX8010S_Get_Time();
 		}
-
-		if(cnt % 5 == 0)								//运行灯以1秒的周期闪烁
-		{
-			led_state = ~led_state;
-		}
-
-		if(led_state)
-		{
-			LED_RUN = 0;
-		}
-		else
-		{
-			LED_RUN = 1;
-		}
 		
-		if(cnt % 20 == 0)
+		if(cnt % 250 == 0)
 		{
 			FreeHeapSize = xPortGetFreeHeapSize();
-//			CPU_Usage = osGetCPUUsage();
 
 #ifdef DEBUG_LOG
 			printf("FreeHeapSize:%d\r\n",FreeHeapSize);
 #endif
-			
-//#ifdef DEBUG_LOG
-//			printf("CPU_Usage   :%d\r\n",CPU_Usage);
-//#endif
 		}
+
+		if(cnt % 20 == 0)								//运行灯以1秒的周期闪烁
+		{
+			led_run_state = ~led_run_state;
+		}
+		
+		if(NetCableState == 1)
+		{
+			if(ETH_ConnectState == ETH_CONNECTED)
+			{
+				if(cnt % 150 == 0)								//运行灯以1秒的周期闪烁
+				{
+					led_eth_state = 1;
+				}
+				else
+				{
+					led_eth_state = 0;
+				}
+			}
+			else
+			{
+				if(cnt % 25 == 0)								//运行灯以1秒的周期闪烁
+				{
+					led_eth_state = ~led_eth_state;
+				}
+			}
+		}
+		else
+		{
+			led_eth_state = 0;
+		}
+		
+		if(EC20ConnectState == CONNECTED)
+		{
+			if(cnt % 150 == 0)								//运行灯以1秒的周期闪烁
+			{
+				led_4g_state = 1;
+			}
+			else
+			{
+				led_4g_state = 0;
+			}
+		}
+		else
+		{
+			if(cnt % 25 == 0)								//运行灯以1秒的周期闪烁
+			{
+				led_4g_state = ~led_4g_state;
+			}
+		}
+		
+		if(Rs485RecvCnt != 0 || Rs485SendCnt != 0)
+		{
+			if(Rs485RecvCnt > 0)
+			{
+				Rs485RecvCnt -= 2;
+			}
+			if(Rs485RecvCnt < 0)
+			{
+				Rs485RecvCnt = 0;
+			}
+			
+			if(Rs485SendCnt > 0)
+			{
+				Rs485SendCnt -= 2;
+			}
+			if(Rs485SendCnt < 0)
+			{
+				Rs485SendCnt = 0;
+			}
+			
+			led_485_state = ~led_485_state;
+		}
+		else
+		{
+			led_485_state = 0;
+		}
+		
+		if(NetWorkRecvCnt != 0)
+		{
+			if(NetWorkRecvCnt > 0)
+			{
+				NetWorkRecvCnt -= 2;
+			}
+			if(NetWorkRecvCnt < 0)
+			{
+				NetWorkRecvCnt = 0;
+			}
+			
+			led_recv_state = ~led_recv_state;
+		}
+		else
+		{
+			led_recv_state = 0;
+		}
+		
+		if(NetWorkSendCnt != 0)
+		{
+			if(NetWorkSendCnt > 0)
+			{
+				NetWorkSendCnt -= 2;
+			}
+			if(NetWorkSendCnt < 0)
+			{
+				NetWorkSendCnt = 0;
+			}
+			
+			led_send_state = ~led_send_state;
+		}
+		else
+		{
+			led_send_state = 0;
+		}
+
+		if(led_run_state)
+		{
+			LED_RUN = 0;
+			LED_STATE = 0;
+		}
+		else
+		{
+			LED_RUN = 1;
+			LED_STATE = 1;
+		}
+		
+		if(led_eth_state)
+		{
+			LED_ETH = 1;
+		}
+		else
+		{
+			LED_ETH = 0;
+		}
+		
+		if(led_4g_state)
+		{
+			LED_4G = 1;
+		}
+		else
+		{
+			LED_4G = 0;
+		}
+		
+		if(led_485_state)
+		{
+			LED_RS485 = 1;
+		}
+		else
+		{
+			LED_RS485 = 0;
+		}
+		
+		if(led_recv_state)
+		{
+			LED_DOWN = 1;
+		}
+		else
+		{
+			LED_DOWN = 0;
+		}
+		
+		if(led_send_state)
+		{
+			LED_UP = 1;
+		}
+		else
+		{
+			LED_UP = 0;
+		}
+		
+		if(SysAlarmState)
+		{
+			LED_ALARM = 1;
+		}
+		else
+		{
+			LED_ALARM = 0;
+		}
+		
+		if(BatteryManagement.discharge_voltage >= BATTERY_LOW_BATTERY)
+		{
+			LED_12V = 1;
+		}
+		else
+		{
+			LED_12V = 0;
+		}
+		
+		
 
 		cnt = (cnt + 1) & 0xFFFFFFFF;
 
-		delay_ms(50);									//循环一次延时约20ms
+		delay_ms(20);									//循环一次延时约20ms
 		
 		SatckLED = uxTaskGetStackHighWaterMark(NULL);
 	}
@@ -356,7 +537,7 @@ u8 GetLinkTypeLinkState(u8 cmd_code,u8 *outbuf)
 		}
 		else
 		{
-			conn_mode = MODE_4G;
+			conn_mode = MODE_INSIDE;
 		}
 	}
 	else
@@ -762,7 +943,7 @@ u8 SetElectricRatio(u8 cmd_code,u8 *data,u8 data_len,u8 *outbuf)
 		BulitInMeterRatio.voltage_ratio = (float)(((u16)data[0] << 8) +(u16)data[1]);
 		BulitInMeterRatio.current_ratio = (float)(((u16)data[2] << 8) +(u16)data[3]);
 
-		WriteConcentratorLocalNetConfig(0,1);
+		WriteBulitInMeterRatio(0,1);
 
 		for(i = 0; i < ElectricityMeterConfigNum.number; i ++)
 		{
