@@ -338,7 +338,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F40XX,USE_STDPERIPH_DRIVER,USE_USB_OTG_FS</Define>
               <Undefine></Undefine>
-              <IncludePath>..\CORE;..\USER;..\DEVICEDRIVER\dp83848;..\ETHERNET;..\FREERTOS\include;..\FREERTOS\portable\RVDS\ARM_CM4F;..\FWLIB\inc;..\SYSTEM\delay;..\SYSTEM\sys;..\LWIP\lwip-1.4.1\src\include;..\LWIP\lwip-1.4.1\src\include\lwip;..\LWIP\lwip-1.4.1\src\include\ipv4;..\LWIP\lwip-1.4.1\src\include\netif;..\LWIP\lwip-1.4.1\port\STM32F4x7;..\LWIP\lwip-1.4.1\port\STM32F4x7\FreeRTOS;..\PERIPHERAL\usart;..\DEVICEDRIVER\battery;..\DEVICEDRIVER\cat25x;..\DEVICEDRIVER\dp83848;..\DEVICEDRIVER\e_meter;..\DEVICEDRIVER\ec20;..\DEVICEDRIVER\ht7038;..\DEVICEDRIVER\ht7038;..\DEVICEDRIVER\kc;..\DEVICEDRIVER\kr;..\DEVICEDRIVER\led;..\DEVICEDRIVER\rx8010s;..\DEVICEDRIVER\w25qxx;..\FATFS;..\FATFS\src;..\FATFS\exfuns;..\MEMORY;..\MIDDLEWARE;..\PROTOCOL;..\PERIPHERAL\iic;..\PERIPHERAL\spi;..\PERIPHERAL\stmflash;..\PERIPHERAL\usart;..\PERIPHERAL\watch_dog;..\EXTERNALDEVICE\concentrator;..\EXTERNALDEVICE\electricity_meter;..\EXTERNALDEVICE\input_collector;..\EXTERNALDEVICE\relay;..\USB\USB_APP;..\USB\STM32_USB_OTG_Driver\inc;..\USB\STM32_USB_HOST_Library\Core\inc;..\USB\STM32_USB_HOST_Library\Class\MSC\inc;..\EXTERNALDEVICE\lamp;..\DEVICEDRIVER\plc;..\EXTERNALDEVICE\lumeter;..\DEVICEDRIVER\lumeter;..\FREERTOS</IncludePath>
+              <IncludePath>..\CORE;..\USER;..\DEVICEDRIVER\dp83848;..\ETHERNET;..\FREERTOS\include;..\FREERTOS\portable\RVDS\ARM_CM4F;..\FWLIB\inc;..\SYSTEM\delay;..\SYSTEM\sys;..\LWIP\lwip-1.4.1\src\include;..\LWIP\lwip-1.4.1\src\include\lwip;..\LWIP\lwip-1.4.1\src\include\ipv4;..\LWIP\lwip-1.4.1\src\include\netif;..\LWIP\lwip-1.4.1\port\STM32F4x7;..\LWIP\lwip-1.4.1\port\STM32F4x7\FreeRTOS;..\PERIPHERAL\usart;..\DEVICEDRIVER\battery;..\DEVICEDRIVER\cat25x;..\DEVICEDRIVER\dp83848;..\DEVICEDRIVER\e_meter;..\DEVICEDRIVER\ec20;..\DEVICEDRIVER\ht7038;..\DEVICEDRIVER\ht7038;..\DEVICEDRIVER\kc;..\DEVICEDRIVER\kr;..\DEVICEDRIVER\led;..\DEVICEDRIVER\rx8010s;..\FATFS;..\FATFS\src;..\FATFS\exfuns;..\MEMORY;..\MIDDLEWARE;..\PROTOCOL;..\PERIPHERAL\iic;..\PERIPHERAL\spi;..\PERIPHERAL\stmflash;..\PERIPHERAL\usart;..\PERIPHERAL\watch_dog;..\EXTERNALDEVICE\concentrator;..\EXTERNALDEVICE\electricity_meter;..\EXTERNALDEVICE\input_collector;..\EXTERNALDEVICE\relay;..\USB\USB_APP;..\USB\STM32_USB_OTG_Driver\inc;..\USB\STM32_USB_HOST_Library\Core\inc;..\USB\STM32_USB_HOST_Library\Class\MSC\inc;..\EXTERNALDEVICE\lamp;..\DEVICEDRIVER\plc;..\EXTERNALDEVICE\lumeter;..\DEVICEDRIVER\lumeter;..\FREERTOS;..\DEVICEDRIVER\sd_card</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -688,16 +688,6 @@
               <FilePath>..\DEVICEDRIVER\rx8010s\rx8010s.c</FilePath>
             </File>
             <File>
-              <FileName>cat25x.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\DEVICEDRIVER\cat25x\cat25x.c</FilePath>
-            </File>
-            <File>
-              <FileName>w25qxx.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\DEVICEDRIVER\w25qxx\w25qxx.c</FilePath>
-            </File>
-            <File>
               <FileName>ht7038.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\DEVICEDRIVER\ht7038\ht7038.c</FilePath>
@@ -726,6 +716,16 @@
               <FileName>lumeter.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\DEVICEDRIVER\lumeter\lumeter.c</FilePath>
+            </File>
+            <File>
+              <FileName>sd_card.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\DEVICEDRIVER\sd_card\sd_card.c</FilePath>
+            </File>
+            <File>
+              <FileName>cat25x.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\DEVICEDRIVER\cat25x\cat25x.c</FilePath>
             </File>
           </Files>
         </Group>

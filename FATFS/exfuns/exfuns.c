@@ -3,6 +3,7 @@
 #include "fattester.h"
 #include "usart.h"
 #include "common.h"
+#include "sd_card.h"
 
 
 ///////////////////////////////公共文件区,使用malloc的时候////////////////////////////////////////////
@@ -22,58 +23,325 @@ FRESULT init_mount_flash(void)
 
 	exfuns_init();
 
-	res = f_mount(fs,"1:",1); 							//挂载FLASH.
+	res = f_mount(fs,"0:",0); 							//挂载FLASH.
 
 	if(res == FR_NO_FILESYSTEM)							//FLASH磁盘,FAT文件系统错误,重新格式化FLASH
 	{
-		res = f_mkfs("1:",1,4096);						//格式化FLASH,1,盘符;1,不需要引导区,8个扇区为1个簇
+		FORMAT:
+		res = f_mkfs("0:",0,4096);						//格式化FLASH,1,盘符;1,不需要引导区,8个扇区为1个簇
 
 		if(res == FR_OK)
 		{
-			f_setlabel((const TCHAR *)"1:BJLINKTECH");	//设置Flash磁盘的名字为：ALIENTEK
+			f_setlabel((const TCHAR *)"0:BJLINKTECH");	//设置Flash磁盘的名字为：ALIENTEK
 
-			res = mf_opendir("1:");
+			res = mf_opendir("0:");
 
 			if(res == FR_OK)
 			{
-				res = mf_mkdir("1:CONCEN");
-				res = mf_mkdir("1:CONCEN/ALARM");
-				res = mf_mkdir("1:CONCEN/EVENT");
-				res = mf_mkdir("1:CONCEN/JOURNAL");
-				res = mf_mkdir("1:CONCEN/STATE");
+				res = mf_mkdir("0:CONCEN");
+				res = mf_mkdir("0:CONCEN/ALARM");
+				res = mf_mkdir("0:CONCEN/EVENT");
+				res = mf_mkdir("0:CONCEN/JOURNAL");
+				res = mf_mkdir("0:CONCEN/STATE");
 
-				res = mf_mkdir("1:LAMP");
-				res = mf_mkdir("1:LAMP/ALARM");
-				res = mf_mkdir("1:LAMP/EVENT");
-				res = mf_mkdir("1:LAMP/JOURNAL");
-				res = mf_mkdir("1:LAMP/STATE");
+				res = mf_mkdir("0:LAMP");
+				res = mf_mkdir("0:LAMP/ALARM");
+				res = mf_mkdir("0:LAMP/EVENT");
+				res = mf_mkdir("0:LAMP/JOURNAL");
+				res = mf_mkdir("0:LAMP/STATE");
 
-				res = mf_mkdir("1:RELAY");
-				res = mf_mkdir("1:RELAY/ALARM");
-				res = mf_mkdir("1:RELAY/EVENT");
-				res = mf_mkdir("1:RELAY/JOURNAL");
-				res = mf_mkdir("1:RELAY/STATE");
+				res = mf_mkdir("0:RELAY");
+				res = mf_mkdir("0:RELAY/ALARM");
+				res = mf_mkdir("0:RELAY/EVENT");
+				res = mf_mkdir("0:RELAY/JOURNAL");
+				res = mf_mkdir("0:RELAY/STATE");
 
-				res = mf_mkdir("1:INPUT");
-				res = mf_mkdir("1:INPUT/ALARM");
-				res = mf_mkdir("1:INPUT/EVENT");
-				res = mf_mkdir("1:INPUT/JOURNAL");
-				res = mf_mkdir("1:INPUT/STATE");
+				res = mf_mkdir("0:INPUT");
+				res = mf_mkdir("0:INPUT/ALARM");
+				res = mf_mkdir("0:INPUT/EVENT");
+				res = mf_mkdir("0:INPUT/JOURNAL");
+				res = mf_mkdir("0:INPUT/STATE");
 
-				res = mf_mkdir("1:METER");
-				res = mf_mkdir("1:METER/ALARM");
-				res = mf_mkdir("1:METER/EVENT");
-				res = mf_mkdir("1:METER/JOURNAL");
-				res = mf_mkdir("1:METER/STATE");
+				res = mf_mkdir("0:METER");
+				res = mf_mkdir("0:METER/ALARM");
+				res = mf_mkdir("0:METER/EVENT");
+				res = mf_mkdir("0:METER/JOURNAL");
+				res = mf_mkdir("0:METER/STATE");
 
-				res = mf_mkdir("1:LUMETER");
-				res = mf_mkdir("1:LUMETER/ALARM");
-				res = mf_mkdir("1:LUMETER/EVENT");
-				res = mf_mkdir("1:LUMETER/JOURNAL");
-				res = mf_mkdir("1:LUMETER/STATE");
+				res = mf_mkdir("0:LUMETER");
+				res = mf_mkdir("0:LUMETER/ALARM");
+				res = mf_mkdir("0:LUMETER/EVENT");
+				res = mf_mkdir("0:LUMETER/JOURNAL");
+				res = mf_mkdir("0:LUMETER/STATE");
 
 				res = mf_closedir();
 			}
+		}
+	}
+	else
+	{
+		res = mf_opendir("0:CONCEN/ALARM");
+		
+		if(res == 0)
+		{
+			mf_closedir();
+		}
+		else
+		{
+			goto FORMAT;
+		}
+		
+		res = mf_opendir("0:CONCEN/EVENT");
+		
+		if(res == 0)
+		{
+			mf_closedir();
+		}
+		else
+		{
+			goto FORMAT;
+		}
+		
+		res = mf_opendir("0:CONCEN/JOURNAL");
+		
+		if(res == 0)
+		{
+			mf_closedir();
+		}
+		else
+		{
+			goto FORMAT;
+		}
+		
+		res = mf_opendir("0:CONCEN/STATE");
+		
+		if(res == 0)
+		{
+			mf_closedir();
+		}
+		else
+		{
+			goto FORMAT;
+		}
+		
+		res = mf_opendir("0:LAMP/ALARM");
+		
+		if(res == 0)
+		{
+			mf_closedir();
+		}
+		else
+		{
+			goto FORMAT;
+		}
+		
+		res = mf_opendir("0:LAMP/EVENT");
+		
+		if(res == 0)
+		{
+			mf_closedir();
+		}
+		else
+		{
+			goto FORMAT;
+		}
+		
+		res = mf_opendir("0:LAMP/JOURNAL");
+		
+		if(res == 0)
+		{
+			mf_closedir();
+		}
+		else
+		{
+			goto FORMAT;
+		}
+		
+		res = mf_opendir("0:LAMP/STATE");
+		
+		if(res == 0)
+		{
+			mf_closedir();
+		}
+		else
+		{
+			goto FORMAT;
+		}
+		
+		res = mf_opendir("0:RELAY/ALARM");
+		
+		if(res == 0)
+		{
+			mf_closedir();
+		}
+		else
+		{
+			goto FORMAT;
+		}
+		
+		res = mf_opendir("0:RELAY/EVENT");
+		
+		if(res == 0)
+		{
+			mf_closedir();
+		}
+		else
+		{
+			goto FORMAT;
+		}
+		
+		res = mf_opendir("0:RELAY/JOURNAL");
+		
+		if(res == 0)
+		{
+			mf_closedir();
+		}
+		else
+		{
+			goto FORMAT;
+		}
+		
+		res = mf_opendir("0:RELAY/STATE");
+		
+		if(res == 0)
+		{
+			mf_closedir();
+		}
+		else
+		{
+			goto FORMAT;
+		}
+		
+		res = mf_opendir("0:INPUT/ALARM");
+		
+		if(res == 0)
+		{
+			mf_closedir();
+		}
+		else
+		{
+			goto FORMAT;
+		}
+		
+		res = mf_opendir("0:INPUT/EVENT");
+		
+		if(res == 0)
+		{
+			mf_closedir();
+		}
+		else
+		{
+			goto FORMAT;
+		}
+		
+		res = mf_opendir("0:INPUT/JOURNAL");
+		
+		if(res == 0)
+		{
+			mf_closedir();
+		}
+		else
+		{
+			goto FORMAT;
+		}
+		
+		res = mf_opendir("0:INPUT/STATE");
+		
+		if(res == 0)
+		{
+			mf_closedir();
+		}
+		else
+		{
+			goto FORMAT;
+		}
+		
+		res = mf_opendir("0:METER/ALARM");
+		
+		if(res == 0)
+		{
+			mf_closedir();
+		}
+		else
+		{
+			goto FORMAT;
+		}
+		
+		res = mf_opendir("0:METER/EVENT");
+		
+		if(res == 0)
+		{
+			mf_closedir();
+		}
+		else
+		{
+			goto FORMAT;
+		}
+		
+		res = mf_opendir("0:METER/JOURNAL");
+		
+		if(res == 0)
+		{
+			mf_closedir();
+		}
+		else
+		{
+			goto FORMAT;
+		}
+		
+		res = mf_opendir("0:METER/STATE");
+		
+		if(res == 0)
+		{
+			mf_closedir();
+		}
+		else
+		{
+			goto FORMAT;
+		}
+		
+		res = mf_opendir("0:LUMETER/ALARM");
+		
+		if(res == 0)
+		{
+			mf_closedir();
+		}
+		else
+		{
+			goto FORMAT;
+		}
+		
+		res = mf_opendir("0:LUMETER/EVENT");
+		
+		if(res == 0)
+		{
+			mf_closedir();
+		}
+		else
+		{
+			goto FORMAT;
+		}
+		
+		res = mf_opendir("0:LUMETER/JOURNAL");
+		
+		if(res == 0)
+		{
+			mf_closedir();
+		}
+		else
+		{
+			goto FORMAT;
+		}
+		
+		res = mf_opendir("0:LUMETER/STATE");
+		
+		if(res == 0)
+		{
+			mf_closedir();
+		}
+		else
+		{
+			goto FORMAT;
 		}
 	}
 

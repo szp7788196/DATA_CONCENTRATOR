@@ -43,27 +43,27 @@ u8 StoreAlarmToSpiFlash(AlarmReport_S *alarm_report)
 	switch(alarm_report->device_type)
 	{
 		case (u8)CONCENTRATOR:
-			sprintf((char *)base_path, "1:CONCEN/ALARM");
+			sprintf((char *)base_path, "0:CONCEN/ALARM");
 		break;
 
 		case (u8)LAMP_CONTROLLER:
-			sprintf((char *)base_path, "1:LAMP/ALARM");
+			sprintf((char *)base_path, "0:LAMP/ALARM");
 		break;
 
 		case (u8)RELAY:
-			sprintf((char *)base_path, "1:RELAY/ALARM");
+			sprintf((char *)base_path, "0:RELAY/ALARM");
 		break;
 
 		case (u8)INPUT_COLLECTOR:
-			sprintf((char *)base_path, "1:INPUT/ALARM");
+			sprintf((char *)base_path, "0:INPUT/ALARM");
 		break;
 
 		case (u8)ELECTRICITY_METER:
-			sprintf((char *)base_path, "1:METER/ALARM");
+			sprintf((char *)base_path, "0:METER/ALARM");
 		break;
 
 		case (u8)LUMETER:
-			sprintf((char *)base_path, "1:LUMETER/ALARM");
+			sprintf((char *)base_path, "0:LUMETER/ALARM");
 		break;
 
 		default:
@@ -301,27 +301,27 @@ u16 GetAlarmEventNumFromDateSegment(EventHistory_S event_history)
 	switch((u8)event_history.device_type)
 	{
 		case (u8)CONCENTRATOR:
-			sprintf((char *)base_path, "1:CONCEN/");
+			sprintf((char *)base_path, "0:CONCEN/");
 		break;
 
 		case (u8)LAMP_CONTROLLER:
-			sprintf((char *)base_path, "1:LAMP/");
+			sprintf((char *)base_path, "0:LAMP/");
 		break;
 
 		case (u8)RELAY:
-			sprintf((char *)base_path, "1:RELAY/");
+			sprintf((char *)base_path, "0:RELAY/");
 		break;
 
 		case (u8)INPUT_COLLECTOR:
-			sprintf((char *)base_path, "1:INPUT/");
+			sprintf((char *)base_path, "0:INPUT/");
 		break;
 
 		case (u8)ELECTRICITY_METER:
-			sprintf((char *)base_path, "1:METER/");
+			sprintf((char *)base_path, "0:METER/");
 		break;
 
 		case (u8)LUMETER:
-			sprintf((char *)base_path, "1:LUMETER/");
+			sprintf((char *)base_path, "0:LUMETER/");
 		break;
 
 		default:
@@ -479,27 +479,27 @@ void GetAlarmEventContentFromDateSegmentAndSendToServer(EventHistory_S event_his
 	switch((u8)event_history.device_type)
 	{
 		case (u8)CONCENTRATOR:
-			sprintf((char *)base_path, "1:CONCEN/");
+			sprintf((char *)base_path, "0:CONCEN/");
 		break;
 
 		case (u8)LAMP_CONTROLLER:
-			sprintf((char *)base_path, "1:LAMP/");
+			sprintf((char *)base_path, "0:LAMP/");
 		break;
 
 		case (u8)RELAY:
-			sprintf((char *)base_path, "1:RELAY/");
+			sprintf((char *)base_path, "0:RELAY/");
 		break;
 
 		case (u8)INPUT_COLLECTOR:
-			sprintf((char *)base_path, "1:INPUT/");
+			sprintf((char *)base_path, "0:INPUT/");
 		break;
 
 		case (u8)ELECTRICITY_METER:
-			sprintf((char *)base_path, "1:METER/");
+			sprintf((char *)base_path, "0:METER/");
 		break;
 
 		case (u8)LUMETER:
-			sprintf((char *)base_path, "1:LUMETER/");
+			sprintf((char *)base_path, "0:LUMETER/");
 		break;
 
 		default:

@@ -644,7 +644,7 @@ void AutoSendFrameToServer(void)
 			}
 		}
 	}
-//	else
+	else
 	{
 		retry_times1 = 0;
 

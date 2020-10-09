@@ -7,226 +7,279 @@
 /* storage control modules to the FatFs module with a defined API.       */
 /*-----------------------------------------------------------------------*/
 #include "diskio.h"			/* FatFs lower layer API */
-#include "w25qxx.h"
+#include "sd_card.h"
 #include "FreeRTOS.h"
 
-//////////////////////////////////////////////////////////////////////////////////
-//本程序只供学习使用，未经作者许可，不得用于其它任何用途
-//ALIENTEK战舰STM32开发板V3
-//FATFS底层(diskio) 驱动代码
-//正点原子@ALIENTEK
-//技术论坛:www.openedv.com
-//创建日期:2015/1/20
-//版本：V1.0
-//版权所有，盗版必究。
-//Copyright(C) 广州市星翼电子科技有限公司 2009-2019
-//All rights reserved
-//////////////////////////////////////////////////////////////////////////////////
 
-#define SD_CARD	 0  //SD卡,卷标为0
-#define EX_FLASH 1	//外部flash,卷标为1
-
-#define FLASH_SECTOR_SIZE 	4096		//每个扇区4K字节
-//W25Q16
-u16	    FLASH_SECTOR_COUNT = 512;	//共2M字节
-#define FLASH_BLOCK_SIZE   	8     		//每个BLOCK有16个扇区
-
-
-//获得磁盘状态
-DSTATUS disk_status (
-	BYTE pdrv		/* Physical drive nmuber to identify the drive */
-)
-{
-	return RES_OK;
-}
-//初始化磁盘
 DSTATUS disk_initialize (
-	BYTE pdrv				/* Physical drive nmuber to identify the drive */
+	BYTE drv				/* Physical drive nmuber (0..) */
 )
 {
-	u8 res=0;
-	switch(pdrv)
+	int Status;
+	switch (drv)
 	{
-		case SD_CARD://SD卡
-//			res=SD_Init();//SD卡初始化
-  			break;
+		case 0 :
+//			if(xSchedulerRunning == 1)
+//				xSemaphoreTake(xMutex_SPI2, portMAX_DELAY);
 		
-		case EX_FLASH://外部flash
-			W25QXX_Init();
-			FLASH_SECTOR_COUNT = 512;//W25Q1218,前12M字节给FATFS占用
- 			break;
-		
-		default:
-			res=1;
-	}
-	if(res)return  STA_NOINIT;
-	else return 0; //初始化成功
-}
-//读扇区
-//pdrv:磁盘编号0~9
-//*buff:数据接收缓冲首地址
-//sector:扇区地址
-//count:需要读取的扇区数
-DRESULT disk_read (
-	BYTE pdrv,		/* Physical drive nmuber to identify the drive */
-	BYTE *buff,		/* Data buffer to store read data */
-	DWORD sector,	/* Sector address in LBA */
-	UINT count		/* Number of sectors to read */
-)
-{
-	u8 res=0;
-    if (!count)return RES_PARERR;//count不能等于0，否则返回参数错误
-	switch(pdrv)
-	{
-		case SD_CARD://SD卡
-//			res=SD_ReadDisk(buff,sector,count);
-//			while(res)//读出错
-//			{
-//				SD_Init();	//重新初始化SD卡
-//				res=SD_ReadDisk(buff,sector,count);
-//				//printf("sd rd error:%d\r\n",res);
-//			}
-			break;
-		case EX_FLASH://外部flash
-				
-			if(xSchedulerRunning == 1)
-				xSemaphoreTake(xMutex_SPI2, portMAX_DELAY);
-		
-			for(;count>0;count--)
-			{
-				W25QXX_Read(buff,sector*FLASH_SECTOR_SIZE,FLASH_SECTOR_SIZE);
-
-				sector++;
-				buff+=FLASH_SECTOR_SIZE;
+			Status = MSD0_Init();
+			
+//			if(xSchedulerRunning == 1)
+//				xSemaphoreGive(xMutex_SPI2);
+			
+			if(Status==0){
+				return RES_OK;
+			}else{
+				return STA_NOINIT;
 			}
-			
-			if(xSchedulerRunning == 1)
-				xSemaphoreGive(xMutex_SPI2);
-			
-			res=0;
-			break;
-			
+		case 1 :
+			return RES_OK;
+		case 2 :
+			return RES_OK;
+		case 3 :
+			return RES_OK;
 		default:
-			res=1;
+			return STA_NOINIT;
 	}
-   //处理返回值，将SPI_SD_driver.c的返回值转成ff.c的返回值
-    if(res==0x00)return RES_OK;
-    else return RES_ERROR;
 }
-//写扇区
-//pdrv:磁盘编号0~9
-//*buff:发送数据首地址
-//sector:扇区地址
-//count:需要写入的扇区数
+
+
+
+
+DSTATUS disk_status (
+	BYTE drv		/* Physical drive nmuber (0..) */
+)
+{
+	switch (drv)
+	{
+		case 0 :
+			return RES_OK;
+		case 1 :
+			return RES_OK;
+		case 2 :
+			return RES_OK;
+		default:
+			return STA_NOINIT;
+	}
+}
+
+
+
+/*-----------------------------------------------------------------------*/
+/* Read Sector(s)                                                        */
+
+DRESULT disk_read (
+	BYTE drv,		/* Physical drive nmuber (0..) */
+	BYTE *buff,		/* Data buffer to store read data */
+	DWORD sector,	/* Sector address (LBA) */
+	UINT count		/* Number of sectors to read (1..255) */
+)
+{
+	int Status;
+	if( !count )
+	{
+		return RES_PARERR;  /* count2??üμèóú0￡?·??ò·μ??2?êy′í?ó */
+	}
+	switch (drv)
+	{
+		case 0:
+		    if(count==1)            /* 1??sectorμ??á2ù×÷ */
+		    {
+				if(xSchedulerRunning == 1)
+					xSemaphoreTake(xMutex_SPI2, portMAX_DELAY);
+				
+				Status =  MSD0_ReadSingleBlock( sector ,buff );
+				
+				if(xSchedulerRunning == 1)
+					xSemaphoreGive(xMutex_SPI2);
+				
+				if(Status == 0){
+					return RES_OK;
+				}else{
+					return RES_ERROR;
+				}
+		    }
+		    else                    /* ?à??sectorμ??á2ù×÷ */
+		    {
+				if(xSchedulerRunning == 1)
+					xSemaphoreTake(xMutex_SPI2, portMAX_DELAY);
+				
+				Status = MSD0_ReadMultiBlock( sector , buff ,count);
+				
+				if(xSchedulerRunning == 1)
+					xSemaphoreGive(xMutex_SPI2);
+				
+				if(Status == 0){
+					return RES_OK;
+				}else{
+					return RES_ERROR;
+				}
+		    }
+		case 1:
+		    if(count==1)            /* 1??sectorμ??á2ù×÷ */
+		    {
+				return RES_OK;
+		    }
+		    else                    /* ?à??sectorμ??á2ù×÷ */
+		    {
+				return RES_OK;
+		    }
+
+		default:
+			return RES_ERROR;
+	}
+}
+
+
+
+/*-----------------------------------------------------------------------*/
+/* Write Sector(s)                                                       */
+
 #if _USE_WRITE
 DRESULT disk_write (
-	BYTE pdrv,			/* Physical drive nmuber to identify the drive */
-	const BYTE *buff,	/* Data to be written */
-	DWORD sector,		/* Sector address in LBA */
-	UINT count			/* Number of sectors to write */
+	BYTE drv,			/* Physical drive nmuber (0..) */
+	const BYTE *buff,	        /* Data to be written */
+	DWORD sector,		/* Sector address (LBA) */
+	UINT count			/* Number of sectors to write (1..255) */
 )
 {
-	u8 res=0;
-    if (!count)return RES_PARERR;//count不能等于0，否则返回参数错误
-	switch(pdrv)
+	int Status;
+	if( !count )
 	{
-		case SD_CARD://SD卡
-//			res=SD_WriteDisk((u8*)buff,sector,count);
-//			while(res)//写出错
-//			{
-//				SD_Init();	//重新初始化SD卡
-//				res=SD_WriteDisk((u8*)buff,sector,count);
-//				//printf("sd wr error:%d\r\n",res);
-//			}
-			break;
-		case EX_FLASH://外部flash
-			if(xSchedulerRunning == 1)
-				xSemaphoreTake(xMutex_SPI2, portMAX_DELAY);
-		
-			for(;count>0;count--)
-			{
-				W25QXX_Write((u8*)buff,sector*FLASH_SECTOR_SIZE,FLASH_SECTOR_SIZE);
-
-				sector++;
-				buff+=FLASH_SECTOR_SIZE;
-			}
-			
-			if(xSchedulerRunning == 1)
-				xSemaphoreGive(xMutex_SPI2);
-			
-			res=0;
-			break;
-			
-		default:
-			res=1;
+		return RES_PARERR;  /* count2??üμèóú0￡?·??ò·μ??2?êy′í?ó */
 	}
-    //处理返回值，将SPI_SD_driver.c的返回值转成ff.c的返回值
-    if(res == 0x00)return RES_OK;
-    else return RES_ERROR;
+	switch (drv)
+	{
+		case 0:
+		    if(count==1)            /* 1??sectorμ?D′2ù×÷ */
+		    {
+				if(xSchedulerRunning == 1)
+					xSemaphoreTake(xMutex_SPI2, portMAX_DELAY);
+				
+				Status = MSD0_WriteSingleBlock( sector , (uint8_t *)(&buff[0]) );
+				
+				if(xSchedulerRunning == 1)
+					xSemaphoreGive(xMutex_SPI2);
+				
+				if(Status == 0){
+					return RES_OK;
+				}else{
+					return RES_ERROR;
+				}
+		    }
+		    else                    /* ?à??sectorμ?D′2ù×÷ */
+		    {
+				if(xSchedulerRunning == 1)
+					xSemaphoreTake(xMutex_SPI2, portMAX_DELAY);
+				
+				Status = MSD0_WriteMultiBlock( sector , (uint8_t *)(&buff[0]) , count );
+				
+				if(xSchedulerRunning == 1)
+					xSemaphoreGive(xMutex_SPI2);
+				
+				if(Status == 0){
+					return RES_OK;
+				}else{
+					return RES_ERROR;
+				}
+		    }
+		case 1:
+		    if(count==1)            /* 1??sectorμ?D′2ù×÷ */
+		    {
+				return RES_OK;
+		    }
+		    else                    /* ?à??sectorμ?D′2ù×÷ */
+		    {
+				return RES_OK;
+		    }
+
+		default:return RES_ERROR;
+	}
 }
-#endif
-//其他表参数的获得
-//pdrv:磁盘编号0~9
-//ctrl:控制代码
-//*buff:发送/接收缓冲区指针
-#if _USE_IOCTL
+#endif /* _READONLY */
+
+
+
+/*-----------------------------------------------------------------------*/
+/* Miscellaneous Functions                                               */
+
 DRESULT disk_ioctl (
-	BYTE pdrv,		/* Physical drive nmuber (0..) */
-	BYTE cmd,		/* Control code */
+	BYTE drv,		/* Physical drive nmuber (0..) */
+	BYTE ctrl,		/* Control code */
 	void *buff		/* Buffer to send/receive control data */
 )
 {
-DRESULT res;
-	if(pdrv==SD_CARD)//SD卡
+	if (drv==0)
 	{
-//	    switch(cmd)
-//	    {
-//		    case CTRL_SYNC:
-//				res = RES_OK;
-//		        break;
-//		    case GET_SECTOR_SIZE:
-//				*(DWORD*)buff = 512;
-//		        res = RES_OK;
-//		        break;
-//		    case GET_BLOCK_SIZE:
-//				*(WORD*)buff = SDCardInfo.CardBlockSize;
-//		        res = RES_OK;
-//		        break;
-//		    case GET_SECTOR_COUNT:
-//		        *(DWORD*)buff = SDCardInfo.CardCapacity/512;
-//		        res = RES_OK;
-//		        break;
-//		    default:
-//		        res = RES_PARERR;
-//		        break;
-//	    }
-	}else if(pdrv==EX_FLASH)	//外部FLASH
-	{
-	    switch(cmd)
-	    {
-		    case CTRL_SYNC:
-				res = RES_OK;
-		        break;
-		    case GET_SECTOR_SIZE:
-		        *(WORD*)buff = FLASH_SECTOR_SIZE;
-		        res = RES_OK;
-		        break;
-		    case GET_BLOCK_SIZE:
-		        *(WORD*)buff = FLASH_BLOCK_SIZE;
-		        res = RES_OK;
-		        break;
-		    case GET_SECTOR_COUNT:
-		        *(DWORD*)buff = FLASH_SECTOR_COUNT;
-		        res = RES_OK;
-		        break;
-		    default:
-		        res = RES_PARERR;
-		        break;
-	    }
-	}else res=RES_ERROR;//其他的不支持
-    return res;
+		MSD0_GetCardInfo(&SD0_CardInfo);
+		switch (ctrl)
+		{
+			case CTRL_SYNC :
+				return RES_OK;
+		  	case GET_SECTOR_COUNT :
+				*(DWORD*)buff = SD0_CardInfo.Capacity/SD0_CardInfo.BlockSize;
+		    	return RES_OK;
+			case GET_SECTOR_SIZE:
+				*(DWORD*)buff = SD0_CardInfo.BlockSize; 
+		        return RES_OK;
+		  	case GET_BLOCK_SIZE :
+				*(WORD*)buff = SD0_CardInfo.BlockSize;
+		    	return RES_OK;
+		  	case CTRL_POWER :
+				break;
+		  	case CTRL_LOCK :
+				break;
+		  	case CTRL_EJECT :
+				break;
+	      	/* MMC/SDC command */
+		  	case MMC_GET_TYPE :
+				break;
+		  	case MMC_GET_CSD :
+				break;
+		  	case MMC_GET_CID :
+				break;
+			case MMC_GET_OCR :
+				break;
+			case MMC_GET_SDSTAT :
+				break;
+		}
+    }else if(drv==1){
+		switch (ctrl)
+		{
+			case CTRL_SYNC :
+				return RES_OK;
+		  	case GET_SECTOR_COUNT :
+		    	return RES_OK;
+		  	case GET_SECTOR_SIZE :
+				return RES_OK;
+		  	case GET_BLOCK_SIZE :
+		    	return RES_OK;
+		  	case CTRL_POWER :
+				break;
+		  	case CTRL_LOCK :
+				break;
+		  	case CTRL_EJECT :
+				break;
+	      	/* MMC/SDC command */
+		  	case MMC_GET_TYPE :
+				break;
+		  	case MMC_GET_CSD :
+				break;
+		  	case MMC_GET_CID :
+				break;
+		  	case MMC_GET_OCR :
+				break;
+		  	case MMC_GET_SDSTAT :
+				break;
+		}
+	}
+	else{
+		return RES_PARERR;
+	}
+	return RES_PARERR;
 }
-#endif
+
+
 //获得时间
 //User defined function to give a current time to fatfs module      */
 //31-25: Year(0-127 org.1980), 24-21: Month(1-12), 20-16: Day(1-31) */

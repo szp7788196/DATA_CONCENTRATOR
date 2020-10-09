@@ -4,6 +4,7 @@
 #include "common.h"
 #include "fattester.h"
 #include "exfuns.h"
+#include "sd_card.h"
 
 
 
@@ -15,6 +16,10 @@ u32 free_size = 0;
 
 void vTaskSTORE(void *pvParameters)
 {
+	MSD0_HARD_Init();
+	
+	init_mount_flash();									//≥ı ºªØ≤¢π“‘ÿflash
+	
 	while(1)
 	{
 		RecvAndStoreAlarmReport();
@@ -38,12 +43,12 @@ void RecvAndStoreAlarmReport(void)
 	{
 		StoreAlarmToSpiFlash(alarm_report);
 
-		mf_scan_files("1:");
+		mf_scan_files("0:");
 
 		DeleteAlarmReport(alarm_report);
 	}
 	
-	exf_getfree("1:",&total_size,&free_size);
+	exf_getfree("0:",&total_size,&free_size);
 }
 
 void RecvAndSendEventHistoryToServer(void)

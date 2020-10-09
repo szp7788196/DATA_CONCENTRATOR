@@ -21,7 +21,7 @@ typedef struct	LumeterBasicConfig							//光照计基础配置
 	u32 light_on_thre;										//开灯光照值
 	u16 light_on_advance_time;								//提前有效时间
 	u16 light_on_delay_time;								//延后有效时间
-	u32 light_off_thre;										//开灯光照值
+	u32 light_off_thre;										//关灯光照值
 	u16 light_off_advance_time;								//提前有效时间
 	u16 light_off_delay_time;								//延后有效时间
 	

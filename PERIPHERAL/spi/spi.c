@@ -36,7 +36,7 @@ void SPI2_Init(void)
 	SPI_InitStructure.SPI_CRCPolynomial = 7;	//CRC值计算的多项式
 	SPI_Init(SPI2, &SPI_InitStructure);  //根据SPI_InitStruct中指定的参数初始化外设SPIx寄存器
 	
-	SPI2_SetSpeed(32);
+	SPI2_SetSpeed(SPI_BaudRatePrescaler_8);
 
 	SPI_Cmd(SPI2, ENABLE);
 
@@ -109,13 +109,13 @@ void SPI3_SetSpeed(u8 SPI_BaudRatePrescaler)
 //返回值:读取到的字节
 u8 SPI2_ReadWriteByte(u8 TxData)
 {
-	u8 retry = 0;
+	u16 retry = 0;
 
 	while (SPI_I2S_GetFlagStatus(SPI2, SPI_I2S_FLAG_TXE) == RESET)//等待发送区空
 	{
 		retry ++;
 
-//		if(retry > 200)
+//		if(retry > 10000)
 //		{
 //			return 0;
 //		}
@@ -129,7 +129,7 @@ u8 SPI2_ReadWriteByte(u8 TxData)
 	{
 		retry ++;
 
-//		if(retry > 200)
+//		if(retry > 10000)
 //		{
 //			return 0;
 //		}
@@ -140,13 +140,13 @@ u8 SPI2_ReadWriteByte(u8 TxData)
 
 u8 SPI3_ReadWriteByte(u8 TxData)
 {
-	u8 retry = 0;
+	u16 retry = 0;
 
 	while (SPI_I2S_GetFlagStatus(SPI3, SPI_I2S_FLAG_TXE) == RESET)//等待发送区空
 	{
 		retry ++;
 
-//		if(retry > 200)
+//		if(retry > 10000)
 //		{
 //			return 0;
 //		}
@@ -160,7 +160,7 @@ u8 SPI3_ReadWriteByte(u8 TxData)
 	{
 		retry ++;
 
-//		if(retry > 200)
+//		if(retry > 10000)
 //		{
 //			return 0;
 //		}

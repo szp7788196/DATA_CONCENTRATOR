@@ -10,7 +10,6 @@
 #include "kr.h"
 #include "rx8010s.h"
 #include "cat25x.h"
-#include "w25qxx.h"
 #include "ht7038.h"
 #include "usart6.h"
 #include "ec20.h"
@@ -55,7 +54,6 @@ int main(void)
 
 	RX8010S_Init();										//外部RTC初始化
 	CAT25X_Init();										//外部EEPROM初始化
-	W25QXX_Init();										//外部FLASH初始化
 	HT7038_Init();										//电能计量芯片初始化
 	EC20_Init();										//4G模块初始化
 	PLC_Init();											//PLC模块初始化

@@ -123,12 +123,12 @@ void AppTaskCreate(void)
 				configMAX_PRIORITIES - 13,          /* 任务优先级*/
 				&xHandleTaskLED); 					/* 任务句柄  */
 				
-//	xTaskCreate(vTaskSTORE,    						/* 指示灯任务  */
-//				"",  								/* 任务名称    */
-//				384,         						/* stack大小,单位word,也就是4字节 */
-//				NULL,        						/* 任务参数  */
-//				configMAX_PRIORITIES - 16,          /* 任务优先级*/
-//				&xHandleTaskSTORE); 				/* 任务句柄  */
+	xTaskCreate(vTaskSTORE,    						/* 指示灯任务  */
+				"",  								/* 任务名称    */
+				384,         						/* stack大小,单位word,也就是4字节 */
+				NULL,        						/* 任务参数  */
+				configMAX_PRIORITIES - 16,          /* 任务优先级*/
+				&xHandleTaskSTORE); 				/* 任务句柄  */
 				
 	xTaskCreate(vTaskLWIP_INIT,    					/* 指示灯任务  */
 				"vTaskLWIP_INIT",  					/* 任务名称    */
