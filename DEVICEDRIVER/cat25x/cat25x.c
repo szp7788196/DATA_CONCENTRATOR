@@ -139,7 +139,7 @@ void CAT25X_Write_Page(u8* Buff,u32 ReadAddr,u16 Num)
 void CAT25X_Write(u8* Buff,u32 WriteAddr,u16 Num)
 {
 	u16 i = 0;
-	uint16_t addr = 0;
+	uint32_t addr = 0;
 	uint16_t len = 0, len1 = 0;
 
 	if(xSchedulerRunning == 1)

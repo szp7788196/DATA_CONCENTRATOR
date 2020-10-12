@@ -68,7 +68,7 @@ void vTaskLED(void *pvParameters)
 				UsartSendString(UART4,mmi_outbuf, mmi_len);
 			}
 		}
-   
+
 		if(Usart1RecvEnd == 0xAA)						//处理屏幕发过来的数据
 		{
 			Usart1RecvEnd = 0;

@@ -713,7 +713,7 @@ void ReadTotalConfigurationParameters(void)
 	ReadLampAppointmentNum();				//读取单灯预约控制配置数量
 	ReadLampStrategyNumList();				//读取单灯任务配置个数列表
 	
-	ReadLumeterConfigNum();					//读取光照计配置个数
+//	ReadLumeterConfigNum();					//读取光照计配置个数
 	ReadLumeterBasicConfig();				//读取光照计基础配置
 	ReadLumeterAlarmConfig();				//读取光照计告警配置
 	ReadLumeterConfig();					//读取光照计配置
