@@ -430,6 +430,31 @@
           <WinNumber>1</WinNumber>
           <ItemText>LumeterConfigNum</ItemText>
         </Ww>
+        <Ww>
+          <count>56</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>ring_fifo</ItemText>
+        </Ww>
+        <Ww>
+          <count>57</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>cmd_tx_buf</ItemText>
+        </Ww>
+        <Ww>
+          <count>58</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>bufff</ItemText>
+        </Ww>
+        <Ww>
+          <count>59</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>Usart5RxBuf</ItemText>
+        </Ww>
+        <Ww>
+          <count>60</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>mmi_outbuf</ItemText>
+        </Ww>
       </WatchWindow1>
       <MemoryWindow1>
         <Mm>
