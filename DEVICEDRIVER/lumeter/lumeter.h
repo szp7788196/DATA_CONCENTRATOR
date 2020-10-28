@@ -16,7 +16,7 @@
 
 void GetBuiltOutLumeterState(LumeterConfig_S config);
 u16 PackBuiltOutLumeterFrame(u8 address,u8 mode,u8 *outbuf);
-void AnalysisBuiltOutLumeterFrame(u8 *buf,u16 len,LumeterCollectState_S *lumeter_state);
+u8 AnalysisBuiltOutLumeterFrame(u8 *buf,u16 len,LumeterCollectState_S *lumeter_state);
 
 
 

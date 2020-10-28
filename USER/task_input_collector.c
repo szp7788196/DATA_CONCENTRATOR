@@ -10,26 +10,26 @@ unsigned portBASE_TYPE SatckCOLLECTOR;
 void vTaskINPUT_COLLECTOR(void *pvParameters)
 {
 	static u32 cnt = 0;
-	
+
 	while(1)
 	{
 		if(cnt % 20)
 		{
 			GetKrState();
 		}
-		
+
 		InputCollectorRecvAndHandleFrameStruct();			//报文解析
-		
+
 		InputCollectorEventCheckPolling();					//告警等事件轮训
-		
+
 		InputCollectorCollectCurrentState();				//采集输入量采集模块状态
-		
+
 		InputCollectorRecvAndHandleDeviceFrame();			//接收并处理外置输入量采集模块返回的数据
-		
+
 		cnt ++;
-		
+
 		delay_ms(100);
-		
+
 		SatckCOLLECTOR = uxTaskGetStackHighWaterMark(NULL);
 	}
 }
@@ -47,7 +47,7 @@ void InputCollectorCollectCurrentState(void)
 		if(GetSysTick10ms() - time_s >= (InputCollectorBasicConfig.detect_interval / 10))
 		{
 			time_s = GetSysTick10ms();
-			
+
 			for(i = 0; i < InputCollectorConfigNum.number; i ++)
 			{
 				if(InputCollectorState[i].address == 0 && InputCollectorState[i].channel == 0)	//集控内部继电器
@@ -66,6 +66,7 @@ void InputCollectorCollectCurrentState(void)
 //接收并处理外置输入量采集模块返回的数据
 void InputCollectorRecvAndHandleDeviceFrame(void)
 {
+	u8 ret = 0;
 	u8 i = 0;
 	Rs485Frame_S *recv_rs485_frame = NULL;
 	BaseType_t xResult;
@@ -75,26 +76,65 @@ void InputCollectorRecvAndHandleDeviceFrame(void)
 
 	if(xResult == pdPASS)
 	{
-		AnalysisBuiltOutInputCollectorFrame(recv_rs485_frame->buf,recv_rs485_frame->len,&collect_state);
+		ret = AnalysisBuiltOutInputCollectorFrame(recv_rs485_frame->buf,recv_rs485_frame->len,&collect_state);
 
-		if(collect_state.update == 1)	//外置继电器模块采集状态有更新
+		if(ret == 1)
 		{
-			collect_state.update = 0;
-
-			for(i = 0; i < InputCollectorConfigNum.number; i ++)
+			if(collect_state.update == 1)	//外置继电器模块采集状态有更新
 			{
-				if(InputCollectorState[i].address == collect_state.address &&
-				   InputCollectorState[i].channel == collect_state.channel)
+				collect_state.update = 0;
+
+				for(i = 0; i < InputCollectorConfigNum.number; i ++)
 				{
-					InputCollectorState[i].d_current_state = collect_state.d_collect_state;
-					InputCollectorState[i].a_current_state[0] = collect_state.a_collect_state[0];
-					InputCollectorState[i].a_current_state[1] = collect_state.a_collect_state[1];
-					
-					break;
+					if(InputCollectorState[i].address == collect_state.address &&
+					   InputCollectorState[i].channel == collect_state.channel)
+					{
+						InputCollectorState[i].d_current_state = collect_state.d_collect_state;
+						InputCollectorState[i].a_current_state[0] = collect_state.a_collect_state[0];
+						InputCollectorState[i].a_current_state[1] = collect_state.a_collect_state[1];
+
+						break;
+					}
 				}
 			}
 		}
-		
+		else
+		{
+			TransTransmissionFrame_S  *trans_trans_frame = NULL;
+			
+			trans_trans_frame = (TransTransmissionFrame_S *)pvPortMalloc(sizeof(TransTransmissionFrame_S));
+			
+			if(trans_trans_frame != NULL)
+			{
+				trans_trans_frame->device_type = INPUT_COLLECTOR;
+				
+				trans_trans_frame->address = 0;
+				trans_trans_frame->channel = 0;
+				trans_trans_frame->trans_moudle = 1;
+				
+				trans_trans_frame->len = recv_rs485_frame->len;
+				
+				trans_trans_frame->buf = (u8 *)pvPortMalloc(sizeof(u8) * recv_rs485_frame->len);
+				
+				if(trans_trans_frame->buf != NULL)
+				{
+					memcpy(trans_trans_frame->buf,recv_rs485_frame->buf,recv_rs485_frame->len);
+					
+					if(xQueueSend(xQueue_TransTransFrame,(void *)&trans_trans_frame,(TickType_t)10) != pdPASS)
+					{
+#ifdef DEBUG_LOG
+						printf("send xQueue_TransTransFrame fail.\r\n");
+#endif
+						DeleteTransTransmissionFrame(trans_trans_frame);
+					}
+				}
+				else
+				{
+					DeleteTransTransmissionFrame(trans_trans_frame);
+				}
+			}
+		}
+
 		DeleteRs485Frame(recv_rs485_frame);
 	}
 }

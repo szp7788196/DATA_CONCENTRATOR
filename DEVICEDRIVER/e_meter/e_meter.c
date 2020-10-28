@@ -412,8 +412,9 @@ u16 PackBuiltOutElectricityMeterFrame(u8 address,u8 mode,u8 *outbuf)
 	return len;
 }
 
-void AnalysisBuiltOutElectricityMeterFrame(u8 *buf,u16 len,ElectricityMeterCollectState_S *meter_state)
+u8 AnalysisBuiltOutElectricityMeterFrame(u8 *buf,u16 len,ElectricityMeterCollectState_S *meter_state)
 {
+	u8 ret = 0;
 	u8 i = 0;
 	u8 *data = NULL;
 	u16 data_len = 0;
@@ -588,6 +589,7 @@ void AnalysisBuiltOutElectricityMeterFrame(u8 *buf,u16 len,ElectricityMeterColle
 
 //				meter_state->update = 1;
 
+				ret = 1;
 			}
 			else if(data_len == 16)
 			{
@@ -615,6 +617,8 @@ void AnalysisBuiltOutElectricityMeterFrame(u8 *buf,u16 len,ElectricityMeterColle
 				memcpy((void *)&meter_state->collect_para[0].reactive_energy,tmp,8);
 
 				meter_state->update = 1;
+				
+				ret = 1;
 			}
 		}
 		else if(address >= 48 && address <= 53)
@@ -691,9 +695,13 @@ void AnalysisBuiltOutElectricityMeterFrame(u8 *buf,u16 len,ElectricityMeterColle
 				meter_state->collect_para[0].frequency = meter_state->collect_para[1].frequency;
 
 				meter_state->update = 1;
+				
+				ret = 1;
 			}
 		}
 	}
+	
+	return ret;
 }
 
 

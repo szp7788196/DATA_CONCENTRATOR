@@ -26,7 +26,7 @@ void GetKrState(void);
 void GetAllBuiltInInputCollectorState(InputCollectorState_S *state);
 void GetBuiltOutInputCollectorState(InputCollectorState_S state);
 u16 PackBuiltOutInputCollectorFrame(u8 address,u8 fun_code,u8 *inbuf,u16 inbuf_len,u8 *outbuf);
-void AnalysisBuiltOutInputCollectorFrame(u8 *buf,u16 len,InputCollectorCollectState_S *collect_state);
+u8 AnalysisBuiltOutInputCollectorFrame(u8 *buf,u16 len,InputCollectorCollectState_S *collect_state);
 
 
 

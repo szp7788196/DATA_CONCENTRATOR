@@ -24,10 +24,12 @@ void SendHeartBeatFrameToServer(void);
 void SendOtaRequestFrameToServer(FrameWareState_S frame_ware_state);
 void SendOtaCompleteFrameToServer(void);
 void SendAlarmReportFrameToServer(AlarmReport_S *alarm_report);
+void SendTransTransFrameToServer(TransTransmissionFrame_S  *trans_trans_frame);
 void SendHeartBeatToServer(void);
 void SendOtaCompleteNoticeToServer(void);
 void SendOtaRequestToServer(void);
 void SendAlarmReportToServer(void);
+void SendTransTransToServer(void);
 void AutoSendFrameToServer(void);
 void ConcentratorRecvAndHandleFrameStruct(void);
 

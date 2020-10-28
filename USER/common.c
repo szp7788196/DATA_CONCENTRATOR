@@ -54,6 +54,7 @@ QueueHandle_t xQueue_LampPlcExecuteTaskToPlc = NULL;
 QueueHandle_t xQueue_LampPlcExecuteTaskFromPlc = NULL;
 QueueHandle_t xQueue_LampState = NULL;
 QueueHandle_t xQueue_LampPlcExecuteTaskState = NULL;
+QueueHandle_t xQueue_TransTransFrame = NULL;
 
 
 

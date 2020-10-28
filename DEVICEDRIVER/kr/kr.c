@@ -161,8 +161,9 @@ u16 PackBuiltOutInputCollectorFrame(u8 address,u8 fun_code,u8 *inbuf,u16 inbuf_l
 	return len;
 }
 
-void AnalysisBuiltOutInputCollectorFrame(u8 *buf,u16 len,InputCollectorCollectState_S *collect_state)
+u8 AnalysisBuiltOutInputCollectorFrame(u8 *buf,u16 len,InputCollectorCollectState_S *collect_state)
 {
+	u8 ret = 0;
 	u16 pos1 = 0;
 	u8 cmd_code = 0;
 	u8 *data = NULL;
@@ -202,6 +203,8 @@ void AnalysisBuiltOutInputCollectorFrame(u8 *buf,u16 len,InputCollectorCollectSt
 							memcpy((void *)&collect_state->a_collect_state[0],data + 2,8);
 							memcpy((void *)&collect_state->a_collect_state[1],data + 10,8);
 							collect_state->update = 1;
+							
+							ret = 1;
 						}
 					break;
 
@@ -216,6 +219,8 @@ void AnalysisBuiltOutInputCollectorFrame(u8 *buf,u16 len,InputCollectorCollectSt
 			}
 		}
 	}
+	
+	return ret;
 }
 
 

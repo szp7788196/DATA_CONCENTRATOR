@@ -16,6 +16,7 @@ extern u8 ElectricityMeterStateChangesReportResponse;
 void ElectricityMeterSendStateChangesReportFrameToServer(ElectricityMeterState_S *module_state);
 void ElectricityMeterSendStateChangesReportToServer(void);
 void ElectricityMeterRecvAndHandleFrameStruct(void);
+u8 ElectricityMeterTransparentTransmission(ServerFrameStruct_S *server_frame_struct);
 u8 ElectricityMeterGetCurrentState(ServerFrameStruct_S *server_frame_struct);
 
 

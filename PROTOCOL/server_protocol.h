@@ -105,6 +105,17 @@ typedef struct	ServerFrameStruct			//帧结构
 	u8 stop;
 }ServerFrameStruct_S;
 
+typedef struct	TransTransmissionFrame
+{
+	DEVICE_TYPE_E device_type;
+	u8 trans_moudle;
+	u32 address;
+	u16 channel;
+	
+	u16 len;
+	u8 *buf;
+}TransTransmissionFrame_S;
+
 
 
 
@@ -116,7 +127,7 @@ typedef struct	ServerFrameStruct			//帧结构
 
 
 void ServerFrameHandle(ServerFrame_S *rx_frame);
-u8 TransServerFrameStructToOtherTask(ServerFrameStruct_S *server_frame_struct,DEVICE_TYPE_E device_type);
+u8 TransServerFrameStructToOtherTask(ServerFrameStruct_S *server_frame_struct);
 u8 GetParameterNum(ServerFrame_S *rx_frame);
 void InitServerFrameStruct(ServerFrameStruct_S *server_frame_struct);
 u8 GetParameters(ServerFrameStruct_S *server_frame_struct,ServerFrame_S *rx_frame);
@@ -126,6 +137,7 @@ u8 CopyServerFrameStruct(ServerFrameStruct_S *s_server_frame_struct,ServerFrameS
 u16 GetFinalFrameLen(u8 *buf,u16 len);
 void DeleteServerFrameStruct(ServerFrameStruct_S *server_frame_struct);
 void DeleteServerFrame(ServerFrame_S *server_frame);
+void DeleteTransTransmissionFrame(TransTransmissionFrame_S *trans_trans_frame);
 u16 EscapeSymbolDelete(u8* inbuf,u16 inbuf_len,u8* outbuf);
 u16 EscapeSymbolAdd(u8* inbuf,u16 inbuf_len,u8* outbuf);
 

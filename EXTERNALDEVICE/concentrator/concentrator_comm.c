@@ -132,7 +132,7 @@ void SendLoginFrameToServer(void)
 				memcpy(server_frame_struct->para[i].value,buf,server_frame_struct->para[i].len + 1);
 			}
 			i ++;
-			
+
 			ConvertFrameStructToFrame(server_frame_struct);
 		}
 		else
@@ -186,7 +186,7 @@ void SendHeartBeatFrameToServer(void)
 				memcpy(server_frame_struct->para[i].value,buf,server_frame_struct->para[i].len + 1);
 			}
 			i ++;
-			
+
 			ConvertFrameStructToFrame(server_frame_struct);
 		}
 		else
@@ -249,7 +249,7 @@ void SendOtaRequestFrameToServer(FrameWareState_S frame_ware_state)
 				memcpy(server_frame_struct->para[i].value,buf,server_frame_struct->para[i].len + 1);
 			}
 			i ++;
-			
+
 			ConvertFrameStructToFrame(server_frame_struct);
 		}
 		else
@@ -321,7 +321,7 @@ void SendOtaCompleteFrameToServer(void)
 				memcpy(server_frame_struct->para[i].value,buf,server_frame_struct->para[i].len + 1);
 			}
 			i ++;
-			
+
 			ConvertFrameStructToFrame(server_frame_struct);
 		}
 	}
@@ -341,7 +341,7 @@ void SendAlarmReportFrameToServer(AlarmReport_S *alarm_report)
 	if(alarm_report != NULL)
 	{
 		server_frame_struct = (ServerFrameStruct_S *)pvPortMalloc(sizeof(ServerFrameStruct_S));
-		
+
 		if(server_frame_struct != NULL)
 		{
 			InitServerFrameStruct(server_frame_struct);
@@ -358,7 +358,7 @@ void SendAlarmReportFrameToServer(AlarmReport_S *alarm_report)
 			}
 			else if(alarm_report->record_type == 0)
 			{
-				server_frame_struct->msg_id = 0x00A0;
+				server_frame_struct->msg_id = 0x00A1;
 			}
 
 			server_frame_struct->msg_id += ((((u16)alarm_report->device_type) << 8) & 0xFF00);
@@ -442,12 +442,104 @@ void SendAlarmReportFrameToServer(AlarmReport_S *alarm_report)
 					memcpy(server_frame_struct->para[i].value,alarm_report->occur_time,server_frame_struct->para[i].len + 1);
 				}
 				i ++;
-				
+
 				ConvertFrameStructToFrame(server_frame_struct);
 			}
 			else
 			{
 				DeleteServerFrameStruct(server_frame_struct);
+			}
+		}
+	}
+}
+
+//发送透传数据
+void SendTransTransFrameToServer(TransTransmissionFrame_S  *trans_trans_frame)
+{
+	u8 i = 0;
+	char buf[513];
+	ServerFrameStruct_S *server_frame_struct = NULL;		//用于响应服务器
+
+	if(trans_trans_frame != NULL)
+	{
+		if(trans_trans_frame->len <= 256)
+		{
+			server_frame_struct = (ServerFrameStruct_S *)pvPortMalloc(sizeof(ServerFrameStruct_S));
+			
+			if(server_frame_struct != NULL)
+			{
+				InitServerFrameStruct(server_frame_struct);
+
+				server_frame_struct->msg_type 	= (u8)SYNC_RESPONSE;	//响应服务器类型
+				server_frame_struct->msg_len 	= 10;
+				server_frame_struct->err_code 	= (u8)NO_ERR;
+				server_frame_struct->msg_id		= 0x0000;
+				server_frame_struct->para_num	= 5;
+
+				server_frame_struct->para = (Parameter_S *)pvPortMalloc(server_frame_struct->para_num * sizeof(Parameter_S));
+
+				if(server_frame_struct->para != NULL)
+				{
+					server_frame_struct->para[i].type = 0x8001;
+					memset(buf,0,25);
+					sprintf(buf, "%d",trans_trans_frame->device_type);
+					server_frame_struct->para[i].len = strlen(buf);
+					server_frame_struct->para[i].value = (u8 *)pvPortMalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
+					if(server_frame_struct->para[i].value != NULL)
+					{
+						memcpy(server_frame_struct->para[i].value,buf,server_frame_struct->para[i].len + 1);
+					}
+					i ++;
+
+					server_frame_struct->para[i].type = 0x8002;
+					memset(buf,0,25);
+					sprintf(buf, "%d",trans_trans_frame->trans_moudle);
+					server_frame_struct->para[i].len = strlen(buf);
+					server_frame_struct->para[i].value = (u8 *)pvPortMalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
+					if(server_frame_struct->para[i].value != NULL)
+					{
+						memcpy(server_frame_struct->para[i].value,buf,server_frame_struct->para[i].len + 1);
+					}
+					i ++;
+
+					server_frame_struct->para[i].type = 0x4003;
+					memset(buf,0,25);
+					sprintf(buf, "%08X",trans_trans_frame->address);
+					server_frame_struct->para[i].len = strlen(buf);
+					server_frame_struct->para[i].value = (u8 *)pvPortMalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
+					if(server_frame_struct->para[i].value != NULL)
+					{
+						memcpy(server_frame_struct->para[i].value,buf,server_frame_struct->para[i].len + 1);
+					}
+					i ++;
+
+					server_frame_struct->para[i].type = 0x4004;
+					memset(buf,0,25);
+					sprintf(buf, "%d",trans_trans_frame->channel);
+					server_frame_struct->para[i].len = strlen(buf);
+					server_frame_struct->para[i].value = (u8 *)pvPortMalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
+					if(server_frame_struct->para[i].value != NULL)
+					{
+						memcpy(server_frame_struct->para[i].value,buf,server_frame_struct->para[i].len + 1);
+					}
+					i ++;
+
+					server_frame_struct->para[i].type = 0x3005;
+					memset(buf,0,513);
+					server_frame_struct->para[i].len = trans_trans_frame->len * 2;
+					server_frame_struct->para[i].value = (u8 *)pvPortMalloc((server_frame_struct->para[i].len + 1) * sizeof(u8));
+					if(server_frame_struct->para[i].value != NULL)
+					{
+						HexToStr((char *)server_frame_struct->para[i].value, trans_trans_frame->buf, trans_trans_frame->len);
+					}
+					i ++;
+
+					ConvertFrameStructToFrame(server_frame_struct);
+				}
+				else
+				{
+					DeleteServerFrameStruct(server_frame_struct);
+				}
 			}
 		}
 	}
@@ -459,7 +551,7 @@ void SendHeartBeatToServer(void)
 	static time_t time_2_1 = 0;
 	static time_t time_2_2 = 0;
 	static u8 retry_times2 = 0;
-	
+
 	if(GetSysTick1s() - time_2_1 >= ConcentratorBasicConfig.heartbeat_cycle)
 	{
 		time_2_1 = GetSysTick1s();
@@ -500,7 +592,7 @@ void SendOtaCompleteNoticeToServer(void)
 {
 	static time_t time_3 = 0;
 	static u8 retry_times3 = 0;
-	
+
 	if(FrameWareState.state == FIRMWARE_UPDATE_SUCCESS ||
 	   FrameWareState.state == FIRMWARE_UPDATE_FAILED ||
 	   FrameWareState.state == FIRMWARE_DOWNLOAD_FAILED)
@@ -529,7 +621,7 @@ void SendOtaRequestToServer(void)
 {
 	static time_t time_4 = 0;
 	static u8 retry_times4 = 0;
-	
+
 	if(FrameWareState.state == FIRMWARE_DOWNLOADING)
 	{
 		time_4 = GetSysTick1s();
@@ -572,7 +664,7 @@ void SendAlarmReportToServer(void)
 	static AlarmReport_S *alarm_report = NULL;
 	static time_t time_5 = 0;
 	static u8 retry_times5 = 0;
-	
+
 	if(AlarmReportResponse == 0)
 	{
 		if(alarm_report != NULL)
@@ -621,6 +713,22 @@ void SendAlarmReportToServer(void)
 	}
 }
 
+//向服务器发送告警事件
+void SendTransTransToServer(void)
+{
+	BaseType_t xResult;
+	TransTransmissionFrame_S  *trans_trans_frame = NULL;
+
+	xResult = xQueueReceive(xQueue_TransTransFrame,(void *)&trans_trans_frame,(TickType_t)pdMS_TO_TICKS(1));
+
+	if(xResult == pdPASS)
+	{
+		SendTransTransFrameToServer(trans_trans_frame);
+		
+		DeleteTransTransmissionFrame(trans_trans_frame);
+	}
+}
+
 void AutoSendFrameToServer(void)
 {
 	static time_t time_1 = 0;
@@ -652,6 +760,7 @@ void AutoSendFrameToServer(void)
 		SendOtaCompleteNoticeToServer();					//发送升级完成通知包
 		SendOtaRequestToServer();							//发送固件请求包
 		SendAlarmReportToServer();							//发送告警上报包
+		SendTransTransToServer();							//发送透传数据
 		RelaySendStateChangesReportToServer();				//发送继电器状态变化包
 		InputCollectorSendStateChangesReportToServer();		//发送输入量采集模块状态变化包
 		ElectricityMeterSendStateChangesReportToServer();	//发送电表状态变化包
@@ -795,7 +904,6 @@ u8 TransparentTransmission(ServerFrameStruct_S *server_frame_struct)
 {
 	u8 ret = 0;
 	u8 type = 0;
-	DEVICE_TYPE_E device_type = RELAY;
 
 	ServerFrameStruct_S *resp_server_frame_struct = NULL;		//用于响应服务器
 	ServerFrameStruct_S *tran_server_frame_struct = NULL;		//用于透传到其他设备
@@ -820,36 +928,11 @@ u8 TransparentTransmission(ServerFrameStruct_S *server_frame_struct)
 
 		type = myatoi((char *)tran_server_frame_struct->para[0].value);
 
-		switch(type)
+		tran_server_frame_struct->msg_id = (((u16)type) << 8) & 0xFF00;
+
+		if(type != CONCENTRATOR && type != UNKNOW_DEVICE)
 		{
-			case 0:
-
-			break;
-
-			case 1:
-				device_type = ELECTRICITY_METER;
-			break;
-
-			case 2:
-				device_type = RELAY;
-			break;
-
-			case 3:
-				device_type = ELECTRICITY_METER;
-			break;
-
-			case 4:
-				device_type = LUMETER;
-			break;
-
-			default:
-
-			break;
-		}
-
-		if(device_type != CONCENTRATOR && device_type != UNKNOW_DEVICE)
-		{
-			TransServerFrameStructToOtherTask(tran_server_frame_struct,device_type);
+			TransServerFrameStructToOtherTask(tran_server_frame_struct);
 		}
 		else
 		{
@@ -1167,7 +1250,7 @@ u8 QueryState(ServerFrameStruct_S *server_frame_struct)
 				resp_server_frame_struct->para[i].value[0] = 0;
 			}
 			i ++;
-			
+
 			ret = ConvertFrameStructToFrame(resp_server_frame_struct);
 		}
 		else
@@ -1461,7 +1544,7 @@ u8 GetAlarmConfiguration(ServerFrameStruct_S *server_frame_struct)
 				memcpy(resp_server_frame_struct->para[i].value,buf,resp_server_frame_struct->para[i].len + 1);
 			}
 			i ++;
-			
+
 			ret = ConvertFrameStructToFrame(resp_server_frame_struct);
 		}
 		else
@@ -1557,7 +1640,7 @@ u8 SetBasicConfiguration(ServerFrameStruct_S *server_frame_struct)
 			break;
 		}
 	}
-	
+
 	resp_server_frame_struct = (ServerFrameStruct_S *)pvPortMalloc(sizeof(ServerFrameStruct_S));
 
 	if(resp_server_frame_struct != NULL)
@@ -1572,7 +1655,7 @@ u8 SetBasicConfiguration(ServerFrameStruct_S *server_frame_struct)
 	}
 
 	WriteConcentratorBasicConfig(0,1);
-	
+
 	msg = (char *)ConcentratorBasicConfig.server_ip;
 	while(*msg != ',' && *msg != '\0')
 	tmp[i ++] = *(msg ++);
@@ -1580,7 +1663,7 @@ u8 SetBasicConfiguration(ServerFrameStruct_S *server_frame_struct)
 	i = 0;
 	msg = msg + 1;
 	ConcentratorLocalNetConfig.remote_ip[0] = myatoi(tmp);
-	
+
 	msg = (char *)ConcentratorBasicConfig.server_ip;
 	while(*msg != ',' && *msg != '\0')
 	tmp[i ++] = *(msg ++);
@@ -1588,7 +1671,7 @@ u8 SetBasicConfiguration(ServerFrameStruct_S *server_frame_struct)
 	i = 0;
 	msg = msg + 1;
 	ConcentratorLocalNetConfig.remote_ip[1] = myatoi(tmp);
-	
+
 	msg = (char *)ConcentratorBasicConfig.server_ip;
 	while(*msg != ',' && *msg != '\0')
 	tmp[i ++] = *(msg ++);
@@ -1596,20 +1679,20 @@ u8 SetBasicConfiguration(ServerFrameStruct_S *server_frame_struct)
 	i = 0;
 	msg = msg + 1;
 	ConcentratorLocalNetConfig.remote_ip[2] = myatoi(tmp);
-	
+
 	msg = (char *)ConcentratorBasicConfig.server_ip;
 	while(*msg != ',' && *msg != '\0')
 	tmp[i ++] = *(msg ++);
 	tmp[i] = '\0';
 	i = 0;
 	msg = msg + 1;
-	
+
 	ConcentratorLocalNetConfig.connection_mode = ConcentratorBasicConfig.connection_mode;
-	
+
 	ConcentratorLocalNetConfig.remote_ip[3] = myatoi(tmp);
-	
+
 	ConcentratorLocalNetConfig.remote_port = myatoi((char *)ConcentratorBasicConfig.server_port);
-	
+
 	WriteConcentratorLocalNetConfig(0,1);
 
 	return ret;
@@ -1793,7 +1876,7 @@ u8 GetBasicConfiguration(ServerFrameStruct_S *server_frame_struct)
 				memcpy(resp_server_frame_struct->para[i].value,ConcentratorBasicConfig.manufacturer_website,resp_server_frame_struct->para[i].len + 1);
 			}
 			i ++;
-			
+
 			ret = ConvertFrameStructToFrame(resp_server_frame_struct);
 		}
 		else
@@ -1964,7 +2047,7 @@ u8 GetLocationConfiguration(ServerFrameStruct_S *server_frame_struct)
 				}
 				i ++;
 			}
-			
+
 			ret = ConvertFrameStructToFrame(resp_server_frame_struct);
 		}
 		else
@@ -2348,7 +2431,7 @@ u8 GetAlarmReportHistory(ServerFrameStruct_S *server_frame_struct)
 				memcpy(resp_server_frame_struct->para[i].value,buf,resp_server_frame_struct->para[i].len + 1);
 			}
 			i ++;
-			
+
 			ret = ConvertFrameStructToFrame(resp_server_frame_struct);
 		}
 		else

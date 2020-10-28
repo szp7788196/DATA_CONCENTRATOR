@@ -369,6 +369,7 @@ extern QueueHandle_t xQueue_LampPlcExecuteTaskToPlc;
 extern QueueHandle_t xQueue_LampPlcExecuteTaskFromPlc;
 extern QueueHandle_t xQueue_LampState;
 extern QueueHandle_t xQueue_LampPlcExecuteTaskState;
+extern QueueHandle_t xQueue_TransTransFrame;
 
 
 extern time_t SysTick1s;

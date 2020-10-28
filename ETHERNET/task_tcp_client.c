@@ -27,21 +27,21 @@ void vTaskTCP_CLIENT(void *pvParameters)
 	err_t err,recv_err;
 	static ip_addr_t server_ipaddr,loca_ipaddr;
 	static u16_t server_port,loca_port;
-	
+
 	server_port = lwipdev.remoteport;
 	IP4_ADDR(&server_ipaddr, lwipdev.remoteip[0],lwipdev.remoteip[1], lwipdev.remoteip[2],lwipdev.remoteip[3]);
-	
+
 	while (1)
 	{
 		RE_CONNECT:
 		ETH_ConnectState = ETH_UNKNOW;
 
-		if((ConcentratorBasicConfig.connection_mode == (u8)MODE_INSIDE && 
-		   EC20ConnectState == CONNECTED) || 
+		if((ConcentratorBasicConfig.connection_mode == (u8)MODE_INSIDE &&
+		   EC20ConnectState == CONNECTED) ||
 		   ConcentratorBasicConfig.connection_mode == (u8)MODE_4G)
 		{
 			delay_ms(1000);
-			
+
 			goto RE_CONNECT;
 		}
 //#ifdef USE_DHCP
@@ -52,59 +52,59 @@ void vTaskTCP_CLIENT(void *pvParameters)
 			   DHCP_state != DHCP_TIMEOUT)
 			{
 				delay_ms(1000);
-				
+
 				goto WAIT_DHCP;
 			}
 		}
 //#endif
-		
+
 		tcp_clientconn = netconn_new(NETCONN_TCP);  //创建一个TCP链接
 		err = netconn_connect(tcp_clientconn,&server_ipaddr,server_port);//连接服务器
-		
-		if(err != ERR_OK)  
+
+		if(err != ERR_OK)
 		{
 			netconn_delete(tcp_clientconn); //返回值不等于ERR_OK,删除tcp_clientconn连接
-			
+
 			delay_ms(1000);
 		}
 		else if(err == ERR_OK)    //处理新连接的数据
 		{
 			struct netbuf *recvbuf;
-			
+
 			tcp_clientconn->recv_timeout = 10;
 			netconn_getaddr(tcp_clientconn,&loca_ipaddr,&loca_port,1); //获取本地IP主机IP地址和端口号
-			
+
 			ETH_ConnectState = ETH_CONNECTED;
 
 #ifdef DEBUG_LOG
 			printf("连接上服务器%d.%d.%d.%d,本机端口号为:%d\r\n",lwipdev.remoteip[0],lwipdev.remoteip[1], lwipdev.remoteip[2],lwipdev.remoteip[3],loca_port);
 #endif
-			
+
 			while(1)
 			{
-				if((ConcentratorBasicConfig.connection_mode == (u8)MODE_INSIDE && 
-				   EC20ConnectState == CONNECTED) || 
+				if((ConcentratorBasicConfig.connection_mode == (u8)MODE_INSIDE &&
+				   EC20ConnectState == CONNECTED) ||
 				   ConcentratorBasicConfig.connection_mode == (u8)MODE_4G)
 				{
 					goto CLOSE_CONNECTION;
 				}
-				
+
 				if((recv_err = netconn_recv(tcp_clientconn,&recvbuf)) == ERR_OK)  //接收到数据
 				{
 					for(q = recvbuf->p; q != NULL; q = q->next)  //遍历完整个pbuf链表
 					{
 						msg = (u8 *)q->payload;
-						
+
 						fifo_put(dl_buf_id,q->len,msg);
 					}
 
 					netbuf_delete(recvbuf);
 				}
-				
+
 				RecvNetFrameAndPushToRxQueue(MODE_ETH);
-				
+
 				PullEthTxQueueAndSendFrame();
-				
+
 				if(recv_err == ERR_CLSD || recv_err == ERR_ABRT)  //关闭连接
 				{
 					CLOSE_CONNECTION:
@@ -114,12 +114,12 @@ void vTaskTCP_CLIENT(void *pvParameters)
 					printf("服务器%d.%d.%d.%d断开连接\r\n",lwipdev.remoteip[0],lwipdev.remoteip[1], lwipdev.remoteip[2],lwipdev.remoteip[3]);
 #endif
 					LoginResponse = 0;
-					
+
 					break;
 				}
-				
+
 				delay_ms(100);
-				
+
 				SatckTCP_CLIENT = uxTaskGetStackHighWaterMark(NULL);
 			}
 		}
@@ -136,7 +136,7 @@ void PullEthTxQueueAndSendFrame(void)
 	if(xResult == pdPASS )
 	{
 		netconn_write(tcp_clientconn ,tx_frame->buf,tx_frame->len,NETCONN_COPY); //发送tcp_server_sentbuf中的数据
-		
+
 		vPortFree(tx_frame->buf);
 		tx_frame->buf = NULL;
 

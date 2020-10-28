@@ -32,6 +32,45 @@ void vTaskPLC(void *pvParameters)
 			DeletePlcFrame(user_frame);
 			user_frame = NULL;
 		}
+		else
+		{
+			if(Usart2RecvEnd != 0x00 && Usart2FrameLen != 0x00)
+			{
+				TransTransmissionFrame_S  *trans_trans_frame = NULL;
+			
+				trans_trans_frame = (TransTransmissionFrame_S *)pvPortMalloc(sizeof(TransTransmissionFrame_S));
+				
+				if(trans_trans_frame != NULL)
+				{
+					trans_trans_frame->device_type = RELAY;
+					
+					trans_trans_frame->address = 0;
+					trans_trans_frame->channel = 0;
+					trans_trans_frame->trans_moudle = 1;
+					
+					trans_trans_frame->len = Usart2FrameLen;
+					
+					trans_trans_frame->buf = (u8 *)pvPortMalloc(sizeof(u8) * Usart2FrameLen);
+					
+					if(trans_trans_frame->buf != NULL)
+					{
+						memcpy(trans_trans_frame->buf,Usart2RxBuf,Usart2FrameLen);
+						
+						if(xQueueSend(xQueue_TransTransFrame,(void *)&trans_trans_frame,(TickType_t)10) != pdPASS)
+						{
+	#ifdef DEBUG_LOG
+							printf("send xQueue_TransTransFrame fail.\r\n");
+	#endif
+							DeleteTransTransmissionFrame(trans_trans_frame);
+						}
+					}
+					else
+					{
+						DeleteTransTransmissionFrame(trans_trans_frame);
+					}
+				}
+			}
+		}
 
 		delay_ms(200);
 

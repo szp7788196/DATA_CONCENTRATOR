@@ -22,6 +22,7 @@ void InputCollectorSendStateChangesReportToServer(void);
 
 void InputCollectorRecvAndHandleFrameStruct(void);
 
+u8 InputCollectorTransparentTransmission(ServerFrameStruct_S *server_frame_struct);
 u8 InputCollectorGetCurrentState(ServerFrameStruct_S *server_frame_struct);
 u8 InputCollectorSetAlarmConfiguration(ServerFrameStruct_S *server_frame_struct);
 u8 InputCollectorGetAlarmConfiguration(ServerFrameStruct_S *server_frame_struct);

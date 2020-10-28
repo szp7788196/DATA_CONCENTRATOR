@@ -52,42 +52,42 @@ void EC20_Init(void)
 }
 
 void ec20_soft_init(void)
-{	
+{
 	RE_INIT:
 	ec20_force_pwr_on();
-	
+
 	USART6_Init(115200);
-	
+
 	if(ec20_wait_pwr_on_ready(15) != 1)
 		goto RE_INIT;
-	
+
 	if(ec20_get_AT_ATI() != 1)
 		goto RE_INIT;
-	
+
 	if(ec20_set_AT_ATE0() != 1)
 		goto RE_INIT;
-	
+
 	if(ec20_get_AT_CPIN() != 1)
 		goto RE_INIT;
-	
+
 	if(ec20_get_AT_CGREG() != 1)
 		goto RE_INIT;
-	
+
 	if(ec20_set_AT_QICSGP() != 1)
 		goto RE_INIT;
-	
+
 	if(ec20_get_AT_CGSN() != 1)
 		goto RE_INIT;
-	
+
 	if(ec20_get_AT_QCCID() != 1)
 		goto RE_INIT;
-	
+
 	if(ec20_get_AT_CIMI() != 1)
 		goto RE_INIT;
-	
+
 	if(ec20_get_AT_CGDCONT() != 1)
 		goto RE_INIT;
-	
+
 //	if(ec20_get_AT_CNUM() != 1)
 //		goto RE_INIT;
 }
@@ -96,20 +96,20 @@ void ec20_soft_init(void)
 u8 ec20_force_pwr_on(void)
 {
 	u8 ret = 1;
-	
+
 	ec20_reset();
-	
+
 	delay_ms(1000);
-	
+
 	RE_PWR_ON:
 	ret = ec20_pwr_on();
-	
+
 	if(ret == 1)					//开机失败
 	{
 		delay_ms(1000);
-		
+
 		ret = ec20_pwr_off();
-		
+
 		if(ret == 0)				//关机成功
 		{
 			goto RE_PWR_ON;			//重新开机
@@ -117,11 +117,11 @@ u8 ec20_force_pwr_on(void)
 		else
 		{
 			ec20_reset();
-			
+
 			goto RE_PWR_ON;			//重新开机
 		}
 	}
-	
+
 	return ret;
 }
 
@@ -191,19 +191,19 @@ void ec20_send_data(unsigned char *buf,unsigned short len)
 unsigned char ec20_wait_pwr_on_ready(u16 time_out_s)
 {
 	u16 cnt = time_out_s * 10;
-	
+
 	while((search_str((unsigned char *)result_ptr->data, "RDY") == -1) && cnt != 0)
 	{
 		delay_ms(100);
-		
+
 		cnt --;
 	}
-	
+
 	if(cnt != 0)
 	{
 		cnt = 1;
 	}
-	
+
 	return cnt;
 }
 
@@ -213,7 +213,7 @@ unsigned char ec20_get_AT_ATI(void)
 	unsigned char ret = 0;
 
     ret = AT_SendCmd("ATI\r\n", "OK", 100,0,TIMEOUT_1S);
-	
+
 	ringbuf_clear(result_ptr);
 
     return ret;
@@ -225,7 +225,7 @@ unsigned char ec20_set_AT_ATE0(void)
 	unsigned char ret = 0;
 
     ret = AT_SendCmd("ATE0\r\n", "OK", 100,0,TIMEOUT_1S);
-	
+
 	ringbuf_clear(result_ptr);
 
     return ret;
@@ -237,7 +237,7 @@ unsigned char ec20_get_AT_CPIN(void)
 	unsigned char ret = 0;
 
     ret = AT_SendCmd("AT+CPIN?\r\n", "+CPIN: READY", 100,2,TIMEOUT_7S);
-	
+
 	ringbuf_clear(result_ptr);
 
     return ret;
@@ -249,13 +249,13 @@ unsigned char ec20_get_AT_CGREG(void)
 	unsigned char ret = 0;
 
     ret = AT_SendCmd("AT+CGREG?\r\n", "+CGREG: 0,1", 100,30,TIMEOUT_1S);
-	
+
 	ringbuf_clear(result_ptr);
 
 	if(ret != 1)
 	{
 		ret = AT_SendCmd("AT+CGREG?\r\n", "+CGREG: 0,5", 100,30,TIMEOUT_1S);
-		
+
 		ringbuf_clear(result_ptr);
 	}
 
@@ -268,7 +268,7 @@ unsigned char ec20_set_AT_QICSGP(void)
 	unsigned char ret = 0;
 
     ret = AT_SendCmd("AT+QICSGP=1\r\n", "OK", 100,0,TIMEOUT_7S);
-	
+
 	ringbuf_clear(result_ptr);
 
     return ret;
@@ -293,7 +293,7 @@ unsigned char ec20_get_AT_CGSN(void)
 			ret = 1;
 		}
     }
-	
+
 	ringbuf_clear(result_ptr);
 
     return ret;
@@ -318,7 +318,7 @@ unsigned char ec20_get_AT_QCCID(void)
 			ret = 1;
 		}
     }
-	
+
 	ringbuf_clear(result_ptr);
 
     return ret;
@@ -343,7 +343,7 @@ unsigned char ec20_get_AT_CIMI(void)
 			ret = 1;
 		}
     }
-	
+
 	ringbuf_clear(result_ptr);
 
     return ret;
@@ -368,7 +368,7 @@ unsigned char ec20_get_AT_CGDCONT(void)
 			ret = 1;
 		}
     }
-	
+
 	ringbuf_clear(result_ptr);
 
     return ret;
@@ -393,7 +393,7 @@ unsigned char ec20_get_AT_CNUM(void)
 			ret = 1;
 		}
     }
-	
+
 	ringbuf_clear(result_ptr);
 
     return ret;
@@ -407,7 +407,7 @@ unsigned char ec20_set_AT_QIACT(void)
 
 	RE_SEND:
     ret = AT_SendCmd("AT+QIACT=1\r\n", "OK", 100,0,TIMEOUT_160S);
-	
+
 	ringbuf_clear(result_ptr);
 
 	if(ret != 1)
@@ -420,7 +420,7 @@ unsigned char ec20_set_AT_QIACT(void)
 		}
 
 		ret = AT_SendCmd("AT+QIDEACT=1\r\n", "OK", 100,0,TIMEOUT_50S);
-		
+
 		ringbuf_clear(result_ptr);
 
 		if(ret == 1)
@@ -450,7 +450,7 @@ unsigned char ec20_get_AT_QIACT(void)
 			ret = 0;
 		}
 	}
-	
+
 	ringbuf_clear(result_ptr);
 
     return ret;
@@ -508,7 +508,7 @@ unsigned char ec20_set_AT_QIOPEN(char *addr, char *port)
 	{
 		goto RE_CLOSE;
 	}
-	
+
 	ringbuf_clear(result_ptr);
 
     return ret;
@@ -520,7 +520,7 @@ unsigned char ec20_set_AT_QICLOSE(void)
 	unsigned char ret = 0;
 
     ret = AT_SendCmd("AT+QICLOSE=0\r\n", "OK", 100,0,TIMEOUT_15S);
-	
+
 	ringbuf_clear(result_ptr);
 
     return ret;
@@ -552,17 +552,17 @@ CONNECT_STATE_E ec20_get_AT_QISTATE(void)
 	{
 		ret = UNKNOW_STATE;
 	}
-	
+
 	if(ret == UNKNOW_STATE)
 	{
 		res = ec20_get_AT_QIACT();
-		
+
 		if(res == 1)
 		{
 			ret = GOT_IP;
 		}
 	}
-	
+
 	ringbuf_clear(result_ptr);
 
     return ret;
@@ -589,12 +589,12 @@ unsigned char ec20_get_AT_CSQ(char *csq)
 			*csq = 0;
 			ret = 0;
 		}
-		
+
 		*csq = 113 - (*csq * 2);
-		
+
 		*csq = 0 - *csq;
 	}
-	
+
 	ringbuf_clear(result_ptr);
 
 	return ret;
@@ -619,7 +619,7 @@ unsigned char ec20_get_AT_QISEND(unsigned char *buf,unsigned short len)
 
 		ret = AT_SendData(buf,len,"SEND OK",100,0,TIMEOUT_1S);
 	}
-	
+
 	ringbuf_clear(result_ptr);
 
 	return ret;

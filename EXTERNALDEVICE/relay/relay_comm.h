@@ -24,7 +24,7 @@ void RelayRecvAndHandleFrameStruct(void);
 
 
 
-
+u8 RelayTransparentTransmission(ServerFrameStruct_S *server_frame_struct);
 u8 RelayLoopControl(ServerFrameStruct_S *server_frame_struct);
 u8 RelayLoopGroupControl(ServerFrameStruct_S *server_frame_struct);
 u8 RelaySetStrategyGroupSwitch(ServerFrameStruct_S *server_frame_struct);

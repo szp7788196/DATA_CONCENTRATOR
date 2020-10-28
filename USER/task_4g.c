@@ -35,14 +35,14 @@ void vTask4G(void *pvParameters)
 		{
 			delay_ms(1000);
 		}
-		
+
 		if(FlagReConnectToServer == 2)
 		{
 			FlagReConnectToServer = 0;
-			
+
 			goto RE_INIT;
 		}
-		
+
 		if(EC20ConnectState != CONNECTED)
 		{
 			refresh_state = 1;
@@ -64,11 +64,11 @@ void vTask4G(void *pvParameters)
 
 			SyncDataTimeFormEC20Module(43200);		//每隔12小时对时一次
 		}
-		
+
 //		if(ConcentratorBasicConfig.connection_mode != (u8)MODE_4G)
 //		{
 //			ec20_set_AT_QICLOSE();
-//			
+//
 //			goto RE_INIT;
 //		}
 
@@ -102,7 +102,7 @@ void vTask4G(void *pvParameters)
 			break;
 
 			case (u8)GOT_IP:
-				ret = ec20_set_AT_QIOPEN((char *)ConcentratorBasicConfig.server_ip, 
+				ret = ec20_set_AT_QIOPEN((char *)ConcentratorBasicConfig.server_ip,
 			                             (char *)ConcentratorBasicConfig.server_port);
 
 				if(ret == 0)
@@ -113,7 +113,7 @@ void vTask4G(void *pvParameters)
 
 			case (u8)CONNECTED:
 				RecvNetFrameAndPushToRxQueue(MODE_4G);
-				
+
 				Pull4gTxQueueAndSendFrame();
 			break;
 
@@ -131,7 +131,7 @@ void vTask4G(void *pvParameters)
 		}
 
 		delay_ms(100);
-		
+
 		Satck4G = uxTaskGetStackHighWaterMark(NULL);
 	}
 }
@@ -146,7 +146,7 @@ void Pull4gTxQueueAndSendFrame(void)
 	if(xResult == pdPASS )
 	{
 		ec20_get_AT_QISEND(tx_frame->buf,tx_frame->len);
-		
+
 		vPortFree(tx_frame->buf);
 		tx_frame->buf = NULL;
 

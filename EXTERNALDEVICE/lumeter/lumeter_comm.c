@@ -1,6 +1,7 @@
 #include "lumeter_comm.h"
 #include "concentrator_comm.h"
 #include "common.h"
+#include "task_rs485.h"
 
 
 u8 LumeterStateChangesReportResponse = 0;
@@ -122,7 +123,7 @@ void LumeterRecvAndHandleFrameStruct(void)
 		switch(server_frame_struct->msg_id)
 		{
 			case 0x0500:	//数据透传
-
+				LumeterTransparentTransmission(server_frame_struct);
 			break;
 			
 			case 0x0501:	//照度计数据
@@ -175,6 +176,60 @@ void LumeterRecvAndHandleFrameStruct(void)
 
 		DeleteServerFrameStruct(server_frame_struct);
 	}
+}
+
+//透传指令
+u8 LumeterTransparentTransmission(ServerFrameStruct_S *server_frame_struct)
+{
+	u8 ret = 0;
+	u8 j = 0;
+	Rs485Frame_S *frame = NULL;
+	
+	if(server_frame_struct->para_num  == 5)				//参数个数是4的倍数
+	{
+		for(j = 0; j < server_frame_struct->para_num; j ++)
+		{
+			if(server_frame_struct->para[j].type == 0x3005)
+			{
+				if(server_frame_struct->para[j].len % 2 == 0)
+				{
+					frame = (Rs485Frame_S *)pvPortMalloc(sizeof(Rs485Frame_S));
+					
+					if(frame != NULL)
+					{
+						frame->device_type = LUMETER;
+						
+						frame->len = server_frame_struct->para[j].len / 2;
+						
+						frame->buf = (u8 *)pvPortMalloc(frame->len * sizeof(u8));
+						
+						if(frame->buf != NULL)
+						{
+							StrToHex(frame->buf, (char *)server_frame_struct->para[j].value, frame->len);
+							
+							xSemaphoreTake(xMutex_Rs485Rs485Frame, portMAX_DELAY);
+
+							if(xQueueSend(xQueue_Rs485Rs485Frame,(void *)&frame,(TickType_t)10) != pdPASS)
+							{
+#ifdef DEBUG_LOG
+								printf("relay send xQueue_Rs485Rs485Frame fail.\r\n");
+#endif
+								DeleteRs485Frame(frame);
+							}
+
+							xSemaphoreGive(xMutex_Rs485Rs485Frame);
+						}
+						else
+						{
+							DeleteRs485Frame(frame);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return ret;
 }
 
 //设置照度值

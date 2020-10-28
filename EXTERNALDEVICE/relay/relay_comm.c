@@ -2,6 +2,7 @@
 #include "common.h"
 #include "concentrator_comm.h"
 #include "rx8010s.h"
+#include "task_rs485.h"
 
 u8 RelayStateChangesReportResponse = 0;						//继电器状态变化上报响应标志
 
@@ -234,8 +235,8 @@ void RelayRecvAndHandleFrameStruct(void)
 	{
 		switch(server_frame_struct->msg_id)
 		{
-			case 0x0000:	//数据透传
-
+			case 0x0200:	//数据透传
+				RelayTransparentTransmission(server_frame_struct);
 			break;
 
 			case 0x0201:	//回路控制
@@ -318,6 +319,60 @@ void RelayRecvAndHandleFrameStruct(void)
 	}
 }
 
+//透传指令
+u8 RelayTransparentTransmission(ServerFrameStruct_S *server_frame_struct)
+{
+	u8 ret = 0;
+	u8 j = 0;
+	Rs485Frame_S *frame = NULL;
+	
+	if(server_frame_struct->para_num  == 5)				//参数个数是4的倍数
+	{
+		for(j = 0; j < server_frame_struct->para_num; j ++)
+		{
+			if(server_frame_struct->para[j].type == 0x3005)
+			{
+				if(server_frame_struct->para[j].len % 2 == 0)
+				{
+					frame = (Rs485Frame_S *)pvPortMalloc(sizeof(Rs485Frame_S));
+					
+					if(frame != NULL)
+					{
+						frame->device_type = RELAY;
+						
+						frame->len = server_frame_struct->para[j].len / 2;
+						
+						frame->buf = (u8 *)pvPortMalloc(frame->len * sizeof(u8));
+						
+						if(frame->buf != NULL)
+						{
+							StrToHex(frame->buf, (char *)server_frame_struct->para[j].value, frame->len);
+							
+							xSemaphoreTake(xMutex_Rs485Rs485Frame, portMAX_DELAY);
+
+							if(xQueueSend(xQueue_Rs485Rs485Frame,(void *)&frame,(TickType_t)10) != pdPASS)
+							{
+#ifdef DEBUG_LOG
+								printf("relay send xQueue_Rs485Rs485Frame fail.\r\n");
+#endif
+								DeleteRs485Frame(frame);
+							}
+
+							xSemaphoreGive(xMutex_Rs485Rs485Frame);
+						}
+						else
+						{
+							DeleteRs485Frame(frame);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return ret;
+}
+
 //回路控制
 u8 RelayLoopControl(ServerFrameStruct_S *server_frame_struct)
 {
@@ -340,9 +395,9 @@ u8 RelayLoopControl(ServerFrameStruct_S *server_frame_struct)
 
 	resp_server_frame_struct = (ServerFrameStruct_S *)pvPortMalloc(sizeof(ServerFrameStruct_S));
 
-	if(server_frame_struct->para_num % 4 == 0)
+	if(resp_server_frame_struct != NULL)
 	{
-		if(resp_server_frame_struct != NULL)				//参数个数是4的倍数
+		if(server_frame_struct->para_num % 4 == 0)				//参数个数是4的倍数
 		{
 			CopyServerFrameStruct(server_frame_struct,resp_server_frame_struct,0);
 

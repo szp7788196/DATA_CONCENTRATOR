@@ -389,6 +389,12 @@ void AppObjCreate(void)
     {
 
     }
+	
+	xQueue_TransTransFrame = xQueueCreate(10, sizeof(TransTransmissionFrame_S *));
+    if(xQueue_TransTransFrame == NULL)
+    {
+
+    }
 }
 
 

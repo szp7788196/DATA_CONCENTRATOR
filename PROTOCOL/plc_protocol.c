@@ -548,8 +548,8 @@ PlcFrame_S* RecvAndAnalysisPlcBottomFrame(u8 mode)
 
 	if(Usart2FrameLen < 8)
 	{
-		Usart2RecvEnd = 0;
-		Usart2FrameLen = 0;
+//		Usart2RecvEnd = 0;
+//		Usart2FrameLen = 0;
 
 		goto GET_OUT;
 	}
@@ -559,8 +559,8 @@ PlcFrame_S* RecvAndAnalysisPlcBottomFrame(u8 mode)
 
 	if(mode == 1)
 	{
-		Usart2RecvEnd = 0;
-		Usart2FrameLen = 0;
+//		Usart2RecvEnd = 0;
+//		Usart2FrameLen = 0;
 	}
 
 	check_sum_read = *(inbuf + len - 2);
@@ -680,6 +680,15 @@ PlcFrame_S* RecvAndAnalysisPlcBottomFrame(u8 mode)
 	}
 
 	GET_OUT:
+	if(mode == 1)
+	{
+		if(ack_frame != NULL)
+		{
+			Usart2RecvEnd = 0;
+			Usart2FrameLen = 0;
+		}
+	}
+	
 	xSemaphoreGive(xMutex_USART2);
 
 	return ack_frame;

@@ -71,6 +71,7 @@ void ElectricityMeterCollectCurrentState(void)
 //接收并处理外置输入量采集模块返回的数据
 void ElectricityMeterRecvAndHandleDeviceFrame(void)
 {
+	u8 ret = 0;
 	u8 i = 0;
 	Rs485Frame_S *recv_rs485_frame = NULL;
 	BaseType_t xResult;
@@ -80,20 +81,59 @@ void ElectricityMeterRecvAndHandleDeviceFrame(void)
 
 	if(xResult == pdPASS)
 	{
-		AnalysisBuiltOutElectricityMeterFrame(recv_rs485_frame->buf,recv_rs485_frame->len,&meter_state);
+		ret = AnalysisBuiltOutElectricityMeterFrame(recv_rs485_frame->buf,recv_rs485_frame->len,&meter_state);
 
-		if(meter_state.update == 1)	//外置继电器模块采集状态有更新
+		if(ret == 1)
 		{
-			meter_state.update = 0;
-
-			for(i = 0; i < ElectricityMeterConfigNum.number; i ++)
+			if(meter_state.update == 1)	//外置继电器模块采集状态有更新
 			{
-				if(ElectricityMeterState[i].address == meter_state.address &&
-				   ElectricityMeterState[i].channel == meter_state.channel)
+				meter_state.update = 0;
+
+				for(i = 0; i < ElectricityMeterConfigNum.number; i ++)
 				{
-					memcpy(&ElectricityMeterState[i].current_para,
-					       meter_state.collect_para,
-					       sizeof(ElectricityMeter_Para_S) * MAX_ELECTRICITY_METER_CH_NUM);
+					if(ElectricityMeterState[i].address == meter_state.address &&
+					   ElectricityMeterState[i].channel == meter_state.channel)
+					{
+						memcpy(&ElectricityMeterState[i].current_para,
+							   meter_state.collect_para,
+							   sizeof(ElectricityMeter_Para_S) * MAX_ELECTRICITY_METER_CH_NUM);
+					}
+				}
+			}
+		}
+		else
+		{
+			TransTransmissionFrame_S  *trans_trans_frame = NULL;
+			
+			trans_trans_frame = (TransTransmissionFrame_S *)pvPortMalloc(sizeof(TransTransmissionFrame_S));
+			
+			if(trans_trans_frame != NULL)
+			{
+				trans_trans_frame->device_type = ELECTRICITY_METER;
+				
+				trans_trans_frame->address = 0;
+				trans_trans_frame->channel = 0;
+				trans_trans_frame->trans_moudle = 1;
+				
+				trans_trans_frame->len = recv_rs485_frame->len;
+				
+				trans_trans_frame->buf = (u8 *)pvPortMalloc(sizeof(u8) * recv_rs485_frame->len);
+				
+				if(trans_trans_frame->buf != NULL)
+				{
+					memcpy(trans_trans_frame->buf,recv_rs485_frame->buf,recv_rs485_frame->len);
+					
+					if(xQueueSend(xQueue_TransTransFrame,(void *)&trans_trans_frame,(TickType_t)10) != pdPASS)
+					{
+#ifdef DEBUG_LOG
+						printf("send xQueue_TransTransFrame fail.\r\n");
+#endif
+						DeleteTransTransmissionFrame(trans_trans_frame);
+					}
+				}
+				else
+				{
+					DeleteTransTransmissionFrame(trans_trans_frame);
 				}
 			}
 		}

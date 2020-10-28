@@ -122,6 +122,7 @@ u32 LumeterGetAverageValue(u32 *stack,u8 depth,u8 ignore_num)
 //接收并处理外置输入量采集模块返回的数据
 void LumeterRecvAndHandleDeviceFrame(void)
 {
+	u8 ret = 0;
 	u8 i = 0;
 	u32 *sort_buf = NULL;
 	Rs485Frame_S *recv_rs485_frame = NULL;
@@ -133,57 +134,96 @@ void LumeterRecvAndHandleDeviceFrame(void)
 
 	if(xResult == pdPASS)
 	{
-		AnalysisBuiltOutLumeterFrame(recv_rs485_frame->buf,recv_rs485_frame->len,&collect_state);
+		ret = AnalysisBuiltOutLumeterFrame(recv_rs485_frame->buf,recv_rs485_frame->len,&collect_state);
 
-		if(collect_state.update == 1)	//外置继电器模块采集状态有更新
+		if(ret == 1)
 		{
-			sort_buf = (u32 *)pvPortMalloc(LumeterBasicConfig.stack_depth * sizeof(u32));
-			
-			if(sort_buf == NULL)
+			if(collect_state.update == 1)	//外置继电器模块采集状态有更新
 			{
-				return;
-			}
-			
-			collect_state.update = 0;
-
-			for(i = 0; i < LumeterConfigNum.number; i ++)
-			{
-				if(LumeterState[i].address == collect_state.address &&
-				   LumeterState[i].channel == collect_state.channel)
+				sort_buf = (u32 *)pvPortMalloc(LumeterBasicConfig.stack_depth * sizeof(u32));
+				
+				if(sort_buf == NULL)
 				{
-					memset(sort_buf,0,LumeterBasicConfig.stack_depth * sizeof(u32));
-					
-					LumeterState[i].waitting_resp = 0;									//复位等待状态
-					LumeterState[i].no_resp_time = 0;									//复位无响应次数
-					
-					LumeterPushNewDateToStack(LumeterState[i].stack,
-					                          LumeterBasicConfig.stack_depth,
-					                          collect_state.value,
-					                          &init_flag[i]);							//入栈
-					
-					memcpy(sort_buf,LumeterState[i].stack,LumeterBasicConfig.stack_depth * sizeof(u32));
+					return;
+				}
+				
+				collect_state.update = 0;
 
-					bubbleSort(sort_buf,LumeterBasicConfig.stack_depth);				//排序
-					
-					LumeterState[i].value = LumeterGetAverageValue(LumeterState[i].stack,
-					                                               LumeterBasicConfig.stack_depth,
-					                                               LumeterBasicConfig.ignore_num);		//忽略最大值和最小值并计算平均值
-					
-					if(LumeterState[i].collect_time < LumeterBasicConfig.stack_depth * 2)
+				for(i = 0; i < LumeterConfigNum.number; i ++)
+				{
+					if(LumeterState[i].address == collect_state.address &&
+					   LumeterState[i].channel == collect_state.channel)
 					{
-						LumeterState[i].collect_time ++;								//记录采集次数
-					}
-					else
-					{
-						LumeterState[i].ref_value = LumeterState[i].value;
-						LumeterState[i].unchange_time = GetSysTick1s();
-					}
+						memset(sort_buf,0,LumeterBasicConfig.stack_depth * sizeof(u32));
+						
+						LumeterState[i].waitting_resp = 0;									//复位等待状态
+						LumeterState[i].no_resp_time = 0;									//复位无响应次数
+						
+						LumeterPushNewDateToStack(LumeterState[i].stack,
+												  LumeterBasicConfig.stack_depth,
+												  collect_state.value,
+												  &init_flag[i]);							//入栈
+						
+						memcpy(sort_buf,LumeterState[i].stack,LumeterBasicConfig.stack_depth * sizeof(u32));
 
-					break;
+						bubbleSort(sort_buf,LumeterBasicConfig.stack_depth);				//排序
+						
+						LumeterState[i].value = LumeterGetAverageValue(LumeterState[i].stack,
+																	   LumeterBasicConfig.stack_depth,
+																	   LumeterBasicConfig.ignore_num);		//忽略最大值和最小值并计算平均值
+						
+						if(LumeterState[i].collect_time < LumeterBasicConfig.stack_depth * 2)
+						{
+							LumeterState[i].collect_time ++;								//记录采集次数
+						}
+						else
+						{
+							LumeterState[i].ref_value = LumeterState[i].value;
+							LumeterState[i].unchange_time = GetSysTick1s();
+						}
+
+						break;
+					}
+				}
+				
+				vPortFree(sort_buf);
+			}
+		}
+		else
+		{
+			TransTransmissionFrame_S  *trans_trans_frame = NULL;
+			
+			trans_trans_frame = (TransTransmissionFrame_S *)pvPortMalloc(sizeof(TransTransmissionFrame_S));
+			
+			if(trans_trans_frame != NULL)
+			{
+				trans_trans_frame->device_type = LUMETER;
+				
+				trans_trans_frame->address = 0;
+				trans_trans_frame->channel = 0;
+				trans_trans_frame->trans_moudle = 1;
+				
+				trans_trans_frame->len = recv_rs485_frame->len;
+				
+				trans_trans_frame->buf = (u8 *)pvPortMalloc(sizeof(u8) * recv_rs485_frame->len);
+				
+				if(trans_trans_frame->buf != NULL)
+				{
+					memcpy(trans_trans_frame->buf,recv_rs485_frame->buf,recv_rs485_frame->len);
+					
+					if(xQueueSend(xQueue_TransTransFrame,(void *)&trans_trans_frame,(TickType_t)10) != pdPASS)
+					{
+#ifdef DEBUG_LOG
+						printf("send xQueue_TransTransFrame fail.\r\n");
+#endif
+						DeleteTransTransmissionFrame(trans_trans_frame);
+					}
+				}
+				else
+				{
+					DeleteTransTransmissionFrame(trans_trans_frame);
 				}
 			}
-			
-			vPortFree(sort_buf);
 		}
 
 		DeleteRs485Frame(recv_rs485_frame);

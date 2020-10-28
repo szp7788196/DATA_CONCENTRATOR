@@ -63,7 +63,7 @@ void RecvRs485FrameQueueAndSendToDeviceAndWaitResponse(void)
 				
 				Usart5RecvEnd = 0;
 
-				if(Usart5FrameLen >= 6)
+				if(Usart5FrameLen >= 1)
 				{
 					time_out = 0;
 					responsed = 1;

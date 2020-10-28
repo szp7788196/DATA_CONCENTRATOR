@@ -21,6 +21,7 @@ void LumeterSendStateChangesReportFrameToServer(void);
 void LumeterSendStateChangesReportToServer(void);
 
 void LumeterRecvAndHandleFrameStruct(void);
+u8 LumeterTransparentTransmission(ServerFrameStruct_S *server_frame_struct);
 u8 LumeterGetCurrentState(ServerFrameStruct_S *server_frame_struct);
 u8 LumeterSetILluminanceValue(ServerFrameStruct_S *server_frame_struct);
 u8 LumeterGetCurrentState(ServerFrameStruct_S *server_frame_struct);

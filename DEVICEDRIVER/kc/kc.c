@@ -129,21 +129,21 @@ void ControlAllBuiltOutRelay(RelayModuleState_S state)
 	inbuf[1] = (u8)((state.loop_current_channel >> 0) & 0x00FF);
 	inbuf[2] = (u8)((state.loop_current_state >> 8) & 0x00FF);
 	inbuf[3] = (u8)((state.loop_current_state >> 0) & 0x00FF);
-	
+
 	frame = (Rs485Frame_S *)pvPortMalloc(sizeof(Rs485Frame_S));
 
 	if(frame != NULL)
 	{
 		frame->device_type = RELAY;
-		
+
 		frame->len = PackBuiltOutRelayFrame(state.address,0xD1,inbuf,4,outbuf);
-		
+
 		frame->buf = (u8 *)pvPortMalloc(frame->len * sizeof(u8));
-		
+
 		if(frame->buf != NULL)
 		{
 			memcpy(frame->buf,outbuf,frame->len);
-			
+
 			xSemaphoreTake(xMutex_Rs485Rs485Frame, portMAX_DELAY);
 
 			if(xQueueSend(xQueue_Rs485Rs485Frame,(void *)&frame,(TickType_t)10) != pdPASS)
@@ -153,14 +153,14 @@ void ControlAllBuiltOutRelay(RelayModuleState_S state)
 #endif
 				DeleteRs485Frame(frame);
 			}
-			
+
 			xSemaphoreGive(xMutex_Rs485Rs485Frame);
 		}
 		else
 		{
 			DeleteRs485Frame(frame);
 		}
-	}	
+	}
 }
 
 //采集集控外部继电器模块状态
@@ -168,21 +168,21 @@ void GetBuiltOutRelayState(RelayModuleState_S state)
 {
 	u8 outbuf[48] = {0};
 	Rs485Frame_S *frame = NULL;
-	
+
 	frame = (Rs485Frame_S *)pvPortMalloc(sizeof(Rs485Frame_S));
 
 	if(frame != NULL)
 	{
 		frame->device_type = RELAY;
-		
+
 		frame->len = PackBuiltOutRelayFrame(state.address,0xD0,NULL,0,outbuf);
-		
+
 		frame->buf = (u8 *)pvPortMalloc(frame->len * sizeof(u8));
-		
+
 		if(frame->buf != NULL)
 		{
 			memcpy(frame->buf,outbuf,frame->len);
-			
+
 			xSemaphoreTake(xMutex_Rs485Rs485Frame, portMAX_DELAY);
 
 			if(xQueueSend(xQueue_Rs485Rs485Frame,(void *)&frame,(TickType_t)10) != pdPASS)
@@ -192,14 +192,14 @@ void GetBuiltOutRelayState(RelayModuleState_S state)
 #endif
 				DeleteRs485Frame(frame);
 			}
-			
+
 			xSemaphoreGive(xMutex_Rs485Rs485Frame);
 		}
 		else
 		{
 			DeleteRs485Frame(frame);
 		}
-	}	
+	}
 }
 
 //合并外部继电器模块报文
@@ -221,9 +221,9 @@ u16 PackBuiltOutRelayFrame(u8 address,u8 fun_code,u8 *inbuf,u16 inbuf_len,u8 *ou
 	memcpy(outbuf + 10,imei,17);
 
 	*(outbuf + 27) = fun_code;
-	
+
 	*(outbuf + 28) = (u8)inbuf_len;
-	
+
 	memcpy(outbuf + 29,inbuf,inbuf_len);
 
 	*(outbuf + 29 + inbuf_len + 0) = CalCheckSum(outbuf, 29 + inbuf_len);
@@ -243,8 +243,9 @@ u16 PackBuiltOutRelayFrame(u8 address,u8 fun_code,u8 *inbuf,u16 inbuf_len,u8 *ou
 }
 
 
-void AnalysisBuiltOutRelayFrame(u8 *buf,u16 len,RelayModuleCollectState_S *collect_state)
+u8 AnalysisBuiltOutRelayFrame(u8 *buf,u16 len,RelayModuleCollectState_S *collect_state)
 {
+	u8 ret = 0;
 	u16 pos1 = 0;
 	u8 cmd_code = 0;
 	u8 *data = NULL;
@@ -263,18 +264,18 @@ void AnalysisBuiltOutRelayFrame(u8 *buf,u16 len,RelayModuleCollectState_S *colle
 
 	if(pos1 != 0xFFFF)
 	{
-		if(*(buf + 0) == 0x68 && 
-		   *(buf + 7) == 0x68 && 
+		if(*(buf + 0) == 0x68 &&
+		   *(buf + 7) == 0x68 &&
 		   *(buf + pos1 - 1) == 0x16)
 		{
 			read_check_sum = *(buf + pos1 - 2);
 			cal_check_sum = CalCheckSum(buf, pos1 - 2);
-			
+
 			if(read_check_sum == cal_check_sum)
 			{
 				collect_state->address = *(buf + 26);
 				collect_state->channel = 1;
-				
+
 				switch(cmd_code)
 				{
 					case 0xD0:
@@ -282,6 +283,8 @@ void AnalysisBuiltOutRelayFrame(u8 *buf,u16 len,RelayModuleCollectState_S *colle
 						{
 							collect_state->loop_collect_state = (((u16)(*(data + 0))) << 8) + (u16)(*(data + 1));
 							collect_state->update = 1;
+
+							ret = 1;
 						}
 					break;
 
@@ -296,6 +299,8 @@ void AnalysisBuiltOutRelayFrame(u8 *buf,u16 len,RelayModuleCollectState_S *colle
 			}
 		}
 	}
+
+	return ret;
 }
 
 

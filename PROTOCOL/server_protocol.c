@@ -23,7 +23,7 @@ void ServerFrameHandle(ServerFrame_S *rx_frame)
 
 		if(ret >= 0)		//初步解析成功，发送至各个任务进行进一步处理
 		{
-			TransServerFrameStructToOtherTask(server_frame_struct,UNKNOW_DEVICE);
+			TransServerFrameStructToOtherTask(server_frame_struct);
 		}
 		else	//释放server_frame_struct缓存
 		{
@@ -32,7 +32,7 @@ void ServerFrameHandle(ServerFrame_S *rx_frame)
 	}
 }
 
-u8 TransServerFrameStructToOtherTask(ServerFrameStruct_S *server_frame_struct,DEVICE_TYPE_E device_type)
+u8 TransServerFrameStructToOtherTask(ServerFrameStruct_S *server_frame_struct)
 {
 	u8 ret = 1;
 	QueueHandle_t xQueue_DeviceXxFrameStruct = NULL;
@@ -40,10 +40,7 @@ u8 TransServerFrameStructToOtherTask(ServerFrameStruct_S *server_frame_struct,DE
 	
 	xSemaphoreTake(xMutex_TransServerFrameStruct, portMAX_DELAY);
 	
-	if(device_type == UNKNOW_DEVICE)
-	{
-		_device_type = (DEVICE_TYPE_E)((server_frame_struct->msg_id & 0xFF00) >> 8);
-	}
+	_device_type = (DEVICE_TYPE_E)((server_frame_struct->msg_id & 0xFF00) >> 8);
 	
 	switch((u8)_device_type)
 	{
@@ -538,6 +535,22 @@ void DeleteServerFrame(ServerFrame_S *server_frame)
 		
 		vPortFree(server_frame);
 		server_frame = NULL;
+	}
+}
+
+//释放ServerFrame结构体申请的内存
+void DeleteTransTransmissionFrame(TransTransmissionFrame_S *trans_trans_frame)
+{
+	if(trans_trans_frame != NULL)
+	{
+		if(trans_trans_frame->buf != NULL)
+		{
+			vPortFree(trans_trans_frame->buf);
+			trans_trans_frame->buf = NULL;
+		}
+		
+		vPortFree(trans_trans_frame);
+		trans_trans_frame = NULL;
 	}
 }
 

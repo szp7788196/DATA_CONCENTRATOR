@@ -131,70 +131,82 @@ u16 PackBuiltOutLumeterFrame(u8 address,u8 mode,u8 *outbuf)
 	return len;
 }
 
-void AnalysisBuiltOutLumeterFrame(u8 *buf,u16 len,LumeterCollectState_S *lumeter_state)
+u8 AnalysisBuiltOutLumeterFrame(u8 *buf,u16 len,LumeterCollectState_S *lumeter_state)
 {
+	u8 ret = 0;
 	u8 *data = NULL;
 	u16 data_len = 0;
 	u16 crc16_read = 0;
 	u16 crc16_cal = 0;
 	u8 address = 0;
 	u8 tmp[4] = {0};
-
-	crc16_read = ((((u16)(*(buf + len - 2))) << 8) & 0xFF00) + (((u16)(*(buf + len - 1))) & 0x00FF);
-
-	crc16_cal = CRC16(buf,len - 2);
-
-	if(crc16_read == crc16_cal && *(buf + 1) == 0x03)			//MODBUS协议
+	
+	if(len >= 2)
 	{
-		address = *(buf + 0);
-		data_len = *(buf + 2);
-		data = buf + 3;
-		
-		lumeter_state->address = address;
-		lumeter_state->channel = 1;
+		crc16_read = ((((u16)(*(buf + len - 2))) << 8) & 0xFF00) + (((u16)(*(buf + len - 1))) & 0x00FF);
 
-		if(data_len == 4)
+		crc16_cal = CRC16(buf,len - 2);
+
+		if(crc16_read == crc16_cal && *(buf + 1) == 0x03)			//MODBUS协议
 		{
-			tmp[3] = *(data ++);
-			tmp[2] = *(data ++);
-			tmp[1] = *(data ++);
-			tmp[0] = *(data ++);
-			memcpy((void *)&lumeter_state->value,tmp,4);
+			address = *(buf + 0);
+			data_len = *(buf + 2);
+			data = buf + 3;
 			
-			lumeter_state->update = 1;
-		}
-		else if(data_len == 2)
-		{
-			tmp[1] = *(data ++);
-			tmp[0] = *(data ++);
-			memcpy((void *)&lumeter_state->value,tmp,2);
-			
-			lumeter_state->value *= 100;
-			
-			lumeter_state->update = 1;
-		}
-	}
-	else
-	{
-		if(len == 6)											//曼德克 MT201
-		{
-			if(*(buf + 1) == 0xBC && *(buf + 4) == 0x00 && *(buf + 5) == 0x04)
+			lumeter_state->address = address;
+			lumeter_state->channel = 1;
+
+			if(data_len == 4)
 			{
-				address = *(buf + 0);
-				
-				lumeter_state->address = address;
-				lumeter_state->channel = 1;
-				
-				data = buf + 2;
-				
+				tmp[3] = *(data ++);
+				tmp[2] = *(data ++);
 				tmp[1] = *(data ++);
 				tmp[0] = *(data ++);
 				memcpy((void *)&lumeter_state->value,tmp,4);
 				
 				lumeter_state->update = 1;
+				
+				ret = 1;
+			}
+			else if(data_len == 2)
+			{
+				tmp[1] = *(data ++);
+				tmp[0] = *(data ++);
+				memcpy((void *)&lumeter_state->value,tmp,2);
+				
+				lumeter_state->value *= 100;
+				
+				lumeter_state->update = 1;
+				
+				ret = 1;
+			}
+		}
+		else
+		{
+			if(len == 6)											//曼德克 MT201
+			{
+				if(*(buf + 1) == 0xBC && *(buf + 4) == 0x00 && *(buf + 5) == 0x04)
+				{
+					address = *(buf + 0);
+					
+					lumeter_state->address = address;
+					lumeter_state->channel = 1;
+					
+					data = buf + 2;
+					
+					tmp[1] = *(data ++);
+					tmp[0] = *(data ++);
+					memcpy((void *)&lumeter_state->value,tmp,4);
+					
+					lumeter_state->update = 1;
+					
+					ret = 1;
+				}
 			}
 		}
 	}
+
+	return ret;
 }
 
 

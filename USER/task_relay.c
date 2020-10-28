@@ -25,9 +25,9 @@ void vTaskRELAY(void *pvParameters)
 		RelayEventCheckPolling();						//告警等事件轮训
 
 		RelayExecuteStrategyGroup();					//轮训普通策略
-		
+
 		RelayExecuteTemporaryStrategyGroup();			//轮训临时策略
-		
+
 		RelayCheckForceSwitchOffAllRelays();			//检测是否有告警联动
 
 		RelayExecuteActions();							//执行继电器动作
@@ -37,7 +37,7 @@ void vTaskRELAY(void *pvParameters)
 		RelayRecvAndHandleDeviceFrame();				//接收并处理外置继电器模块返回的数据
 
 		delay_ms(100);
-		
+
 		SatckRELAY = uxTaskGetStackHighWaterMark(NULL);
 	}
 }
@@ -246,7 +246,7 @@ void RelayExecuteTemporaryStrategyGroup(void)
 							}
 						}
 					}
-					
+
 					RelayStrategyGroupSwitchTemp.type = 0;
 				}
 			}
@@ -260,21 +260,21 @@ void RelayExecuteTemporaryStrategyGroup(void)
 void RelayCheckForceSwitchOffAllRelays(void)
 {
 	u8 i = 0;
-	
+
 	if(RelayForceSwitchOffAllRelays == 1)		//强制关闭所有继电器
 	{
 		RelayForceSwitchOffAllRelays = 0;
-		
+
 		for(i = 0; i < RelayModuleConfigNum.number; i ++)
 		{
 			RelayModuleState[i].loop_last_channel = 0;
 			RelayModuleState[i].loop_last_state = 0;
-			
+
 			RelayModuleState[i].loop_current_channel = 0xFFFF & RelayModuleState[i].loop_channel_bit;
 			RelayModuleState[i].loop_current_state = 0;
-			
+
 			RelayModuleState[i].controller = 5;
-			
+
 			memset(RelayModuleState[i].control_time,0,15);
 			TimeToString(RelayModuleState[i].control_time,
 						 calendar.w_year,
@@ -283,7 +283,7 @@ void RelayCheckForceSwitchOffAllRelays(void)
 						 calendar.hour,
 						 calendar.min,
 						 calendar.sec);
-			
+
 			RelayModuleState[i].execute_immediately = 1;
 		}
 	}
@@ -294,7 +294,7 @@ void RelayExecuteActions(void)
 {
 	u8 i = 0;
 	u8 execute = 0;
-	
+
 	for(i = 0; i < RelayModuleConfigNum.number; i ++)
 	{
 		if(RelayModuleState[i].loop_last_channel != RelayModuleState[i].loop_current_channel ||
@@ -304,14 +304,14 @@ void RelayExecuteActions(void)
 			RelayModuleState[i].execute_immediately = 0;
 
 			execute = 0;
-			
+
 			if(RunMode == MODE_AUTO ||
-			  (RunMode == MODE_MANUAL && 
-			  (RelayModuleState[i].controller == 1 || 
-			   RelayModuleState[i].controller == 2 || 
+			  (RunMode == MODE_MANUAL &&
+			  (RelayModuleState[i].controller == 1 ||
+			   RelayModuleState[i].controller == 2 ||
 			   RelayModuleState[i].controller == 4)) ||
-			  (RunMode == MODE_TASK && 
-			  (RelayModuleState[i].controller == 3 || 
+			  (RunMode == MODE_TASK &&
+			  (RelayModuleState[i].controller == 3 ||
 			   RelayModuleState[i].controller == 6)) ||
 			   RelayModuleState[i].controller == 5)
 			{
@@ -321,7 +321,7 @@ void RelayExecuteActions(void)
 			{
 				execute = 0;
 			}
-			
+
 			if(execute == 1)
 			{
 				if(RelayModuleState[i].address == 0 && RelayModuleState[i].channel == 0)	//集控内部继电器
@@ -351,7 +351,7 @@ void RelayCollectCurrentState(void)
 		if(GetSysTick1s() - time_s >= (RelayModuleBasicConfig.state_monitoring_cycle * 60))
 		{
 			time_s = GetSysTick1s();
-			
+
 			for(i = 0; i < RelayModuleConfigNum.number; i ++)
 			{
 				if(RelayModuleState[i].address == 0 && RelayModuleState[i].channel == 0)	//集控内部继电器
@@ -370,6 +370,7 @@ void RelayCollectCurrentState(void)
 //接收并处理外置继电器模块返回的数据
 void RelayRecvAndHandleDeviceFrame(void)
 {
+	u8 ret = 0;
 	u8 i = 0;
 	Rs485Frame_S *recv_rs485_frame = NULL;
 	BaseType_t xResult;
@@ -379,24 +380,66 @@ void RelayRecvAndHandleDeviceFrame(void)
 
 	if(xResult == pdPASS)
 	{
-		AnalysisBuiltOutRelayFrame(recv_rs485_frame->buf,recv_rs485_frame->len,&collect_state);
+		ret = AnalysisBuiltOutRelayFrame(recv_rs485_frame->buf,recv_rs485_frame->len,&collect_state);
 
-		if(collect_state.update == 1)	//外置继电器模块采集状态有更新
+		if(ret == 1)
 		{
-			collect_state.update = 0;
-
-			for(i = 0; i < RelayModuleConfigNum.number; i ++)
+			if(collect_state.update == 1)	//外置继电器模块采集状态有更新
 			{
-				if(RelayModuleState[i].address == collect_state.address &&
-				   RelayModuleState[i].channel == collect_state.channel)
+				collect_state.update = 0;
+
+				for(i = 0; i < RelayModuleConfigNum.number; i ++)
 				{
-					RelayModuleState[i].loop_collect_state = collect_state.loop_collect_state;
-					
-					break;
+					if(RelayModuleState[i].address == collect_state.address &&
+					   RelayModuleState[i].channel == collect_state.channel)
+					{
+						RelayModuleState[i].loop_collect_state = collect_state.loop_collect_state;
+
+						break;
+					}
 				}
 			}
 		}
-		
+		else
+		{
+			TransTransmissionFrame_S  *trans_trans_frame = NULL;
+
+			trans_trans_frame = (TransTransmissionFrame_S *)pvPortMalloc(sizeof(TransTransmissionFrame_S));
+
+			if(trans_trans_frame != NULL)
+			{
+				trans_trans_frame->device_type = RELAY;
+
+				trans_trans_frame->address = 0;
+				trans_trans_frame->channel = 0;
+				trans_trans_frame->trans_moudle = 1;
+
+				trans_trans_frame->len = recv_rs485_frame->len;
+
+				trans_trans_frame->buf = (u8 *)pvPortMalloc(sizeof(u8) * recv_rs485_frame->len);
+
+				if(trans_trans_frame->buf != NULL)
+				{
+					memcpy(trans_trans_frame->buf,recv_rs485_frame->buf,recv_rs485_frame->len);
+
+					if(xQueueSend(xQueue_TransTransFrame,(void *)&trans_trans_frame,(TickType_t)10) != pdPASS)
+					{
+#ifdef DEBUG_LOG
+						printf("send xQueue_TransTransFrame fail.\r\n");
+#endif
+						DeleteTransTransmissionFrame(trans_trans_frame);
+					}
+				}
+				else
+				{
+					DeleteTransTransmissionFrame(trans_trans_frame);
+				}
+			}
+
+			Usart2RecvEnd = 0;
+			Usart2FrameLen = 0;
+		}
+
 		DeleteRs485Frame(recv_rs485_frame);
 	}
 }
