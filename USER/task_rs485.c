@@ -1,4 +1,5 @@
 #include "task_rs485.h"
+#include "task_led.h"
 #include "delay.h"
 #include "usart.h"
 #include "common.h"
@@ -18,9 +19,11 @@ void vTaskRS485(void *pvParameters)
 	while(1)
 	{
 		RecvRs485FrameQueueAndSendToDeviceAndWaitResponse();
+		
+		RecvAnsAnalysisHCI_Frame();
 
 		delay_ms(200);
-		
+
 		SatckRS485 = uxTaskGetStackHighWaterMark(NULL);
 	}
 }
@@ -46,7 +49,7 @@ void RecvRs485FrameQueueAndSendToDeviceAndWaitResponse(void)
 
 		RE_SEND:
 		Rs485SendCnt = send_rs485_frame->len;
-		
+
 		UsartSendString(UART5,send_rs485_frame->buf, send_rs485_frame->len);
 
 		time_out = 400;
@@ -60,10 +63,10 @@ void RecvRs485FrameQueueAndSendToDeviceAndWaitResponse(void)
 			if(Usart5RecvEnd == 0xAA)
 			{
 				Rs485RecvCnt = Usart5FrameLen;
-				
+
 				Usart5RecvEnd = 0;
 
-				if(Usart5FrameLen >= 1)
+				if(Usart5FrameLen >= 2)
 				{
 					time_out = 0;
 					responsed = 1;
@@ -134,6 +137,28 @@ void RecvRs485FrameQueueAndSendToDeviceAndWaitResponse(void)
 		}
 
 		DeleteRs485Frame(send_rs485_frame);
+	}
+}
+
+void RecvAnsAnalysisHCI_Frame(void)
+{
+	u8 hci_len = 0;
+	u8 hci_outbuf[32] = {0};
+	
+	if(Usart5RecvEnd == 0xAA)						//处理屏幕发过来的数据
+	{
+		Usart5RecvEnd = 0;
+
+		hci_len = HCI_DataAnalysis(Usart5RxBuf,Usart5FrameLen,hci_outbuf);
+
+		memset(Usart5RxBuf,0,Usart5FrameLen);
+
+		Usart5FrameLen = 0;
+
+		if(hci_len >= 1)
+		{
+			UsartSendString(UART5,hci_outbuf, hci_len);
+		}
 	}
 }
 

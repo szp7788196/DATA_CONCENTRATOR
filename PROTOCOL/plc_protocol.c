@@ -468,7 +468,7 @@ EXECUTE_STATE_E SendPlcFrameToDeviceAndWaitResponse(PlcFrame_S in_frame)
 	}
 	else if(in_frame.type == 2 && in_frame.wait_ack == 1)	//单播并且需要等待响应
 	{
-		time_out = 5 * 100;
+		time_out = LampBasicConfig.response_timeout * 100;
 
 		while(time_out)
 		{

@@ -43,7 +43,7 @@ void vTaskLED(void *pvParameters)
 	u8 mmi_outbuf[256] = {0};
 	u8 hci_len = 0;
 	u8 hci_outbuf[32] = {0};
-	
+
 	u8 led_run_state = 0;
 	u8 led_eth_state = 0;
 	u8 led_4g_state = 0;
@@ -73,7 +73,7 @@ void vTaskLED(void *pvParameters)
 		{
 			Usart1RecvEnd = 0;
 
-			hci_len = HCI_DataAnalysis(Usart1RxBuf,Usart1FrameLen,mmi_outbuf);
+			hci_len = HCI_DataAnalysis(Usart1RxBuf,Usart1FrameLen,hci_outbuf);
 
 			memset(Usart1RxBuf,0,Usart1FrameLen);
 
@@ -102,7 +102,7 @@ void vTaskLED(void *pvParameters)
 
 			RX8010S_Get_Time();
 		}
-		
+
 		if(cnt % 250 == 0)
 		{
 			FreeHeapSize = xPortGetFreeHeapSize();
@@ -116,7 +116,7 @@ void vTaskLED(void *pvParameters)
 		{
 			led_run_state = ~led_run_state;
 		}
-		
+
 		if(NetCableState == 1)
 		{
 			if(ETH_ConnectState == ETH_CONNECTED)
@@ -142,7 +142,7 @@ void vTaskLED(void *pvParameters)
 		{
 			led_eth_state = 0;
 		}
-		
+
 		if(EC20ConnectState == CONNECTED)
 		{
 			if(cnt % 150 == 0)								//运行灯以1秒的周期闪烁
@@ -161,7 +161,7 @@ void vTaskLED(void *pvParameters)
 				led_4g_state = ~led_4g_state;
 			}
 		}
-		
+
 		if(Rs485RecvCnt != 0 || Rs485SendCnt != 0)
 		{
 			if(Rs485RecvCnt > 0)
@@ -172,7 +172,7 @@ void vTaskLED(void *pvParameters)
 			{
 				Rs485RecvCnt = 0;
 			}
-			
+
 			if(Rs485SendCnt > 0)
 			{
 				Rs485SendCnt -= 2;
@@ -181,14 +181,14 @@ void vTaskLED(void *pvParameters)
 			{
 				Rs485SendCnt = 0;
 			}
-			
+
 			led_485_state = ~led_485_state;
 		}
 		else
 		{
 			led_485_state = 0;
 		}
-		
+
 		if(NetWorkRecvCnt != 0)
 		{
 			if(NetWorkRecvCnt > 0)
@@ -199,14 +199,14 @@ void vTaskLED(void *pvParameters)
 			{
 				NetWorkRecvCnt = 0;
 			}
-			
+
 			led_recv_state = ~led_recv_state;
 		}
 		else
 		{
 			led_recv_state = 0;
 		}
-		
+
 		if(NetWorkSendCnt != 0)
 		{
 			if(NetWorkSendCnt > 0)
@@ -217,7 +217,7 @@ void vTaskLED(void *pvParameters)
 			{
 				NetWorkSendCnt = 0;
 			}
-			
+
 			led_send_state = ~led_send_state;
 		}
 		else
@@ -235,7 +235,7 @@ void vTaskLED(void *pvParameters)
 			LED_RUN = 1;
 			LED_STATE = 1;
 		}
-		
+
 		if(led_eth_state)
 		{
 			LED_ETH = 1;
@@ -244,7 +244,7 @@ void vTaskLED(void *pvParameters)
 		{
 			LED_ETH = 0;
 		}
-		
+
 		if(led_4g_state)
 		{
 			LED_4G = 1;
@@ -253,7 +253,7 @@ void vTaskLED(void *pvParameters)
 		{
 			LED_4G = 0;
 		}
-		
+
 		if(led_485_state)
 		{
 			LED_RS485 = 1;
@@ -262,7 +262,7 @@ void vTaskLED(void *pvParameters)
 		{
 			LED_RS485 = 0;
 		}
-		
+
 		if(led_recv_state)
 		{
 			LED_DOWN = 1;
@@ -271,7 +271,7 @@ void vTaskLED(void *pvParameters)
 		{
 			LED_DOWN = 0;
 		}
-		
+
 		if(led_send_state)
 		{
 			LED_UP = 1;
@@ -280,7 +280,7 @@ void vTaskLED(void *pvParameters)
 		{
 			LED_UP = 0;
 		}
-		
+
 		if(SysAlarmState)
 		{
 			LED_ALARM = 1;
@@ -289,7 +289,7 @@ void vTaskLED(void *pvParameters)
 		{
 			LED_ALARM = 0;
 		}
-		
+
 		if(BatteryManagement.discharge_voltage >= BATTERY_LOW_BATTERY)
 		{
 			LED_12V = 1;
@@ -298,13 +298,11 @@ void vTaskLED(void *pvParameters)
 		{
 			LED_12V = 0;
 		}
-		
-		
 
 		cnt = (cnt + 1) & 0xFFFFFFFF;
 
 		delay_ms(20);									//循环一次延时约20ms
-		
+
 		SatckLED = uxTaskGetStackHighWaterMark(NULL);
 	}
 }
@@ -330,9 +328,9 @@ u16 HCI_DataAnalysis(u8 *inbuf,u16 inbuf_len,u8 *outbuf)
 										   (u32)buf[3]);
 
 			WriteConcentratorGateWayID(0,1);
-			
+
 			memcpy(&plc_addr_w[2],buf,4);
-			
+
 			plc_set_addr(plc_addr_w);
 
 			delay_ms(100);
@@ -342,7 +340,7 @@ u16 HCI_DataAnalysis(u8 *inbuf,u16 inbuf_len,u8 *outbuf)
 			if(MyStrstr(plc_addr_w,plc_addr_r, 6, 6) != 0xFFFF)
 			{
 				HexToStr((char *)tmp, buf, 4);
-				
+
 				sprintf((char*)outbuf,"{\"LTUAddr\":\"%s\"}\r\n",tmp);
 
 				ret = strlen((char *)outbuf);
@@ -363,20 +361,20 @@ u16 HCI_DataAnalysis(u8 *inbuf,u16 inbuf_len,u8 *outbuf)
 			buf[1] = (u8)((ConcentratorGateWayID.number >> 16) & 0x000000FF);
 			buf[2] = (u8)((ConcentratorGateWayID.number >>  8) & 0x000000FF);
 			buf[3] = (u8)((ConcentratorGateWayID.number >>  0) & 0x000000FF);
-			
+
 			plc_get_addr(plc_addr_r);
 
 			if(MyStrstr(&plc_addr_r[2],buf, 4, 4) != 0xFFFF)
 			{
 				HexToStr((char*)tmp,&plc_addr_r[2],4);
-				
+
 				sprintf((char*)outbuf,"{\"LTUAddr\":\"%s\"}\r\n",tmp);
 
 				ret = strlen((char *)outbuf);
 			}
 			else
 			{
-				sprintf((char*)outbuf,"address err! please reset!\r\n");
+				sprintf((char*)outbuf,"not configured!\r\n");
 
 				ret = strlen((char *)outbuf);
 			}
@@ -502,7 +500,7 @@ u8 HandleMMI_Frame(u8 *inbuf,u8 len,u8 *outbuf)
 		case 0x11:
 			ret = GetDO_State(cmd_code,data,data_len,outbuf);
 		break;
-		
+
 		case 0x12:
 			ret = SetSysReset(cmd_code,data,data_len,outbuf);
 		break;
@@ -518,9 +516,9 @@ u8 GetLinkTypeLinkState(u8 cmd_code,u8 *outbuf)
 {
 	u8 ret = 0;
 	u8 buf[3] = {0};
-	
+
 	CONNECTION_MODE_E conn_mode = MODE_4G;
-	
+
 	if(ConcentratorBasicConfig.connection_mode == (u8)MODE_INSIDE)
 	{
 		if(EC20ConnectState == CONNECTED && ETH_ConnectState == ETH_CONNECTED)
@@ -546,7 +544,7 @@ u8 GetLinkTypeLinkState(u8 cmd_code,u8 *outbuf)
 	}
 
 	buf[0] = (u8)conn_mode;
-	
+
 	if(conn_mode == MODE_4G)
 	{
 		if(EC20ConnectState == (u8)CONNECTED)
@@ -565,7 +563,7 @@ u8 GetLinkTypeLinkState(u8 cmd_code,u8 *outbuf)
 
 		buf[2] = 0;
 	}
-	
+
 	ret = CombineMMI_Frame(cmd_code,buf,3,outbuf);
 
 	return ret;
@@ -707,13 +705,13 @@ u8 SetDO_State(u8 cmd_code,u8 *data,u8 data_len,u8 *outbuf)
 //						loop_ch &= RelayModuleConfig[i].loop_enable;
 //						loop_state &= RelayModuleConfig[i].loop_enable;
 //					}
-					
+
 					loop_ch = 0xFFFF;
 					loop_state = (((u16)(*(data + 2))) << 8) + *(data + 3);
-					
+
 //					loop_ch &= RelayModuleConfig[i].loop_enable;
 //					loop_state &= RelayModuleConfig[i].loop_enable;
-					
+
 					RelayModuleState[i].loop_current_channel = loop_ch;
 					RelayModuleState[i].loop_current_state = loop_state;
 					RelayModuleState[i].controller = 4;
@@ -752,38 +750,38 @@ u8 SetLamp_State(u8 cmd_code,u8 *data,u8 data_len,u8 *outbuf)
 		if(*(data + 0) <= 2)
 		{
 			_data = (u8 *)pvPortMalloc(4 * sizeof(u8));
-			
+
 			if(_data != NULL)
 			{
 				task = (LampPlcExecuteTask_S *)pvPortMalloc(sizeof(LampPlcExecuteTask_S));
-				
+
 				if(task != NULL)
 				{
 					memset(task,0,sizeof(LampPlcExecuteTask_S));
-					
+
 					task->cmd_code = 0x0103;
 					task->broadcast_type = *(data + 0);
-					
+
 					if(LampBasicConfig.auto_report_plc_state & (1 << 3))
 					{
 						task->notify_enable = 1;
 					}
-					
+
 					*(_data + 0) = 0x03;
 					*(_data + 1) = *(data + 1);
 					*(_data + 2) = *(data + 2);
 					*(_data + 3) = 0;
-					
+
 					task->data = _data;
 					task->data_len = 4;
-					
-					add = ((((u32)(*(data + 3))) << 24) & 0xFF000000) + 
-						  ((((u32)(*(data + 4))) << 16) & 0x00FF0000) + 
+
+					add = ((((u32)(*(data + 3))) << 24) & 0xFF000000) +
+						  ((((u32)(*(data + 4))) << 16) & 0x00FF0000) +
 						  ((((u32)(*(data + 5))) <<  8) & 0x0000FF00) +
 						  ((((u32)(*(data + 6))) <<  0) & 0x000000FF);
-					
+
 					task->group_dev_id[0] = add;
-					
+
 					switch(task->broadcast_type)
 					{
 						case 0:
@@ -791,24 +789,24 @@ u8 SetLamp_State(u8 cmd_code,u8 *data,u8 data_len,u8 *outbuf)
 							task->dev_num = LampNumList.number;
 							task->execute_total_num = 1;
 						break;
-						
+
 						case 1:
 							task->execute_type = 0;
 							task->group_num = 1;
 							task->dev_num = LampGroupListNum.list[task->group_dev_id[0]];
-							task->execute_total_num = 1;	
+							task->execute_total_num = 1;
 						break;
-						
+
 						case 2:
 							task->execute_type = 1;
 							task->dev_num = 1;
 							task->execute_total_num = 1;
 						break;
-						
+
 						default:
 						break;
 					}
-					
+
 					if(xQueueSend(xQueue_LampPlcExecuteTaskToPlc,(void *)&task,(TickType_t)10) != pdPASS)
 					{
 #ifdef DEBUG_LOG
@@ -820,7 +818,7 @@ u8 SetLamp_State(u8 cmd_code,u8 *data,u8 data_len,u8 *outbuf)
 			}
 		}
 	}
-	
+
 	ret = CombineMMI_Frame(cmd_code,&err_code,1,outbuf);
 
 	return ret;
@@ -855,9 +853,9 @@ u8 SetGateWayID(u8 cmd_code,u8 *data,u8 data_len,u8 *outbuf)
 									   (u32)data[3]);
 
 		WriteConcentratorGateWayID(0,1);
-		
+
 		memcpy(&plc_addr_w[2],data,4);
-			
+
 		plc_set_addr(plc_addr_w);
 	}
 
@@ -989,21 +987,21 @@ u8 SetSysReset(u8 cmd_code,u8 *data,u8 data_len,u8 *outbuf)
 	if(data_len == 1)
 	{
 		type = *(data + 0);
-		
+
 		switch(type)
 		{
 			case 0:		//重启
 				FlagSystemReBoot = 1;
 			break;
-			
+
 			case 1:		//重启 + 恢复出厂
-				
+
 			break;
-			
+
 			case 2:		//重链接
 				FlagReConnectToServer = 1;
 			break;
-			
+
 			default:
 			break;
 		}

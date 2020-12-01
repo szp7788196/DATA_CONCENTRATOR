@@ -35,7 +35,7 @@ void GetBuiltOutLumeterState(LumeterConfig_S config)
 				}
 			}
 		}
-		
+
 		if(search_str((unsigned char *)config.module, "MT201") != -1)
 		{
 			module_type = 0;
@@ -92,7 +92,7 @@ u16 PackBuiltOutLumeterFrame(u8 address,u8 mode,u8 *outbuf)
 		*(outbuf + 4) = 0x00;
 		*(outbuf + 5) = 0x00;
 		*(outbuf + 6) = 0x04;
-		
+
 		len = 7;
 	}
 	else if(mode == 1)
@@ -103,12 +103,12 @@ u16 PackBuiltOutLumeterFrame(u8 address,u8 mode,u8 *outbuf)
 		*(outbuf + 3) = 0x00;
 		*(outbuf + 4) = 0x00;
 		*(outbuf + 5) = 0x02;
-		
+
 		crc16 = CRC16(outbuf,6);
 
 		*(outbuf + 6) = (u8)((crc16 >> 8) & 0x00FF);
 		*(outbuf + 7) = (u8)(crc16 & 0x00FF);
-		
+
 		len = 8;
 	}
 	else if(mode == 2)
@@ -119,12 +119,12 @@ u16 PackBuiltOutLumeterFrame(u8 address,u8 mode,u8 *outbuf)
 		*(outbuf + 3) = 0x00;
 		*(outbuf + 4) = 0x00;
 		*(outbuf + 5) = 0x01;
-		
+
 		crc16 = CRC16(outbuf,6);
 
 		*(outbuf + 6) = (u8)((crc16 >> 8) & 0x00FF);
 		*(outbuf + 7) = (u8)(crc16 & 0x00FF);
-		
+
 		len = 8;
 	}
 
@@ -140,7 +140,7 @@ u8 AnalysisBuiltOutLumeterFrame(u8 *buf,u16 len,LumeterCollectState_S *lumeter_s
 	u16 crc16_cal = 0;
 	u8 address = 0;
 	u8 tmp[4] = {0};
-	
+
 	if(len >= 2)
 	{
 		crc16_read = ((((u16)(*(buf + len - 2))) << 8) & 0xFF00) + (((u16)(*(buf + len - 1))) & 0x00FF);
@@ -152,7 +152,7 @@ u8 AnalysisBuiltOutLumeterFrame(u8 *buf,u16 len,LumeterCollectState_S *lumeter_s
 			address = *(buf + 0);
 			data_len = *(buf + 2);
 			data = buf + 3;
-			
+
 			lumeter_state->address = address;
 			lumeter_state->channel = 1;
 
@@ -163,9 +163,9 @@ u8 AnalysisBuiltOutLumeterFrame(u8 *buf,u16 len,LumeterCollectState_S *lumeter_s
 				tmp[1] = *(data ++);
 				tmp[0] = *(data ++);
 				memcpy((void *)&lumeter_state->value,tmp,4);
-				
+
 				lumeter_state->update = 1;
-				
+
 				ret = 1;
 			}
 			else if(data_len == 2)
@@ -173,11 +173,11 @@ u8 AnalysisBuiltOutLumeterFrame(u8 *buf,u16 len,LumeterCollectState_S *lumeter_s
 				tmp[1] = *(data ++);
 				tmp[0] = *(data ++);
 				memcpy((void *)&lumeter_state->value,tmp,2);
-				
+
 				lumeter_state->value *= 100;
-				
+
 				lumeter_state->update = 1;
-				
+
 				ret = 1;
 			}
 		}
@@ -188,18 +188,18 @@ u8 AnalysisBuiltOutLumeterFrame(u8 *buf,u16 len,LumeterCollectState_S *lumeter_s
 				if(*(buf + 1) == 0xBC && *(buf + 4) == 0x00 && *(buf + 5) == 0x04)
 				{
 					address = *(buf + 0);
-					
+
 					lumeter_state->address = address;
 					lumeter_state->channel = 1;
-					
+
 					data = buf + 2;
-					
+
 					tmp[1] = *(data ++);
 					tmp[0] = *(data ++);
 					memcpy((void *)&lumeter_state->value,tmp,4);
-					
+
 					lumeter_state->update = 1;
-					
+
 					ret = 1;
 				}
 			}

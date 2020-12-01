@@ -509,46 +509,46 @@ void UART5_IRQHandler(void)                	//串口1中断服务程序
 }
 
 //定时器2初始化，主要用于监测串口是否接收完一帧数据
-void TIM2_Init(u16 TIM2_Interval_xus)
-{
-    TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
-    NVIC_InitTypeDef  NVIC_InitStructure;
-    
-    NVIC_InitStructure.NVIC_IRQChannel = TIM2_IRQn;
-  	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 5;//设置中断优先级
-  	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
-  	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-  	NVIC_Init(&NVIC_InitStructure);	
-	  
-  	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);//外设时钟使能  				
-  	TIM_TimeBaseStructure.TIM_Period = 8400 - 1;
-  	TIM_TimeBaseStructure.TIM_Prescaler = TIM2_Interval_xus-1;
-  	TIM_TimeBaseStructure.TIM_ClockDivision = 0;
-  	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
-  	TIM_TimeBaseInit(TIM2, &TIM_TimeBaseStructure);
-    TIM_ITConfig(TIM2, TIM_IT_Update,ENABLE);
-    TIM_Cmd(TIM2, ENABLE);  		
-}
+//void TIM2_Init(u16 TIM2_Interval_xus)
+//{
+//	TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
+//	NVIC_InitTypeDef  NVIC_InitStructure;
 
-//定时器2中断入口
-void TIM2_IRQHandler(void)
-{
-	static u16 cnt = 0;
-	
-	if(TIM_GetITStatus(TIM2, TIM_IT_Update) != RESET) 
-	{
-		TIM_ClearITPendingBit(TIM2, TIM_IT_Update); 
-		
-		SysTick10ms ++;
-		
-		if((cnt ++) >= 100)
-		{
-			cnt = 0;
-			
-			SysTick1s ++;
-		}
-	}
-}
+//	NVIC_InitStructure.NVIC_IRQChannel = TIM2_IRQn;
+//	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 5;//设置中断优先级
+//	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+//	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+//	NVIC_Init(&NVIC_InitStructure);	
+//	  
+//	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);//外设时钟使能  				
+//	TIM_TimeBaseStructure.TIM_Period = 8400 - 1;
+//	TIM_TimeBaseStructure.TIM_Prescaler = TIM2_Interval_xus-1;
+//	TIM_TimeBaseStructure.TIM_ClockDivision = 0;
+//	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
+//	TIM_TimeBaseInit(TIM2, &TIM_TimeBaseStructure);
+//	TIM_ITConfig(TIM2, TIM_IT_Update,ENABLE);
+//	TIM_Cmd(TIM2, ENABLE);  		
+//}
+
+////定时器2中断入口
+//void TIM2_IRQHandler(void)
+//{
+//	static u16 cnt = 0;
+//	
+//	if(TIM_GetITStatus(TIM2, TIM_IT_Update) != RESET) 
+//	{
+//		TIM_ClearITPendingBit(TIM2, TIM_IT_Update); 
+//		
+//		SysTick10ms ++;
+//		
+//		if((cnt ++) >= 100)
+//		{
+//			cnt = 0;
+//			
+//			SysTick1s ++;
+//		}
+//	}
+//}
 
 
 

@@ -31,6 +31,7 @@ extern s16 Rs485SendCnt;
 void vTaskRS485(void *pvParameters);
 void DeleteRs485Frame(Rs485Frame_S *rs485_frame);
 void RecvRs485FrameQueueAndSendToDeviceAndWaitResponse(void);
+void RecvAnsAnalysisHCI_Frame(void);
 
 
 

@@ -15,6 +15,8 @@ void vTaskELECTRICITY_METER(void *pvParameters)
 {
 	u16 cnt = 0;
 	
+	delay_ms(1000);
+	
 	HT7038ConfigClibration();
 	
 	while(1)
@@ -126,7 +128,7 @@ void ElectricityMeterRecvAndHandleDeviceFrame(void)
 					if(xQueueSend(xQueue_TransTransFrame,(void *)&trans_trans_frame,(TickType_t)10) != pdPASS)
 					{
 #ifdef DEBUG_LOG
-						printf("send xQueue_TransTransFrame fail.\r\n");
+						printf("send xQueue_TransTransFrame fail 4.\r\n");
 #endif
 						DeleteTransTransmissionFrame(trans_trans_frame);
 					}

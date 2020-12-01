@@ -4,33 +4,16 @@
 #include "fs.h"
 #include "lwip_comm.h"
 #include "led.h"
-//#include "beep.h"
-//#include "adc.h"
-//#include "rtc.h"
-//#include "lcd.h"
+
 
 #include <string.h>
 #include <stdlib.h>
-//////////////////////////////////////////////////////////////////////////////////	 
-//本程序只供学习使用，未经作者许可，不得用于其它任何用途
-//ALIENTEK STM32F407开发板
-//NETCONN API编程方式的WebServer测试代码	   
-//正点原子@ALIENTEK
-//技术论坛:www.openedv.com
-//创建日期:2014/8/15
-//版本：V1.0
-//版权所有，盗版必究。
-//Copyright(C) 广州市星翼电子科技有限公司 2009-2019
-//All rights reserved									  
-//*******************************************************************************
-//修改信息
-//无
-////////////////////////////////////////////////////////////////////////////////// 	   
+
 
 
 #define NUM_CONFIG_CGI_URIS	(sizeof(ppcURLs) / sizeof(tCGI))
 #define NUM_CONFIG_SSI_TAGS	(sizeof(ppcTAGs) / sizeof(char *))
-	
+
 extern short Get_Temprate(void);  //声明Get_Temperate()函数
 extern void RTC_Get_Time(u8 *hour,u8 *min,u8 *sec,u8 *ampm); //声明RTC_Get_Timer()函数
 extern void RTC_Get_Date(u8 *year,u8 *month,u8 *date,u8 *week); //声明RTC_Get_Date()函数
@@ -72,22 +55,22 @@ static int FindCGIParameter(const char *pcToFind,char *pcParam[],int iNumParams)
 
 //SSIHandler中需要用到的处理ADC的函数
 void ADC_Handler(char *pcInsert)
-{ 
-//    char Digit1=0, Digit2=0, Digit3=0, Digit4=0; 
-//    uint32_t ADCVal = 0;        
+{
+//    char Digit1=0, Digit2=0, Digit3=0, Digit4=0;
+//    uint32_t ADCVal = 0;
 
      //获取ADC的值
 //     ADCVal = Get_Adc_Average(5,10); //获取ADC1_CH5的电压值
-		
-     
+
+
      //转换为电压 ADCVval * 0.8mv
-//     ADCVal = (uint32_t)(ADCVal * 0.8);  
-//     
+//     ADCVal = (uint32_t)(ADCVal * 0.8);
+//
 //     Digit1= ADCVal/1000;
 //     Digit2= (ADCVal-(Digit1*1000))/100 ;
 //     Digit3= (ADCVal-((Digit1*1000)+(Digit2*100)))/10;
 //     Digit4= ADCVal -((Digit1*1000)+(Digit2*100)+ (Digit3*10));
-        
+
      //准备添加到html中的数据
 	*pcInsert 		= (char)(1+0x30);
 	*(pcInsert+1) = (char)(0+0x30);
@@ -101,9 +84,9 @@ void ADC_Handler(char *pcInsert)
 //SSIHandler中需要用到的处理内部温度传感器的函数
 void Temperate_Handler(char *pcInsert)
 {
-//		char Digit1=0, Digit2=0, Digit3=0, Digit4=0,Digit5=0; 
+//		char Digit1=0, Digit2=0, Digit3=0, Digit4=0,Digit5=0;
 //		short Temperate = 111;
-		
+
 		//获取内部温度值
 //		Temperate = Get_Temprate(); //获取温度值 此处扩大了100倍
 //		Digit1 = Temperate / 10000;
@@ -124,9 +107,9 @@ void Temperate_Handler(char *pcInsert)
 void RTCTime_Handler(char *pcInsert)
 {
 	u8 hour,min,sec;
-	
+
 //	RTC_Get_Time(&hour,&min,&sec,&ampm);
-	
+
 	*pcInsert = 		(char)((hour/10) + 0x30);
 	*(pcInsert+1) = (char)((hour%10) + 0x30);
 	*(pcInsert+2) = ':';
@@ -142,7 +125,7 @@ void RTCdate_Handler(char *pcInsert)
 {
 	u8 year,month,date,week;
 //	RTC_Get_Date(&year,&month,&date,&week);
-	
+
 	*pcInsert = '2';
 	*(pcInsert+1) = '0';
 	*(pcInsert+2) = (char)((year/10) + 0x30);
@@ -160,14 +143,14 @@ void RTCdate_Handler(char *pcInsert)
 	*(pcInsert+14) = 'k';
 	*(pcInsert+15) = ':';
 	*(pcInsert+16) = (char)(week + 0x30);
-	
+
 }
 //SSI的Handler句柄
 static u16_t SSIHandler(int iIndex,char *pcInsert,int iInsertLen)
 {
 	switch(iIndex)
 	{
-		case 0: 
+		case 0:
 				ADC_Handler(pcInsert);
 				break;
 		case 1:
@@ -187,7 +170,7 @@ static u16_t SSIHandler(int iIndex,char *pcInsert,int iInsertLen)
 const char* LEDS_CGI_Handler(int iIndex, int iNumParams, char *pcParam[], char *pcValue[])
 {
   u8 i=0;  //注意根据自己的GET的参数的多少来选择i值范围
-  
+
 	iIndex = FindCGIParameter("LED1",pcParam,iNumParams);  //找到led的索引号
 	//只有一个CGI句柄 iIndex=0
 	if (iIndex != -1)
@@ -198,16 +181,16 @@ const char* LEDS_CGI_Handler(int iIndex, int iNumParams, char *pcParam[], char *
 		  {
 			if(strcmp(pcValue[i], "LED1ON") ==0)  //改变LED1状态
 			{
-				
+
 			}
 			else if(strcmp(pcValue[i],"LED1OFF") == 0)
 			{
-				
+
 			}
 		  }
 		}
 	 }
-	return "/STM32_LED_OFF_BEEP_OFF.shtml";   							//LED1关,BEEP关					
+	return "/STM32_LED_OFF_BEEP_OFF.shtml";   							//LED1关,BEEP关
 }
 
 //BEEP的CGI控制句柄
@@ -229,20 +212,20 @@ const char *BEEP_CGI_Handler(int iIndex,int iNumParams,char *pcParam[],char *pcV
 			}
 		}
 	}
-	
+
 	return "/STM32_LED_OFF_BEEP_OFF.shtml";   //LED1关,BEEP关
 }
 
 //SSI句柄初始化
 void httpd_ssi_init(void)
-{  
+{
 	//配置内部温度传感器的SSI句柄
 	http_set_ssi_handler(SSIHandler,ppcTAGs,NUM_CONFIG_SSI_TAGS);
 }
 
 //CGI句柄初始化
 void httpd_cgi_init(void)
-{ 
+{
   //配置CGI句柄LEDs control CGI) */
   http_set_cgi_handlers(ppcURLs, NUM_CONFIG_CGI_URIS);
 }

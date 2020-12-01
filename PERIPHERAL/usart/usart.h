@@ -50,7 +50,7 @@ u8 UsartSendString(USART_TypeDef* USARTx,u8 *str, u16 len);
 
 
 
-void TIM2_Init(u16 TIM2_Interval_xus);
+//void TIM2_Init(u16 TIM2_Interval_xus);
 
 #endif
 

@@ -9,7 +9,7 @@ void PLC_Init(void)
 {
 	GPIO_InitTypeDef  GPIO_InitStructure;
 
-	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);	
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);
 
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_4;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
@@ -86,17 +86,17 @@ void plc_get_addr(u8 *addr)
 {
 	u8 send_len = 0;
 	u8 send_buf[32];
-	
+
 	xSemaphoreTake(xMutex_USART2, portMAX_DELAY);
-	
+
 	send_len = plc_combine_data(0x0B,NULL,0,send_buf);
-	
+
 	UsartSendString(USART2,send_buf, send_len);
-	
+
 	send_len = 0;
-	
+
 	delay_ms(200);
-	
+
 	if(Usart2RecvEnd == 0xAA)
 	{
 		if(Usart2FrameLen == 0x14)
@@ -108,10 +108,10 @@ void plc_get_addr(u8 *addr)
 			memcpy(addr,&Usart2RxBuf[5],6);
 		}
 	}
-	
+
 	Usart2RecvEnd = 0;
 	Usart2FrameLen = 0;
-	
+
 	xSemaphoreGive(xMutex_USART2);
 }
 
@@ -119,15 +119,15 @@ void plc_set_addr(u8 *addr)
 {
 	u8 send_len = 0;
 	u8 send_buf[32];
-	
+
 	xSemaphoreTake(xMutex_USART2, portMAX_DELAY);
-	
+
 	send_len = plc_combine_data(0x0C,addr,6,send_buf);
-	
+
 	UsartSendString(USART2,send_buf, send_len);
-	
+
 	send_len = 0;
-	
+
 	xSemaphoreGive(xMutex_USART2);
 }
 

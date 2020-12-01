@@ -59,7 +59,7 @@ void vTaskPLC(void *pvParameters)
 						if(xQueueSend(xQueue_TransTransFrame,(void *)&trans_trans_frame,(TickType_t)10) != pdPASS)
 						{
 	#ifdef DEBUG_LOG
-							printf("send xQueue_TransTransFrame fail.\r\n");
+							printf("send xQueue_TransTransFrame fail 1.\r\n");
 	#endif
 							DeleteTransTransmissionFrame(trans_trans_frame);
 						}
@@ -69,6 +69,9 @@ void vTaskPLC(void *pvParameters)
 						DeleteTransTransmissionFrame(trans_trans_frame);
 					}
 				}
+				
+				Usart2RecvEnd = 0;
+				Usart2FrameLen = 0;
 			}
 		}
 

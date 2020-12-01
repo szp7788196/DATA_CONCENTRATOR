@@ -15,7 +15,7 @@ extern TaskHandle_t xHandleTaskLUMETER;
 
 void vTaskLUMETER(void *pvParameters);
 
-void LumeterPushNewDateToStack(u32 *stack,u8 depth,u32 new_date,u8 *mode);
+void LumeterPushNewDateToStack(u32 *stack,u8 depth,u32 new_data,u8 *mode);
 u32 LumeterGetAverageValue(u32 *stack,u8 depth,u8 ignore_num);
 void LumeterGetAppValue(void);
 void LumeterCollectCurrentState(void);

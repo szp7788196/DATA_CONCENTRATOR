@@ -1,5 +1,6 @@
 #include "delay.h"
 #include "sys.h"
+#include "common.h"
 //////////////////////////////////////////////////////////////////////////////////
 //如果使用OS,则包括下面的头文件即可
 #if SYSTEM_SUPPORT_OS
@@ -32,10 +33,30 @@ extern void xPortSysTickHandler(void);
 
 void SysTick_Handler(void)
 {
+	static u8 time_1ms = 0;
+	static u8 time_10ms = 0;
+	
     if(xTaskGetSchedulerState()!=taskSCHEDULER_NOT_STARTED)//系统已经运行
     {
         xPortSysTickHandler();
     }
+	
+	time_1ms ++;
+	
+	if(time_1ms >= 10)
+	{
+		time_1ms = 0;
+		
+		SysTick10ms ++;
+		time_10ms ++;
+	}
+	
+	if(time_10ms >= 100)
+	{
+		time_10ms = 0;
+		
+		SysTick1s ++;
+	}
 }
 
 //初始化延迟函数

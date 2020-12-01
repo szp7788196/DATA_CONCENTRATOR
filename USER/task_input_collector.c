@@ -123,7 +123,7 @@ void InputCollectorRecvAndHandleDeviceFrame(void)
 					if(xQueueSend(xQueue_TransTransFrame,(void *)&trans_trans_frame,(TickType_t)10) != pdPASS)
 					{
 #ifdef DEBUG_LOG
-						printf("send xQueue_TransTransFrame fail.\r\n");
+						printf("send xQueue_TransTransFrame fail 3.\r\n");
 #endif
 						DeleteTransTransmissionFrame(trans_trans_frame);
 					}

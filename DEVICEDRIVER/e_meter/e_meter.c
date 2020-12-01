@@ -658,39 +658,39 @@ u8 AnalysisBuiltOutElectricityMeterFrame(u8 *buf,u16 len,ElectricityMeterCollect
 				}
 
 				meter_state->collect_para[0].voltage = (meter_state->collect_para[1].voltage +
-				                                          meter_state->collect_para[2].voltage +
-				                                          meter_state->collect_para[3].voltage +
-				                                          meter_state->collect_para[4].voltage +
-				                                          meter_state->collect_para[5].voltage +
-				                                          meter_state->collect_para[6].voltage) / 6.0f;
+				                                        meter_state->collect_para[2].voltage +
+				                                        meter_state->collect_para[3].voltage +
+				                                        meter_state->collect_para[4].voltage +
+				                                        meter_state->collect_para[5].voltage +
+				                                        meter_state->collect_para[6].voltage) / 6.0f;
 
 				meter_state->collect_para[0].current = (meter_state->collect_para[1].current +
-				                                          meter_state->collect_para[2].current +
-				                                          meter_state->collect_para[3].current +
-				                                          meter_state->collect_para[4].current +
-				                                          meter_state->collect_para[5].current +
-				                                          meter_state->collect_para[6].current);
+				                                        meter_state->collect_para[2].current +
+				                                        meter_state->collect_para[3].current +
+				                                        meter_state->collect_para[4].current +
+				                                        meter_state->collect_para[5].current +
+				                                        meter_state->collect_para[6].current);
 
 				meter_state->collect_para[0].active_power = (meter_state->collect_para[1].active_power +
-				                                               meter_state->collect_para[2].active_power +
-				                                               meter_state->collect_para[3].active_power +
-				                                               meter_state->collect_para[4].active_power +
-				                                               meter_state->collect_para[5].active_power +
-				                                               meter_state->collect_para[6].active_power);
+				                                             meter_state->collect_para[2].active_power +
+				                                             meter_state->collect_para[3].active_power +
+				                                             meter_state->collect_para[4].active_power +
+				                                             meter_state->collect_para[5].active_power +
+				                                             meter_state->collect_para[6].active_power);
 
 				meter_state->collect_para[0].active_energy = (meter_state->collect_para[1].active_energy +
-				                                                meter_state->collect_para[2].active_energy +
-				                                                meter_state->collect_para[3].active_energy +
-				                                                meter_state->collect_para[4].active_energy +
-				                                                meter_state->collect_para[5].active_energy +
-				                                                meter_state->collect_para[6].active_energy);
+				                                              meter_state->collect_para[2].active_energy +
+				                                              meter_state->collect_para[3].active_energy +
+				                                              meter_state->collect_para[4].active_energy +
+				                                              meter_state->collect_para[5].active_energy +
+				                                              meter_state->collect_para[6].active_energy);
 
 				meter_state->collect_para[0].power_factor = (meter_state->collect_para[1].power_factor +
-				                                               meter_state->collect_para[2].power_factor +
-				                                               meter_state->collect_para[3].power_factor +
-				                                               meter_state->collect_para[4].power_factor +
-				                                               meter_state->collect_para[5].power_factor +
-				                                               meter_state->collect_para[6].power_factor) / 6.0f;
+				                                             meter_state->collect_para[2].power_factor +
+				                                             meter_state->collect_para[3].power_factor +
+				                                             meter_state->collect_para[4].power_factor +
+				                                             meter_state->collect_para[5].power_factor +
+				                                             meter_state->collect_para[6].power_factor) / 6.0f;
 
 				meter_state->collect_para[0].frequency = meter_state->collect_para[1].frequency;
 

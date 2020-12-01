@@ -27,27 +27,27 @@ void USART6_Write(uint8_t *Data, uint32_t len)
 	UsartSendString(USART6,Data,len);
 //#else
 //	DMA_InitTypeDef DMA_InitStruct;
-//    DMA_Cmd(DMA2_Stream6,DISABLE);
-//
+//	DMA_Cmd(DMA2_Stream6,DISABLE);
+
 //	DMA_ClearFlag(DMA2_Stream6,DMA_FLAG_TCIF6);
 //	while (DMA_GetCmdStatus(DMA2_Stream6) != DISABLE);
 //	DMA_InitStruct.DMA_Channel = DMA_Channel_5;
-//    DMA_InitStruct.DMA_PeripheralBaseAddr = (u32)(&USART6->DR);
-//    DMA_InitStruct.DMA_Memory0BaseAddr  = (u32)Data;
-//    DMA_InitStruct.DMA_DIR = DMA_DIR_MemoryToPeripheral;
-//    DMA_InitStruct.DMA_BufferSize = len;
-//    DMA_InitStruct.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
-//    DMA_InitStruct.DMA_MemoryInc = DMA_MemoryInc_Enable;
-//    DMA_InitStruct.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
-//    DMA_InitStruct.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte;
-//    DMA_InitStruct.DMA_Mode = DMA_Mode_Normal;
-//    DMA_InitStruct.DMA_Priority = DMA_Priority_VeryHigh;
+//	DMA_InitStruct.DMA_PeripheralBaseAddr = (u32)(&USART6->DR);
+//	DMA_InitStruct.DMA_Memory0BaseAddr  = (u32)Data;
+//	DMA_InitStruct.DMA_DIR = DMA_DIR_MemoryToPeripheral;
+//	DMA_InitStruct.DMA_BufferSize = len;
+//	DMA_InitStruct.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
+//	DMA_InitStruct.DMA_MemoryInc = DMA_MemoryInc_Enable;
+//	DMA_InitStruct.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
+//	DMA_InitStruct.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte;
+//	DMA_InitStruct.DMA_Mode = DMA_Mode_Normal;
+//	DMA_InitStruct.DMA_Priority = DMA_Priority_VeryHigh;
 //	DMA_InitStruct.DMA_FIFOMode = DMA_FIFOMode_Disable;
 //	DMA_InitStruct.DMA_FIFOThreshold = DMA_FIFOThreshold_Full;
 //	DMA_InitStruct.DMA_MemoryBurst = DMA_MemoryBurst_Single;//存储器突发单次传输
 //	DMA_InitStruct.DMA_PeripheralBurst = DMA_PeripheralBurst_Single;//外设突发单次传输
-//    DMA_Init(DMA2_Stream6,&DMA_InitStruct);
-//    DMA_Cmd(DMA2_Stream6,ENABLE);
+//	DMA_Init(DMA2_Stream6,&DMA_InitStruct);
+//	DMA_Cmd(DMA2_Stream6,ENABLE);
 //#endif
 }
 
